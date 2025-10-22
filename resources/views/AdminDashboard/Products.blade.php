@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8" />
     <title>Admin - Products</title>
-    <link rel="stylesheet" href="{{ asset('DashB_css/products.css') }}">
-    <link rel="stylesheet" href="{{ asset('DashB_css/ProductsModal.css') }}">
+    <link rel="stylesheet" href="{{ asset('Dashboard CSS/products.css') }}">
+    <link rel="stylesheet" href="{{ asset('Dashboard CSS/productsmodal.css') }}">
     <link rel="stylesheet" href="{{ asset('DashB_css/UpdateProductModal.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
@@ -40,14 +40,14 @@
         <aside class="sidebar">
             <nav class="sidebar-nav">
                 <a href="{{ route('admin.dashboard') }}" class="nav-item"><i class="bi bi-list"></i> Dashboard</a>
-                <a href="{{ route('products.index')}}" class="nav-item"><i class="bi bi-bag"></i> Products</a>
+                <a href="{{ route('products.index') }}" class="nav-item"><i class="bi bi-bag"></i> Products</a>
                 <a href="{{ route('admin.orders') }}" class="nav-item"><i class="bi bi-bag-check-fill"></i> Orders</a>
                 <a href="{{ route('admin.orderitem') }}" class="nav-item"><i class="bi bi-basket"></i> OrderItem</a>
                 <a href="{{ route('admin.employee') }}" class="nav-item"><i class="bi bi-person-circle"></i> Employee</a>
                 <a href="{{ route('admin.archived') }}" class="nav-item"><i class="bi bi-person-x"></i> Archived</a>
                 <a href="{{ route('admin.inventory') }}" class="nav-item"><i class="bi bi-cart-check"></i> Inventory</a>
                 <a href="{{ route('admin.ingredients') }}" class="nav-item"><i class="bi bi-check2-square"></i> Ingredients</a>
-                <a href="{{ route('admin.supplier') }}" class="nav-item"><i class="bi bi-box-fill"></i> Supplier</a>
+                <a href="{{ route('admin.suppliers') }}" class="nav-item"><i class="bi bi-box-fill"></i> Supplier</a>
                 <a href="{{ route('admin.payment') }}" class="nav-item"><i class="bi bi-cash-coin"></i> Payment</a>
                 <a href="{{ route('admin.category') }}" class="nav-item"><i class="bi bi-tags"></i> Category</a>
                 <a href="{{ route('admin.logout') }}" class="nav-item logout">
@@ -181,42 +181,45 @@
         </form>
     </div>
 
-    <!-- Update Product Modal -->
-    <div id="UpdateProductModal" class="modal-overlay">
-        <form action="{{ route('products.update') }}" method="POST" enctype="multipart/form-data">
-            @csrf
-            <input type="hidden" name="Product_id" id="updateProductId">
-            <h1>Update Product</h1>
-            <p>Product name</p>
-            <input type="text" name="Product_name" id="updateProductName" required>
+   <!-- Update Product Modal -->
+<div id="UpdateProductModal" class="modal-overlay">
+    <form id="updateForm" method="POST" enctype="multipart/form-data">
+        @csrf
+        @method('PUT')
 
-            <p>Category</p>
-            <select name="Category_id" id="updateCategoryId" disabled>
-                <option value="">-- Select Category --</option>
-                @foreach($categories as $cat)
-                    <option value="{{ $cat->Category_id }}">{{ $cat->Category_name }}</option>
-                @endforeach
-            </select>
-            <input type="hidden" name="Category_id" id="hiddenCategoryId">
+        <input type="hidden" name="Product_id" id="updateProductId">
 
-            <p>Price</p>
-            <input type="number" step="0.01" name="Price" id="updatePrice" required>
+        <h1>Update Product</h1>
+        <p>Product name</p>
+        <input type="text" name="Product_name" id="updateProductName" required>
 
-            <div class="btn-group">
-                <button type="submit" class="UpdateBtn">Update Product</button>
-                <button type="button" id="closeUpdateProductModal" class="CancelBtn">Cancel</button>
-            </div>
-        </form>
-    </div>
+        <p>Price</p>
+        <input type="number" name="Product_price" id="updateProductPrice" required>
+
+        <p>Category</p>
+        <select name="Category_id" id="updateProductCategory">
+            @foreach ($categories as $category)
+                <option value="{{ $category->id }}">{{ $category->name }}</option>
+            @endforeach
+        </select>
+
+        <button type="submit" class="btn btn-primary">Update</button>
+    </form>
+</div>
+
 
     <!-- Delete Confirmation Modal -->
     <div id="deleteModal" class="modal-overlay" style="display:none;">
         <div class="modal-content">
             <h2>Confirm Deletion</h2>
             <p>Are you sure you want to delete <strong id="productName"></strong>?</p>
-            <form id="deleteForm" action="{{ route('products.delete') }}" method="POST">
+            <form id="deleteForm" action="{{ route('products.destroy', 0) }}" method="POST">
                 @csrf
+                @method('DELETE')
                 <input type="hidden" name="Product_id" id="deleteProductId">
+                ...
+            </form>
+
                 <div class="btn-group">
                     <button type="submit" class="AddBtn">Yes, Delete</button>
                     <button type="button" id="cancelDelete" class="CancelBtn">Cancel</button>
@@ -226,12 +229,10 @@
     </div>
 </div>
 
-<script type="module" src="{{ asset('JS_Dashboard/Products.js') }}"></script>
-<script type="module" src="{{ asset('JS_Dashboard/DashboardsTime.js') }}"></script>
-<script type="module" src="{{ asset('JS_Dashboard/buttontransition.js') }}"></script>
-<script type="module" src="{{ asset('JS_Dashboard/AddProductModal.js') }}"></script>
-<script type="module" src="{{ asset('JS_Dashboard/UpdateProductModal.js') }}"></script>
 <script src="{{ asset('JS_Dashboard/DeleteProductModal.js') }}"></script>
+<script src="{{ asset('js/product.js') }}"></script>
+
+
 
 </body>
 </html>

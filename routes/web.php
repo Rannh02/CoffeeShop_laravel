@@ -5,7 +5,6 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\IngredientController;
 use App\Http\Controllers\SupplierController;
-
 // ✅ Welcome page
 Route::get('/', function () {
     return view('LoginSystem.WelcomeLogin');
@@ -21,44 +20,33 @@ Route::get('/login/admin', [AdminController::class, 'showLoginForm'])->name('log
 Route::post('/login/admin', [AdminController::class, 'login'])->name('admin.login.submit');
 Route::post('/logout/admin', [AdminController::class, 'logout'])->name('admin.logout');
 
-// ✅ Admin dashboard
-Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-
-// ✅ Admin Product routes
+// ✅ All admin routes grouped under prefix "admin"
 Route::prefix('admin')->group(function () {
-    Route::resource('products', ProductController::class)->names([
-        'index' => 'admin.products',
-        'create' => 'admin.products.create',
-        'store' => 'admin.products.store',
-        'show' => 'admin.products.show',
-        'edit' => 'admin.products.edit',
-        'update' => 'admin.products.update',
-        'destroy' => 'admin.products.destroy',
-    ]);
-});
 
+    // Dashboard
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
 
-// ✅ Ingredient routes
-Route::prefix('admin')->group(function () {
+    // ✅ Products (uses default route names like products.index, products.create, etc.)
+    Route::resource('products', ProductController::class);
+
+    // ✅ Ingredients
     Route::get('/ingredients', [IngredientController::class, 'index'])->name('admin.ingredients');
     Route::post('/ingredients', [IngredientController::class, 'store'])->name('admin.ingredients.store');
     Route::post('/ingredients/{id}/update', [IngredientController::class, 'update'])->name('admin.ingredients.update');
     Route::delete('/ingredients/{id}', [IngredientController::class, 'destroy'])->name('admin.ingredients.destroy');
-});
 
-// ✅ Supplier routes
-Route::prefix('admin')->group(function () {
+    // ✅ Suppliers
     Route::get('/suppliers', [SupplierController::class, 'index'])->name('admin.suppliers');
     Route::post('/suppliers', [SupplierController::class, 'store'])->name('admin.suppliers.store');
     Route::post('/suppliers/{id}/update', [SupplierController::class, 'update'])->name('admin.suppliers.update');
     Route::delete('/suppliers/{id}', [SupplierController::class, 'destroy'])->name('admin.suppliers.destroy');
-});
 
-// ✅ Placeholder pages (optional)
-Route::get('/admin/orders', fn() => 'Orders Page')->name('admin.orders');
-Route::get('/admin/orderitem', fn() => 'OrderItem Page')->name('admin.orderitem');
-Route::get('/admin/employee', fn() => 'Employee Page')->name('admin.employee');
-Route::get('/admin/archived', fn() => 'Archived Page')->name('admin.archived');
-Route::get('/admin/inventory', fn() => 'Inventory Page')->name('admin.inventory');
-Route::get('/admin/payment', fn() => 'Payment Page')->name('admin.payment');
-Route::get('/admin/category', fn() => 'Category Page')->name('admin.category');
+    // ✅ Placeholder pages (replace with Blade views later)
+    Route::view('/orders', 'AdminDashboard.Orders')->name('admin.orders');
+    Route::view('/orderitem', 'AdminDashboard.OrderItem')->name('admin.orderitem');
+    Route::view('/employee', 'AdminDashboard.Employee')->name('admin.employee');
+    Route::view('/archived', 'AdminDashboard.Archived')->name('admin.archived');
+    Route::view('/inventory', 'AdminDashboard.Inventory')->name('admin.inventory');
+    Route::view('/payment', 'AdminDashboard.Payment')->name('admin.payment');
+    Route::view('/category', 'AdminDashboard.Category')->name('admin.category');
+});
