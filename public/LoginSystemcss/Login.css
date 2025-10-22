@@ -1,0 +1,127 @@
+/* General Styles */
+body {
+  margin: 0;
+  font-family: 'Courier New', Courier, monospace;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Background Image */
+.bg-image {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  filter: blur(3px);
+  object-fit: cover;
+}
+
+/* Main Container */
+.container {
+  display: flex;
+  width: 80%;
+  height: 80%;
+  border-radius: 30px;
+  overflow: hidden;
+  box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Left Section (Image) */
+.image-section {
+  flex: 1;
+  height: 100%;
+}
+
+.image-section img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Right Section (Login Form) */
+.login-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.75); 
+  color: #fff;
+  padding: 20px;
+  position: relative; 
+}
+
+.login-section h2 {
+  font-size: 50px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.login-section p {
+  margin: 10px 10%;
+  font-size: 15px;
+  letter-spacing: 2px;
+}
+
+.login-section input {
+  width: 80%;
+  padding: 10px;
+  margin: 10px 10%;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  outline: none;
+}
+
+/* Buttons */
+.button-group {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.login-section button {
+  width: 120px;
+  height: 40px;
+  background-color: #ffc107;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: bold;
+  color: #000;
+  transition: 0.3s;
+}
+
+.login-section button:hover {
+  background-color: #b88a4b;
+}
+
+/* Error Message */
+.error-message {
+  color: red;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 10px;
+}
+
+/* Register Link */
+.register-link {
+  text-align: center;
+  margin-top: 15px;
+  font-weight: bold;
+}
+
+.register-link a {
+  color: #baae9b;
+  font-size: 15px;
+  text-decoration: none;
+}
+
+.register-link a:hover {
+  text-decoration: underline;
+  color: #fff;
+}
+
