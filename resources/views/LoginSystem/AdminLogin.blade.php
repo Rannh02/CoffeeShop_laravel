@@ -21,7 +21,8 @@
 
       <h2>Admin Login</h2>
 
-      <form method="POST">
+    <form action="{{ route('admin.login.submit') }}" method="POST">
+    @csrf
     <p>Username:</p>
     <input type="text" name="username" placeholder="Admin" required>
     <p>Password:</p>

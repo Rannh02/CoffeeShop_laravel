@@ -40,7 +40,7 @@
         <aside class="sidebar">
             <nav class="sidebar-nav">
                 <a href="{{ route('admin.dashboard') }}" class="nav-item"><i class="bi bi-list"></i> Dashboard</a>
-                <a href="{{ route('admin.products') }}" class="nav-item"><i class="bi bi-bag"></i> Products</a>
+                <a href="{{ route('products.index')}}" class="nav-item"><i class="bi bi-bag"></i> Products</a>
                 <a href="{{ route('admin.orders') }}" class="nav-item"><i class="bi bi-bag-check-fill"></i> Orders</a>
                 <a href="{{ route('admin.orderitem') }}" class="nav-item"><i class="bi bi-basket"></i> OrderItem</a>
                 <a href="{{ route('admin.employee') }}" class="nav-item"><i class="bi bi-person-circle"></i> Employee</a>

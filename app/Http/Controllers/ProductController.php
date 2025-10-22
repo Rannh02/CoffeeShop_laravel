@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\Ingredient;
+use App\Models\Supplier;
 
 class ProductController extends Controller
 {
@@ -29,8 +31,16 @@ class ProductController extends Controller
 
         // Retrieve all categories for the dropdown
         $categories = Category::all();
+        $ingredients = Ingredient::all();
+        $suppliers = Supplier::all();
 
-        return view('AdminDashboard.Products', compact('products', 'categories'));
+           return view('AdminDashboard.Products', compact(
+            'products',
+            'categories',
+            'ingredients',
+            'suppliers',
+            'totalPages', 
+            'page'));
     }
 
     // Store a new product

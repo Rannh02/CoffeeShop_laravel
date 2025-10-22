@@ -1,7 +1,10 @@
 <?php
+
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ProductController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\IngredientController;
+use App\Http\Controllers\SupplierController;
 
 // ✅ Welcome page
 Route::get('/', function () {
@@ -13,37 +16,49 @@ Route::get('/login/cashier', function () {
     return view('LoginSystem.CashierLogin');
 })->name('login.cashier');
 
-// ✅ Admin login page
-Route::get('/login/admin', function () {
-    return view('LoginSystem.AdminLogin');
-})->name('login.admin');
+// ✅ Admin login routes
+Route::get('/login/admin', [AdminController::class, 'showLoginForm'])->name('login.admin');
+Route::post('/login/admin', [AdminController::class, 'login'])->name('admin.login.submit');
+Route::post('/logout/admin', [AdminController::class, 'logout'])->name('admin.logout');
 
-// ✅ Admin routes
-Route::get('/admin/login', [AdminController::class, 'showLoginForm'])->name('admin.login');
-Route::post('/admin/login', [AdminController::class, 'login'])->name('admin.login.submit');
-Route::post('/admin/logout', [AdminController::class, 'logout'])->name('admin.logout');
-
-// ✅ Admin dashboard route
+// ✅ Admin dashboard
 Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
 
-//routes for product resource controller
-// Route::prefix('admin')->group(function () {
-//     Route::resource('products', ProductController::class);
-// });
+// ✅ Admin Product routes
+Route::prefix('admin')->group(function () {
+    Route::resource('products', ProductController::class)->names([
+        'index' => 'admin.products',
+        'create' => 'admin.products.create',
+        'store' => 'admin.products.store',
+        'show' => 'admin.products.show',
+        'edit' => 'admin.products.edit',
+        'update' => 'admin.products.update',
+        'destroy' => 'admin.products.destroy',
+    ]);
+});
 
-// //side bar links routes
-// Route::get('/admin/products', [ProductController::class, 'index'])->name('admin.products');
-// Route::post('/admin/products', [ProductController::class, 'store'])->name('products.store');
 
+// ✅ Ingredient routes
+Route::prefix('admin')->group(function () {
+    Route::get('/ingredients', [IngredientController::class, 'index'])->name('admin.ingredients');
+    Route::post('/ingredients', [IngredientController::class, 'store'])->name('admin.ingredients.store');
+    Route::post('/ingredients/{id}/update', [IngredientController::class, 'update'])->name('admin.ingredients.update');
+    Route::delete('/ingredients/{id}', [IngredientController::class, 'destroy'])->name('admin.ingredients.destroy');
+});
 
+// ✅ Supplier routes
+Route::prefix('admin')->group(function () {
+    Route::get('/suppliers', [SupplierController::class, 'index'])->name('admin.suppliers');
+    Route::post('/suppliers', [SupplierController::class, 'store'])->name('admin.suppliers.store');
+    Route::post('/suppliers/{id}/update', [SupplierController::class, 'update'])->name('admin.suppliers.update');
+    Route::delete('/suppliers/{id}', [SupplierController::class, 'destroy'])->name('admin.suppliers.destroy');
+});
 
-
-Route::get('/admin/orders', function() { return 'Orders Page'; })->name('admin.orders');
-Route::get('/admin/orderitem', function() { return 'OrderItem Page'; })->name('admin.orderitem');
-Route::get('/admin/employee', function() { return 'Employee Page'; })->name('admin.employee');
-Route::get('/admin/archived', function() { return 'Archived Page'; })->name('admin.archived');
-Route::get('/admin/inventory', function() { return 'Inventory Page'; })->name('admin.inventory');
-Route::get('/admin/ingredients', function() { return 'Ingredients Page'; })->name('admin.ingredients');
-Route::get('/admin/supplier', function() { return 'Supplier Page'; })->name('admin.supplier');
-Route::get('/admin/payment', function() { return 'Payment Page'; })->name('admin.payment');
-Route::get('/admin/category', function() { return 'Category Page'; })->name('admin.category');
+// ✅ Placeholder pages (optional)
+Route::get('/admin/orders', fn() => 'Orders Page')->name('admin.orders');
+Route::get('/admin/orderitem', fn() => 'OrderItem Page')->name('admin.orderitem');
+Route::get('/admin/employee', fn() => 'Employee Page')->name('admin.employee');
+Route::get('/admin/archived', fn() => 'Archived Page')->name('admin.archived');
+Route::get('/admin/inventory', fn() => 'Inventory Page')->name('admin.inventory');
+Route::get('/admin/payment', fn() => 'Payment Page')->name('admin.payment');
+Route::get('/admin/category', fn() => 'Category Page')->name('admin.category');

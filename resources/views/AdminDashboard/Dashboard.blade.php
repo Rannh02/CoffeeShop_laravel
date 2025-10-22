@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Dashboard</title>
-    <link rel="stylesheet" href="{{ asset('dashboard/Dashboard.css') }}">
+    <link rel="stylesheet" href="{{ asset('Dashboard CSS/dashboard.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -39,7 +39,7 @@
                 <a href="{{ route('admin.archived') }}" class="nav-item"><i class="bi bi-person-x"></i> Archived</a>
                 <a href="{{ route('admin.inventory') }}" class="nav-item"><i class="bi bi-cart-check"></i> Inventory</a>
                 <a href="{{ route('admin.ingredients') }}" class="nav-item"><i class="bi bi-check2-square"></i> Ingredients</a>
-                <a href="{{ route('admin.supplier') }}" class="nav-item"><i class="bi bi-box-fill"></i> Supplier</a>
+                <a href="{{ route('admin.suppliers') }}" class="nav-item"><i class="bi bi-box-fill"></i> Supplier</a>
                 <a href="{{ route('admin.payment') }}" class="nav-item"><i class="bi bi-cash-coin"></i> Payment</a>
                 <a href="{{ route('admin.category') }}" class="nav-item"><i class="bi bi-tags"></i> Category</a>
                 <form action="{{ route('admin.logout') }}" method="POST" style="display: inline;">
