@@ -1,36 +1,29 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\DB;
+namespace App\Models;
 
-return new class extends Migration
+use Illuminate\Database\Eloquent\Model;
+
+class Employee extends Model
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
-    {
-        Schema::create('employee', function (Blueprint $table) {
-            $table->id('Employee_id');
-            $table->string('First_name', 100);
-            $table->string('Last_name', 100);
-            $table->string('Cashier_Account', 100)->unique();
-            $table->string('Password', 255);
-            $table->enum('Gender',['Male', 'Female']);
-            $table->integer('Contact_number');
-            $table->dateTime('Date/Time')->default(DB::raw('CURRENT_TIMESTAMP'));
-            $table->enum('Status', ['Active', 'Archived'])->default('Active');
-            $table->timestamps();
-        });
-    }
+    protected $table = 'employee';  // ✅ Add this line
+    protected $primaryKey = 'Employee_id';
+    public $timestamps = true;
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    protected $fillable = [
+        'First_name',
+        'Last_name',
+        'Cashier_Account',
+        'Password',
+        'Gender',
+        'Contact_number',
+        'Date/Time',
+        'Status'
+    ];
+
+    // Relationships
+    public function orders()
     {
-        Schema::dropIfExists('employee');
+        return $this->hasMany(Order::class, 'Employee_id', 'Employee_id');
     }
-};
+}

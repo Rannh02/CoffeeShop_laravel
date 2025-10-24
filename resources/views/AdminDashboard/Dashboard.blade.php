@@ -32,7 +32,7 @@
         <aside class="sidebar">
             <nav class="sidebar-nav">
                 <a href="{{ route('admin.dashboard') }}" class="nav-item active"><i class="bi bi-list"></i> Dashboard</a>
-                                <a href="{{ route('products.index') }}" class="nav-item"><i class="bi bi-bag"></i> Products</a>
+                <a href="{{ route('products.index') }}" class="nav-item"><i class="bi bi-bag"></i> Products</a>
                 <a href="{{ route('admin.orders') }}" class="nav-item"><i class="bi bi-bag-check-fill"></i> Orders</a>
                 <a href="{{ route('admin.orderitem') }}" class="nav-item"><i class="bi bi-basket"></i> OrderItem</a>
                 <a href="{{ route('admin.employee') }}" class="nav-item"><i class="bi bi-person-circle"></i> Employee</a>
@@ -89,30 +89,7 @@
         </main>
     </div>
 </div>
-
-<script>
-    window.chartData = {
-        topProductsLabels: @json($topProducts->pluck('Product_name')),
-        topProductsValues: @json($topProducts->pluck('total_sold')),
-        weeklySalesLabels: @json(array_keys($chartSales)),
-        weeklySalesValues: @json(array_values($chartSales))
-    };
-
-    // Real-time clock
-    function updateTime() {
-        const now = new Date();
-        const timeString = now.toLocaleTimeString('en-US', { 
-            hour: '2-digit', 
-            minute: '2-digit', 
-            second: '2-digit',
-            hour12: true 
-        });
-        document.getElementById('currentTime').textContent = timeString;
-    }
-    
-    updateTime();
-    setInterval(updateTime, 1000);
-</script>
 <script src="{{ asset('js/JS_Dashboard/dashboardCharts.js') }}"></script>
+<script src="{{ asset('Javascripts/RealTime.js') }}"></script>
 </body>
 </html>

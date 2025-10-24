@@ -92,6 +92,31 @@ class AdminController extends Controller
             'chartSales'
         ));
     }
+    public function orderItems()
+    {
+        if (!Session::get('admin_logged_in')) {
+            return redirect()->route('admin.login');
+        }
+
+        // ✅ Fetch order items with related order, customer, and product info
+        $orderItems = DB::table('orderitem')
+            ->join('orders', 'orderitem.Order_id', '=', 'orders.Order_id')
+            ->join('products', 'orderitem.Product_id', '=', 'products.Product_id')
+            ->join('costumer', 'orders.Costumer_id', '=', 'costumer.Costumer_id')
+            ->select(
+                'orderitem.OrderItem_id',
+                'orderitem.Order_id',
+                'costumer.CustomerName',
+                'products.Product_name',
+                'orderitem.Quantity',
+                'orderitem.Price_sale'
+            )
+            ->get();
+
+        // ✅ Send $orderItems to the Blade view
+        return view('AdminDashboard.OrderItem', compact('orderItems'));
+    }
+
 
     public function logout() {
         Session::flush();

@@ -20,7 +20,7 @@
         </div>
         <div class="header-right">
             <div class="admin-profile">
-                <span class="time">Time</span>
+                <span class="time" id="currentTime">Time</span>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 
                     14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 
@@ -230,7 +230,7 @@
 </div>
 
 <script src="{{ asset('JS_Dashboard/DeleteProductModal.js') }}"></script>
-<script src="{{ asset('js/product.js') }}"></script>
+<script src="{{ asset('Javascripts/RealTime.js') }}"></script>
 
 
 

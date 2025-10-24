@@ -5,6 +5,10 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\IngredientController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\Admin\OrderItemController;
+
+Route::get('/admin/orderitem', [AdminController::class, 'orderItems'])->name('admin.orderitem');
 // ✅ Welcome page
 Route::get('/', function () {
     return view('LoginSystem.WelcomeLogin');
@@ -41,8 +45,11 @@ Route::prefix('admin')->group(function () {
     Route::post('/suppliers/{id}/update', [SupplierController::class, 'update'])->name('admin.suppliers.update');
     Route::delete('/suppliers/{id}', [SupplierController::class, 'destroy'])->name('admin.suppliers.destroy');
 
+    // ✅ Orders (UPDATED - now uses controller)
+    Route::get('/orders', [OrderController::class, 'index'])->name('admin.orders');
+    Route::post('/orders', [OrderController::class, 'store'])->name('admin.orders.store');
+
     // ✅ Placeholder pages (replace with Blade views later)
-    Route::view('/orders', 'AdminDashboard.Orders')->name('admin.orders');
     Route::view('/orderitem', 'AdminDashboard.OrderItem')->name('admin.orderitem');
     Route::view('/employee', 'AdminDashboard.Employee')->name('admin.employee');
     Route::view('/archived', 'AdminDashboard.Archived')->name('admin.archived');
