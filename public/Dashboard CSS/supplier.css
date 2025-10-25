@@ -96,7 +96,7 @@ body {
 .nav-item.active {
   background-color: #4b5563;
   color: #ffffff;
-  border-left-color: #12b82d;
+  border-left-color: #f59e0b;
 }
 
 .nav-item.logout {
@@ -110,7 +110,7 @@ body {
   flex: 1;
   padding: 32px;
   background-color: #f9f7f6;
-  overflow-y: visible;
+  overflow-y: auto;
 }
 
 /* Products Header */
@@ -150,6 +150,7 @@ body {
   background-color: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
+  overflow: hidden;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
@@ -158,8 +159,6 @@ body {
   width: 100%;
   border-collapse: collapse;
   background-color: #ffffff;
-  table-layout: fixed;
-  overflow-x: scroll;
 }
 
 .products-table thead {
@@ -172,17 +171,16 @@ body {
   font-weight: 600;
   color: #374151;
   font-size: 14px;
-  text-align: center;
   border-bottom: 1px solid #e2e8f0;
+  text-align: center;
 }
 
 .products-table td {
   padding: 16px 20px;
-  text-align: center;
   border-bottom: 1px solid #f1f5f9;
   color: #4b5563;
   font-size: 14px;
-  text-overflow: ellipsis;
+  text-align: center;
 }
 
 .products-table tbody tr {
@@ -197,8 +195,8 @@ body {
   border-bottom: none;
 }
 
-/* Action Buttons */
-.archive-btn {
+
+.archive-btn{
   padding: 8px 16px;
   border: none;
   border-radius: 6px;
@@ -206,113 +204,55 @@ body {
   font-size: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
-  background-color: #f59e0b;
+}
+.archive-btn {
+  background-color: #eba026;
   color: #1f2937;
 }
 
 .archive-btn:hover {
-  background-color: #d97706;
+  background-color: #cb7927;
   transform: translateY(-1px);
 }
-
-/* Pagination */
-.pagination {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-  gap: 10px;
-}
-
-.pagination a {
-  text-decoration: none;
-  background-color: #eee;
-  color: #000000;
-  padding: 10px 15px;
-  border-radius: 5px;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
-  transition: 0.3s ease;
-}
-
-.pagination a:hover {
-  background-color: #ccc;
-}
-
-.pagination a.active {
-  background-color: #007bff;
-  color: rgb(185, 185, 185);
-  pointer-events: none;
-}
-
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.form-group label {
-  font-weight: 600;
-  color: #374151;
-  font-size: 14px;
-}
-
-.form-group input,
-.form-group select {
-  padding: 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 14px;
-  color: #1f2937;
-  background-color: #ffffff;
-  transition: border-color 0.2s ease;
-}
-
-.form-group input:focus,
-.form-group select:focus {
-  outline: none;
-  border-color: #f59e0b;
-  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
-}
-
-.modal-buttons {
-  display: flex;
-  gap: 12px;
-  margin-top: 24px;
-}
-
-.modal-btn {
-  flex: 1;
-  padding: 12px 24px;
+/* Action Buttons */
+.update-btn{
+  padding: 8px 16px;
   border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 14px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.modal-btn-primary {
-  background-color: #10b981;
-  color: #ffffff;
+.update-btn {
+  background-color: #f59e0b;
+  color: #1f2937;
 }
 
-.modal-btn-primary:hover {
-  background-color: #059669;
+.update-btn:hover {
+  background-color: #d97706;
   transform: translateY(-1px);
 }
 
-.modal-btn-secondary {
-  background-color: #e5e7eb;
-  color: #374151;
+.restore-btn{
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.modal-btn-secondary:hover {
-  background-color: #d1d5db;
+.restore-btn {
+  background-color: #acacac;
+  color: #1f2937;
+}
+
+.restore-btn:hover {
+  background-color: #656565;
   transform: translateY(-1px);
-}
-
-.hidden {
-  display: none;
 }
 
 /* Responsive Design */
@@ -320,19 +260,19 @@ body {
   .main-container {
     flex-direction: column;
   }
-
+  
   .sidebar {
     width: 100%;
     order: 2;
   }
-
+  
   .sidebar-nav {
     flex-direction: row;
     overflow-x: auto;
     padding: 8px;
     gap: 8px;
   }
-
+  
   .nav-item {
     white-space: nowrap;
     border-left: none;
@@ -340,57 +280,123 @@ body {
     padding: 8px 16px;
     border-radius: 6px;
   }
-
+  
   .nav-item.active {
     border-bottom-color: #f59e0b;
     border-left: none;
   }
-
+  
   .main-content {
     order: 1;
     padding: 16px;
   }
-
+  
   .products-header {
     flex-direction: column;
     gap: 16px;
     align-items: stretch;
   }
-
+  
   .add-product-btn {
     align-self: flex-end;
   }
 }
 
 @media (max-width: 768px) {
+  .header {
+    padding: 12px 16px;
+  }
+  
+  .header-left .logo {
+    font-size: 16px;
+  }
+  
+  .main-content {
+    padding: 16px;
+  }
+  
+  .page-title {
+    font-size: 24px;
+  }
+  
   .table-container {
-    overflow-x: scroll;
+    overflow-x: auto;
   }
-
+  
   .products-table {
-    width: 100%;
-    table-layout: fixed;
+    min-width: 600px;
   }
-
+  
   .products-table th,
   .products-table td {
     padding: 12px 16px;
-    white-space: nowrap;
-  }
-
-  .products-table th {
-    font-size: 12px;
-  }
-
-  .products-table td {
-    font-size: 12px;
   }
 }
 
 @media (max-width: 480px) {
+  .header-left .logo span,
+  .header-right .admin-profile span {
+    display: none;
+  }
+  
+  .products-header {
+    margin-bottom: 24px;
+  }
+  
+  .page-title {
+    font-size: 20px;
+  }
+  
+  .add-product-btn {
+    padding: 10px 20px;
+    font-size: 13px;
+  }
+  
   .products-table th,
   .products-table td {
-    padding: 8px 12px;
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+  
+  .update-btn,
+  .delete-btn {
+    padding: 6px 12px;
     font-size: 11px;
   }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.table-container {
+  animation: fadeIn 0.6s ease-out;
+}
+
+.products-table tbody tr {
+  animation: fadeIn 0.4s ease-out;
+}
+
+.products-table tbody tr:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.products-table tbody tr:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.products-table tbody tr:nth-child(4) {
+  animation-delay: 0.3s;
+}
+
+.products-table tbody tr:nth-child(5) {
+  animation-delay: 0.4s;
 }

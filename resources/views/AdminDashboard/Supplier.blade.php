@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8" />
     <title>Admin - Products</title>
-    <link rel="stylesheet" href="{{ asset('Dashboard CSS/products.css') }}">
-    <link rel="stylesheet" href="{{ asset('Dashboard CSS/productsmodal.css') }}">
-    <link rel="stylesheet" href="{{ asset('Dashboard CSS/supplymodal.css') }}">
+    <link rel="stylesheet" href="{{ asset('Dashboard CSS/supplierModal.css') }}">
+    <link rel="stylesheet" href="{{ asset('Dashboard CSS/supplier.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
 </head>
@@ -67,8 +66,14 @@
         <button class="add-product-btn" id="openAddSupplierModal">Add Supplier</button>
       </div>
 
+      <style>
+        .status-message { margin-bottom: 10px; }
+        .status-message.error { color: red; }
+        .status-message.success { color: green; }
+      </style>
+
       @if(session('status_message'))
-        <div style="color: {{ str_contains(session('status_message'), 'Error') ? 'red' : 'green' }}; margin-bottom: 10px;">
+        <div class="status-message {{ str_contains(session('status_message'), 'Error') ? 'error' : 'success' }}">
           {{ session('status_message') }}
         </div>
       @endif
