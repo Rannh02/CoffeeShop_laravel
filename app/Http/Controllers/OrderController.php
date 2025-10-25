@@ -25,7 +25,7 @@ class OrderController extends Controller
         $totalPages = ceil($totalOrders / $perPage);
 
         // Fetch orders for the current page
-        $orders = Order::orderBy('OrderDate', 'desc')
+        $orders = Order::orderBy('Order_date', 'desc')
                        ->skip(($page - 1) * $perPage)
                        ->take($perPage)
                        ->get();

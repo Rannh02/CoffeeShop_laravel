@@ -42,7 +42,7 @@ class AdminController extends Controller
     public function dashboard() {
         // Check if admin is logged in
         if (!Session::get('admin_logged_in')) {
-            return redirect()->route('admin.login');
+            return redirect()->route('login.admin');
         }
     
         // Total Orders

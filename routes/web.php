@@ -7,6 +7,9 @@ use App\Http\Controllers\IngredientController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\Admin\OrderItemController;
+use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\CategoryController;
+
 
 Route::get('/admin/orderitem', [AdminController::class, 'orderItems'])->name('admin.orderitem');
 // ✅ Welcome page
@@ -40,20 +43,29 @@ Route::prefix('admin')->group(function () {
     Route::delete('/ingredients/{id}', [IngredientController::class, 'destroy'])->name('admin.ingredients.destroy');
 
     // ✅ Suppliers
-    Route::get('/suppliers', [SupplierController::class, 'index'])->name('admin.suppliers');
-    Route::post('/suppliers', [SupplierController::class, 'store'])->name('admin.suppliers.store');
-    Route::post('/suppliers/{id}/update', [SupplierController::class, 'update'])->name('admin.suppliers.update');
-    Route::delete('/suppliers/{id}', [SupplierController::class, 'destroy'])->name('admin.suppliers.destroy');
+    Route::get('/suppliers', [SupplierController::class, 'index'])->name('suppliers.index');
+    Route::post('/suppliers', [SupplierController::class, 'store'])->name('suppliers.store');
+    Route::post('/suppliers/{Supplier_id}/update', [SupplierController::class, 'update'])->name('suppliers.update');
+    Route::post('/suppliers/{Supplier_id}/archive', [SupplierController::class, 'archive'])->name('suppliers.archive');
+    Route::delete('/suppliers/{Supplier_id}', [SupplierController::class, 'destroy'])->name('suppliers.destroy');
 
     // ✅ Orders (UPDATED - now uses controller)
     Route::get('/orders', [OrderController::class, 'index'])->name('admin.orders');
     Route::post('/orders', [OrderController::class, 'store'])->name('admin.orders.store');
 
+    // ✅ Employees
+    Route::get('/employee', [EmployeeController::class, 'index'])->name('admin.employee');
+    Route::post('/employee', [EmployeeController::class, 'store'])->name('admin.employee.store');
+    Route::post('/employee/{id}/archive', [EmployeeController::class, 'archive'])->name('admin.employee.archive');
+
+    // ✅ Category
+    Route::get('/category', [CategoryController::class, 'index'])->name('admin.category');
+
     // ✅ Placeholder pages (replace with Blade views later)
     Route::view('/orderitem', 'AdminDashboard.OrderItem')->name('admin.orderitem');
-    Route::view('/employee', 'AdminDashboard.Employee')->name('admin.employee');
+    //Route::view('/employee', 'AdminDashboard.Employee')->name('admin.employee');
     Route::view('/archived', 'AdminDashboard.Archived')->name('admin.archived');
     Route::view('/inventory', 'AdminDashboard.Inventory')->name('admin.inventory');
     Route::view('/payment', 'AdminDashboard.Payment')->name('admin.payment');
-    Route::view('/category', 'AdminDashboard.Category')->name('admin.category');
+    //Route::view('/category', 'AdminDashboard.Category')->name('admin.category');
 });

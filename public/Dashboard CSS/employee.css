@@ -110,7 +110,7 @@ body {
   flex: 1;
   padding: 32px;
   background-color: #f9f7f6;
-  overflow-y: auto;
+  overflow-y: visible;
 }
 
 /* Products Header */
@@ -158,6 +158,8 @@ body {
   width: 100%;
   border-collapse: collapse;
   background-color: #ffffff;
+  table-layout: fixed; /* Ensures the table takes up available space */
+  overflow-x: scroll;
 }
 
 .products-table thead {
@@ -170,17 +172,17 @@ body {
   font-weight: 600;
   color: #374151;
   font-size: 14px;
-  border-bottom: 1px solid #e2e8f0;
   text-align: center;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .products-table td {
   padding: 16px 20px;
+  text-align: center;
   border-bottom: 1px solid #f1f5f9;
   color: #4b5563;
   font-size: 14px;
-  text-align: center;
-
+  text-overflow: ellipsis; /* Add ellipsis for overflowed text */
 }
 
 .products-table tbody tr {
@@ -196,8 +198,7 @@ body {
 }
 
 /* Action Buttons */
-.update-btn,
-.delete-btn {
+.archive-btn {
   padding: 8px 16px;
   border: none;
   border-radius: 6px;
@@ -207,44 +208,33 @@ body {
   transition: all 0.2s ease;
 }
 
-.update-btn {
+.archive-btn {
   background-color: #f59e0b;
   color: #1f2937;
 }
 
-.update-btn:hover {
+.archive-btn:hover {
   background-color: #d97706;
   transform: translateY(-1px);
 }
-
-.delete-btn {
-  background-color: #dc2626;
-  color: #ffffff;
-}
-
-.delete-btn:hover {
-  background-color: #b91c1c;
-  transform: translateY(-1px);
-}
-
 /* Responsive Design */
 @media (max-width: 1024px) {
   .main-container {
     flex-direction: column;
   }
-  
+
   .sidebar {
     width: 100%;
     order: 2;
   }
-  
+
   .sidebar-nav {
     flex-direction: row;
     overflow-x: auto;
     padding: 8px;
     gap: 8px;
   }
-  
+
   .nav-item {
     white-space: nowrap;
     border-left: none;
@@ -252,162 +242,86 @@ body {
     padding: 8px 16px;
     border-radius: 6px;
   }
-  
+
   .nav-item.active {
     border-bottom-color: #f59e0b;
     border-left: none;
   }
-  
+
   .main-content {
     order: 1;
     padding: 16px;
   }
-  
+
   .products-header {
     flex-direction: column;
     gap: 16px;
     align-items: stretch;
   }
-  
+
   .add-product-btn {
     align-self: flex-end;
   }
 }
 
 @media (max-width: 768px) {
-  .header {
-    padding: 12px 16px;
-  }
-  
-  .header-left .logo {
-    font-size: 16px;
-  }
-  
-  .main-content {
-    padding: 16px;
-  }
-  
-  .page-title {
-    font-size: 24px;
-  }
-  
   .table-container {
-    overflow-x: auto;
+    overflow-x: scroll; /* Disable horizontal scrolling */
   }
-  
+
   .products-table {
-    min-width: 600px;
+    width: 100%;
+    table-layout: fixed; /* Makes the table more flexible */
   }
-  
+
   .products-table th,
   .products-table td {
     padding: 12px 16px;
+    white-space: nowrap; /* Prevent text from wrapping */
+  }
+
+  .products-table th {
+    font-size: 12px;
+  }
+
+  .products-table td {
+    font-size: 12px;
   }
 }
 
 @media (max-width: 480px) {
-  .header-left .logo span,
-  .header-right .admin-profile span {
-    display: none;
-  }
-  
-  .products-header {
-    margin-bottom: 24px;
-  }
-  
-  .page-title {
-    font-size: 20px;
-  }
-  
-  .add-product-btn {
-    padding: 10px 20px;
-    font-size: 13px;
-  }
-  
   .products-table th,
   .products-table td {
-    
-    padding: 10px 12px;
-    font-size: 13px;
-  }
-  
-  .update-btn,
-  .delete-btn {
-    padding: 6px 12px;
+    padding: 8px 12px;
     font-size: 11px;
   }
 }
-
-/* Animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.table-container {
-  animation: fadeIn 0.6s ease-out;
-}
-
-.products-table tbody tr {
-  animation: fadeIn 0.4s ease-out;
-}
-
-.products-table tbody tr:nth-child(2) {
-  animation-delay: 0.1s;
-}
-
-.products-table tbody tr:nth-child(3) {
-  animation-delay: 0.2s;
-}
-
-.products-table tbody tr:nth-child(4) {
-  animation-delay: 0.3s;
-}
-
-.products-table tbody tr:nth-child(5) {
-  animation-delay: 0.4s;
-}
-
 .pagination {
-  text-align: center;
+  display: flex;
+  justify-content: center;
   margin-top: 20px;
+  gap: 10px;
 }
 
-.pagination ul {
-  list-style: none;
-  padding: 0;
-  display: inline-block;
-}
-
-.pagination ul li {
-  display: inline;
-  margin: 0 5px;
-}
-
-.pagination ul li a {
+.pagination a {
   text-decoration: none;
-  padding: 8px 16px;
-  background-color: #f1f1f1;
-  color: #000;
-  border-radius: 4px;
+  background-color: eee; /* same tone as your card */
+  color: #000000; /* coffee-like text */
+  padding: 10px 15px;
+  border-radius: 5px; /* rounded corners like cards */
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+  transition: 0.3s ease;
 }
 
-.pagination ul li a.active {
-  background-color: #007bff;
-  color: white;
+.pagination a:hover {
+  background-color: #ccc; /* hover color similar to card hover */
+
+
 }
 
-.pagination ul li a:hover {
-  background-color: #ddd;
-}
-.view-items-btn{
-  cursor:pointer;
-  text-decoration: none;
+.pagination a.active {
+  background-color: #007bff; /* active card color */
+  color: rgb(185, 185, 185);
+  pointer-events: none;
 }
 

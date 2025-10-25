@@ -16,6 +16,7 @@ class Supplier extends Model
         'Supplier_name',
         'Contact_number',
         'Address',
+        'Status',
     ];
 
     // Relationship: One supplier can supply many ingredients

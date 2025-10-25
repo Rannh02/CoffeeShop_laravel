@@ -7,49 +7,63 @@ use App\Models\Supplier;
 
 class SupplierController extends Controller
 {
-    // Show all suppliers
+    // ✅ Show all suppliers
     public function index()
     {
         $suppliers = Supplier::all();
-        return view('AdminDashboard.Suppliers', compact('suppliers'));
+        return view('AdminDashboard.Supplier', compact('suppliers'));
     }
 
-    // Store a new supplier
+    // ✅ Store a new supplier
     public function store(Request $request)
     {
         $request->validate([
-            'Supplier_name' => 'required|string|max:255',
-            'Contact_number' => 'nullable|string|max:20',
-            'Address' => 'nullable|string|max:255',
+            'Supplier_name'   => 'required|string|max:255',
+            'Contact_number'  => 'nullable|string|max:20',
+            'Address'         => 'nullable|string|max:255',
         ]);
 
-        Supplier::create($request->all());
+        Supplier::create([
+            'Supplier_name'  => $request->Supplier_name,
+            'Contact_number' => $request->Contact_number,
+            'Address'        => $request->Address,
+            'Status'         => 'active',
+        ]);
 
-        return redirect()->back()->with('success', 'Supplier added successfully.');
+        return redirect()->route('suppliers.index')->with('success', 'Supplier added successfully.');
     }
 
-    // Update supplier
-    public function update(Request $request, $id)
+    // ✅ Update supplier
+    public function update(Request $request, $Supplier_id)
     {
-        $supplier = Supplier::findOrFail($id);
-
         $request->validate([
-            'Supplier_name' => 'required|string|max:255',
-            'Contact_number' => 'nullable|string|max:20',
-            'Address' => 'nullable|string|max:255',
+            'Supplier_name'   => 'required|string|max:255',
+            'Contact_number'  => 'nullable|string|max:20',
+            'Address'         => 'nullable|string|max:255',
         ]);
 
-        $supplier->update($request->all());
+        $supplier = Supplier::findOrFail($Supplier_id);
+        $supplier->update($request->only(['Supplier_name', 'Contact_number', 'Address']));
 
-        return redirect()->back()->with('success', 'Supplier updated successfully.');
+        return redirect()->route('suppliers.index')->with('success', 'Supplier updated successfully.');
     }
 
-    // Delete supplier
-    public function destroy($id)
+    // ✅ Archive / Restore supplier
+    public function archive($Supplier_id)
     {
-        $supplier = Supplier::findOrFail($id);
+        $supplier = Supplier::findOrFail($Supplier_id);
+        $supplier->Status = $supplier->Status === 'active' ? 'inactive' : 'active';
+        $supplier->save();
+
+        return redirect()->route('suppliers.index')->with('success', 'Supplier status updated.');
+    }
+
+    // ✅ Delete supplier
+    public function destroy($Supplier_id)
+    {
+        $supplier = Supplier::findOrFail($Supplier_id);
         $supplier->delete();
 
-        return redirect()->back()->with('success', 'Supplier deleted successfully.');
+        return redirect()->route('suppliers.index')->with('success', 'Supplier deleted successfully.');
     }
 }

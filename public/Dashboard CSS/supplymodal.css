@@ -1,0 +1,234 @@
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+/* Modal Overlay */
+#SupplyModal {
+  display: none; /* hidden by default */
+  position: fixed;
+  inset: 0; /* top, right, bottom, left */
+  background: rgba(0,0,0,0.45);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+/* Form Container */
+#SupplyModal form {
+  width: 380px;
+  max-width: 95%;
+  background: #fffdf9;
+  border-radius: 18px;
+  padding: 28px 25px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: fadeIn 0.25s ease;
+}
+
+/* Title */
+#SupplyModal form h1 {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #3a241c;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+/* Labels */
+#SupplyModal form p, 
+#SupplyModal form label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #4b2e2e;
+  margin-bottom: 4px;
+}
+
+/* Inputs */
+#SupplyModal form input[type="text"],
+#SupplyModal form input[type="number"],
+#SupplyModal form select {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid #c9b9af;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.95rem;
+  outline: none;
+  transition: all 0.25s ease;
+}
+
+#SupplyModal form input:focus,
+#SupplyModal form select:focus {
+  border-color: #8b5e34;
+  box-shadow: 0 0 0 3px rgba(139, 94, 52, 0.18);
+}
+
+/* Buttons Container */
+#SupplyModal form .btn-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 5px;
+}
+
+/* Buttons */
+#SupplyModal form .AddBtn,
+#SupplyModal form .CancelBtn {
+  flex: 1;
+  padding: 11px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+/* Add Button */
+#SupplyModal form .AddBtn {
+  background: #2f6630;
+  color: #fff;
+}
+
+#SupplyModal form .AddBtn:hover {
+  background: #1f4f20;
+  transform: translateY(-2px);
+}
+
+/* Cancel Button */
+#SupplyModal form .CancelBtn {
+  background: #e6e6e6;
+  color: #333;
+}
+
+#SupplyModal form .CancelBtn:hover {
+  background: #cfcfcf;
+  transform: translateY(-2px);
+}
+
+/* Fade In Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-15px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+/* ================================
+   Update Supplier Modal Styling
+================================ */
+#EditSupplyModal {
+  display: none; /* hidden by default */
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(3px);
+}
+
+/* Form container */
+#EditSupplyModal form {
+  width: 380px;
+  max-width: 95%;
+  background: #fffdf9;
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: fadeIn 0.25s ease;
+}
+
+/* Title */
+#EditSupplyModal form h1 {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #3a241c;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+/* Labels / Paragraphs */
+#EditSupplyModal form p,
+#EditSupplyModal form label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #4b2e2e;
+  margin-bottom: 4px;
+}
+
+/* Input fields */
+#EditSupplyModal form input[type="text"],
+#EditSupplyModal form input[type="number"],
+#EditSupplyModal form select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #c9b9af;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.95rem;
+  outline: none;
+  transition: all 0.25s ease;
+}
+
+#EditSupplyModal form input:focus,
+#EditSupplyModal form select:focus {
+  border-color: #8b5e34;
+  box-shadow: 0 0 0 3px rgba(139, 94, 52, 0.18);
+}
+
+/* Button group */
+#EditSupplyModal form .btn-group {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* Buttons */
+#EditSupplyModal form .AddBtn,
+#EditSupplyModal form .CancelBtn {
+  flex: 1;
+  padding: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+/* Update Button (slightly green tint to differentiate) */
+#EditSupplyModal form .AddBtn {
+  background: #4e8b34;
+  color: #fff;
+}
+
+#EditSupplyModal form .AddBtn:hover {
+  background: #3b6d26;
+  transform: translateY(-2px);
+}
+
+/* Cancel Button */
+#EditSupplyModal form .CancelBtn {
+  background: #e6e6e6;
+  color: #333;
+}
+
+#EditSupplyModal form .CancelBtn:hover {
+  background: #cfcfcf;
+  transform: translateY(-2px);
+}
+
+

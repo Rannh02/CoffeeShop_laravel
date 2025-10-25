@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -9,13 +8,10 @@ class Category extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'category_name', 
-    ];
+    protected $table = 'categories'; // or 'categories' depending on your table name
+    protected $primaryKey = 'Category_id';
 
-    // Relationship: One Category has many Products
-    public function products()
-    {
-        return $this->hasMany(Product::class);
-    }
+    protected $fillable = [
+        'Category_name'
+    ];
 }
