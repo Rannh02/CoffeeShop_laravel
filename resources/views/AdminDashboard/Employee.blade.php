@@ -175,7 +175,6 @@
         </div>
     </div>
 
-    <script type="module" src="{{ asset('JS_Dashboard/DashboardsTime.js') }}"></script>
     <script src="{{ asset('Javascripts/employee.js') }}"></script>
     <script src="{{ asset('Javascripts/RealTime.js') }}"></script>
 </body>

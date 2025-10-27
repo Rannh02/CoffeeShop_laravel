@@ -89,7 +89,6 @@
         </main>
     </div>
 </div>
-<script src="{{ asset('js/JS_Dashboard/dashboardCharts.js') }}"></script>
 <script src="{{ asset('Javascripts/RealTime.js') }}"></script>
 </body>
 </html>

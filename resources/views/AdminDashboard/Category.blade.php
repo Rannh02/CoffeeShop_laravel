@@ -99,6 +99,6 @@
             </main>
         </div>
     </div>
-    <script type="module" src="{{ asset('JS_Dashboard/DashboardsTime.js') }}"></script>
+<script src="{{ asset('Javascripts/RealTime.js') }}"></script>
 </body>
 </html>

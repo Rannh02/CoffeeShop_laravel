@@ -88,7 +88,7 @@
               <th>Address</th>
               <th>Status</th>
               <th>Update</th>
-              <th>Delete</th>
+              <th>Archive</th>
             </tr>
           </thead>
           <tbody>
@@ -161,10 +161,6 @@
     </div>
   </div>
 </div>
-
-<script src="{{ asset('JS_Dashboard/DashboardsTime.js') }}"></script>
-<script src="{{ asset('Javascripts/supplierModal.js') }}"></script>
-<script src="{{ asset('Javascripts/supplierArchive.js') }}"></script>
-<script src="{{ asset('Javascripts/supplierUpdate.js') }}"></script>
+<script src="{{ asset('Javascripts/RealTime.js') }}"></script>
   </body>
 </html>

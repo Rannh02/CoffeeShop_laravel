@@ -6,12 +6,12 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\IngredientController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\OrderController;
-use App\Http\Controllers\Admin\OrderItemController;
+use App\Http\Controllers\OrderItemController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\CategoryController;
 
 
-Route::get('/admin/orderitem', [AdminController::class, 'orderItems'])->name('admin.orderitem');
+
 // ✅ Welcome page
 Route::get('/', function () {
     return view('LoginSystem.WelcomeLogin');
@@ -53,6 +53,10 @@ Route::prefix('admin')->group(function () {
     Route::get('/orders', [OrderController::class, 'index'])->name('admin.orders');
     Route::post('/orders', [OrderController::class, 'store'])->name('admin.orders.store');
 
+    // ✅ Order Items
+    Route::get('/admin/orderitem', [OrderItemController::class, 'index'])->name('admin.orderitem');
+
+
     // ✅ Employees
     Route::get('/employee', [EmployeeController::class, 'index'])->name('admin.employee');
     Route::post('/employee', [EmployeeController::class, 'store'])->name('admin.employee.store');
@@ -61,8 +65,9 @@ Route::prefix('admin')->group(function () {
     // ✅ Category
     Route::get('/category', [CategoryController::class, 'index'])->name('admin.category');
 
+
     // ✅ Placeholder pages (replace with Blade views later)
-    Route::view('/orderitem', 'AdminDashboard.OrderItem')->name('admin.orderitem');
+    //Route::view('/orderitem', 'AdminDashboard.OrderItem')->name('admin.orderitem');
     //Route::view('/employee', 'AdminDashboard.Employee')->name('admin.employee');
     Route::view('/archived', 'AdminDashboard.Archived')->name('admin.archived');
     Route::view('/inventory', 'AdminDashboard.Inventory')->name('admin.inventory');

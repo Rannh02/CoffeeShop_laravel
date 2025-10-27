@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -10,23 +10,22 @@ class OrderItemController extends Controller
 {
     public function index()
     {
-        // Fetch order items from the database
-        $orderItems = DB::table('orderitem')
-            ->join('orders', 'orderitem.Order_id', '=', 'orders.Order_id')
-            ->join('products', 'orderitem.Product_id', '=', 'products.Product_id')
-            ->join('costumer', 'orders.Costumer_id', '=', 'costumer.Costumer_id')
+        // Fetch order items from the database with pagination
+        $orderItems = DB::table('order_items') // ✅ Changed from 'orderitem' to 'order_items'
+            ->join('orders', 'order_items.Order_id', '=', 'orders.Order_id')
+            ->join('products', 'order_items.Product_id', '=', 'products.Product_id')
+            ->join('customer', 'orders.Customer_id', '=', 'customer.Customer_id') // Note: Check if table is 'costumer' or 'customer'
             ->select(
-                'orderitem.OrderItem_id',
-                'orderitem.Order_id',
-                'costumer.CustomerName',
+                'order_items.OrderItem_id',
+                'order_items.Order_id',
+                'custumer.CustomerName',
                 'products.Product_name',
-                'orderitem.Quantity',
-                'orderitem.Price_sale'
+                'order_items.Quantity',
+                'order_items.UnitPrice as Price_sale' // ✅ Changed from Price_sale to UnitPrice and aliased it
             )
-            ->get();
+            ->paginate(10); // ✅ Added pagination (10 items per page)
 
-        // ✅ Pass the variable to the view
+        // Pass the variable to the view
         return view('AdminDashboard.OrderItem', compact('orderItems'));
     }
-
 }
