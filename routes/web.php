@@ -1,4 +1,5 @@
 <?php
+// routes/web.php (updated with archived and restore routes integrated)
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
@@ -10,8 +11,6 @@ use App\Http\Controllers\OrderItemController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CashierController;
-
-
 
 // ✅ Welcome page
 Route::get('/', function () {
@@ -30,7 +29,6 @@ Route::post('/logout/admin', [AdminController::class, 'logout'])->name('admin.lo
 // Cashier login
 Route::get('/login/cashier', [AdminController::class, 'showCashierLoginForm'])->name('cashier.login');
 Route::post('/login/cashier', [AdminController::class, 'cashierLogin'])->name('cashier.login.submit');
-
 
 // ✅ All admin routes grouped under prefix "admin"
 Route::prefix('admin')->group(function () {
@@ -59,34 +57,21 @@ Route::prefix('admin')->group(function () {
     Route::post('/orders', [OrderController::class, 'store'])->name('admin.orders.store');
 
     // ✅ Order Items
-    Route::get('/admin/orderitem', [OrderItemController::class, 'index'])->name('admin.orderitem');
-
+    Route::get('/orderitem', [OrderItemController::class, 'index'])->name('admin.orderitem');
 
     // ✅ Employees
     Route::get('/employee', [EmployeeController::class, 'index'])->name('admin.employee');
     Route::post('/employee', [EmployeeController::class, 'store'])->name('admin.employee.store');
     Route::post('/employee/{id}/archive', [EmployeeController::class, 'archive'])->name('admin.employee.archive');
+    Route::get('/archived', [EmployeeController::class, 'archived'])->name('admin.archived');
+    Route::post('/employee/{id}/restore', [EmployeeController::class, 'restore'])->name('admin.employee.restore');
 
     // ✅ Category
     Route::get('/category', [CategoryController::class, 'index'])->name('admin.category');
 
-
-    //cashier ordering page
-   Route::get('/cashier/coffee', function () {
-    return view('Cashier.coffee');
-    })->name('cashier.coffee');
-
-
-    Route::get('/cashier/coffee', [CashierController::class, 'showCoffee'])->name('cashier.coffee');
-
-
-
+    // Cashier ordering page
 
     // ✅ Placeholder pages (replace with Blade views later)
-    //Route::view('/orderitem', 'AdminDashboard.OrderItem')->name('admin.orderitem');
-    //Route::view('/employee', 'AdminDashboard.Employee')->name('admin.employee');
-    Route::view('/archived', 'AdminDashboard.Archived')->name('admin.archived');
     Route::view('/inventory', 'AdminDashboard.Inventory')->name('admin.inventory');
     Route::view('/payment', 'AdminDashboard.Payment')->name('admin.payment');
-    //Route::view('/category', 'AdminDashboard.Category')->name('admin.category');
 });

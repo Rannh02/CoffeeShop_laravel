@@ -1,4 +1,5 @@
 <?php
+// app/Models/Employee.php (updated to match your existing model, with HasFactory trait added)
 
 namespace App\Models;
 
@@ -7,6 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Employee extends Model
 {
+    use HasFactory;
+
     protected $table = 'employee';  
     protected $primaryKey = 'Employee_id';
     public $timestamps = true;
@@ -26,4 +29,6 @@ class Employee extends Model
     protected $hidden = [
         'Password',
     ];
+
+    protected $dates = ['Date_of_Hire'];
 }

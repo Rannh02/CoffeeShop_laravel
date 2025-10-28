@@ -18,7 +18,7 @@
   padding: 24px 28px;
   border-radius: 12px;
   width: 420px;
-  height:80%;
+  height:100%;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
   animation: fadeIn 0.3s ease-out;
 }

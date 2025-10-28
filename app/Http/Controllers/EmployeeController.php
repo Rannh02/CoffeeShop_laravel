@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 
 class EmployeeController extends Controller
-{
+{   
     public function index()
     {
         $employees = Employee::where('Status', 'Active')->get();
@@ -52,5 +52,18 @@ class EmployeeController extends Controller
         $employee->update(['Status' => 'Archived']);
 
         return response()->json(['success' => true, 'message' => 'Employee archived successfully']);
+    }
+    public function archived(){
+        $employees = Employee::where('Status', 'Archived')->paginate(4);
+        $fullname = Auth::user()->name ?? 'Admin'; // Consistent with index
+        
+        return view('AdminDashboard.Archived', compact('employees', 'fullname'));
+    }
+    public function restore($id)
+    {
+        $employee = Employee::findOrFail($id);
+        $employee->update(['Status' => 'Active']);
+
+        return response()->json(['success' => true, 'message' => 'Employee restored successfully']);
     }
 }   
