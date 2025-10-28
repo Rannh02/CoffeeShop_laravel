@@ -18,7 +18,7 @@ class OrderItemController extends Controller
             ->select(
                 'order_items.OrderItem_id',
                 'order_items.Order_id',
-                'custumer.CustomerName',
+                'customer.CustomerName',
                 'products.Product_name',
                 'order_items.Quantity',
                 'order_items.UnitPrice as Price_sale' // ✅ Changed from Price_sale to UnitPrice and aliased it

@@ -42,7 +42,7 @@ class EmployeeController extends Controller
             'Status' => 'Active'
         ]);
 
-        return redirect()->route('employees.index')
+        return redirect()->route('admin.employee')
             ->with('success', 'Employee added successfully!');
     }
 

@@ -45,7 +45,7 @@
                 <form action="{{ route('admin.logout') }}" method="POST" style="display: inline;">
                     @csrf
                     <button type="submit" class="nav-item logout" style="width: 100%; text-align: left; background: none; border: none; cursor: pointer; color: inherit; font: inherit; padding: 0.75rem 1rem;">
-                        <i class="bi bi-box-arrow-left"></i> Logout
+                        <i class="bi bi-box-arrow-left">Logout</i>
                     </button>
                 </form>
             </nav>

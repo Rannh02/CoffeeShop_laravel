@@ -9,6 +9,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderItemController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CashierController;
 
 
 
@@ -26,6 +27,10 @@ Route::get('/login/cashier', function () {
 Route::get('/login/admin', [AdminController::class, 'showLoginForm'])->name('login.admin');
 Route::post('/login/admin', [AdminController::class, 'login'])->name('admin.login.submit');
 Route::post('/logout/admin', [AdminController::class, 'logout'])->name('admin.logout');
+// Cashier login
+Route::get('/login/cashier', [AdminController::class, 'showCashierLoginForm'])->name('cashier.login');
+Route::post('/login/cashier', [AdminController::class, 'cashierLogin'])->name('cashier.login.submit');
+
 
 // ✅ All admin routes grouped under prefix "admin"
 Route::prefix('admin')->group(function () {
@@ -64,6 +69,17 @@ Route::prefix('admin')->group(function () {
 
     // ✅ Category
     Route::get('/category', [CategoryController::class, 'index'])->name('admin.category');
+
+
+    //cashier ordering page
+   Route::get('/cashier/coffee', function () {
+    return view('Cashier.coffee');
+    })->name('cashier.coffee');
+
+
+    Route::get('/cashier/coffee', [CashierController::class, 'showCoffee'])->name('cashier.coffee');
+
+
 
 
     // ✅ Placeholder pages (replace with Blade views later)

@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Log;
 
 class AdminController extends Controller
 {
+    // =========================
+    // ✅ ADMIN LOGIN
+    // =========================
     public function showLoginForm() {
         return view('LoginSystem.AdminLogin');
     }
@@ -34,24 +37,53 @@ class AdminController extends Controller
         ])->withInput($request->only('username'));
     }
 
+    // =========================
+    // ✅ CASHIER LOGIN
+    // =========================
+    public function showCashierLoginForm()
+    {
+        return view('LoginSystem.CashierLogin');
+    }
+
+    public function cashierLogin(Request $request)
+    {
+        $request->validate([
+            'username' => 'required|string',
+            'password' => 'required|string',
+        ]);
+
+        $employee = DB::table('employee')
+            ->where('username', $request->username)
+            ->where('password', $request->password)
+            ->first();
+
+        if ($employee) {
+            Session::put('cashier_logged_in', true);
+            Session::put('cashier_name', $employee->Employee_name);
+
+            return view('Cashier.coffee')->with('success', 'Welcome, ' . $employee->Employee_name . '!');
+        }
+
+        return back()->withErrors([
+            'credentials' => 'Invalid username or password.',
+        ])->withInput();
+    }
+
+    // =========================
+    // ✅ ADMIN DASHBOARD
+    // =========================
     public function dashboard() {
         if (!Session::get('admin_logged_in')) {
             return redirect()->route('admin.login');
         }
 
-        // Total Orders
         $totalOrders = DB::table('order')->count();
-
-        // Total Income
         $totalIncome = DB::table('order')->sum('TotalAmount') ?? 0;
-
-        // Total Customers - Count Distinct Customer IDs
         $totalCustomers = DB::table('order')
             ->whereNotNull('Customer_id')
             ->selectRaw('COUNT(DISTINCT Customer_id) as total')
             ->value('total');
 
-        // Top 5 Best-Selling Products
         $topProducts = DB::table('orderitem as oi')
             ->join('product as p', 'oi.Product_id', '=', 'p.Product_id')
             ->select('p.Product_name', DB::raw('SUM(oi.Quantity) as total_sold'))
@@ -60,7 +92,6 @@ class AdminController extends Controller
             ->limit(5)
             ->get();
 
-        // Last 7 Days Sales (grouped by weekday)
         $salesData = DB::table('order')
             ->select(DB::raw('DAYNAME(OrderDate) as day_name'), DB::raw('SUM(TotalAmount) as daily_sales'))
             ->whereRaw('YEARWEEK(OrderDate, 1) = YEARWEEK(CURDATE(), 1)')
@@ -68,14 +99,12 @@ class AdminController extends Controller
             ->pluck('daily_sales', 'day_name')
             ->toArray();
 
-        // Define full week (Mon–Sun)
         $weekDays = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
         $chartSales = [];
         foreach ($weekDays as $day) {
             $chartSales[$day] = isset($salesData[$day]) ? (float)$salesData[$day] : 0;
         }
 
-        // Debug - Check if variables are set
         Log::info('Dashboard Data:', [
             'totalOrders' => $totalOrders,
             'totalIncome' => $totalIncome,
@@ -92,13 +121,16 @@ class AdminController extends Controller
             'chartSales'
         ));
     }
+
+    // =========================
+    // ✅ ORDER ITEMS (ADMIN)
+    // =========================
     public function orderItems()
     {
         if (!Session::get('admin_logged_in')) {
             return redirect()->route('admin.login');
         }
 
-        // ✅ Fetch order items with related order, customer, and product info
         $orderItems = DB::table('orderitem')
             ->join('orders', 'orderitem.Order_id', '=', 'orders.Order_id')
             ->join('products', 'orderitem.Product_id', '=', 'products.Product_id')
@@ -113,11 +145,12 @@ class AdminController extends Controller
             )
             ->get();
 
-        // ✅ Send $orderItems to the Blade view
         return view('AdminDashboard.OrderItem', compact('orderItems'));
     }
 
-
+    // =========================
+    // ✅ LOGOUT (ADMIN + CASHIER)
+    // =========================
     public function logout() {
         Session::flush();
         return redirect()->route('admin.login')->with('success', 'Logged out successfully!');
