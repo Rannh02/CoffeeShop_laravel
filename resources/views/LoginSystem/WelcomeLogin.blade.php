@@ -21,7 +21,7 @@
       <h1>Welcome to Berde Kopi</h1>
       <h3 style="margin-top:15%;">Login as</h3>
       <div class="button-group">
-        <a href="{{ route('cashier.login') }}">
+        <a href="{{ route('login.cashier') }}">
             <button type="button">Cashier</button>
         </a>
             <span>or</span>

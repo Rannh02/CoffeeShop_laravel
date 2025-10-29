@@ -13,7 +13,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    @vite('resources/css/app.css') <!-- If using Vite -->
   </head>
   <body>
     <div id="app">
@@ -31,7 +30,7 @@
               <path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" fill="currentColor"/>
               <path d="M12 14C7.58172 14 4 17.5817 4 22H20C20 17.5817 16.4183 14 12 14Z" fill="currentColor"/>
             </svg>
-            <span><strong style="color:green; font-weight:bolder;">Admin: </strong>{{ $fullname }}</span>
+            <span><strong style="color:green; font-weight:bolder;">Admin: </strong>{{ session('fullname', 'Admin') }}</span>
           </div>
         </div>
       </header>

@@ -1,5 +1,4 @@
 <?php
-// routes/web.php (updated with archived and restore routes integrated)
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
@@ -11,6 +10,31 @@ use App\Http\Controllers\OrderItemController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CashierController;
+
+
+Route::prefix('cashier')->group(function () {
+Route::get('/login/cashier', [CashierController::class, 'showLoginForm'])
+->name('cashier.login.form');
+
+Route::post('/login/cashier', [CashierController::class, 'login'])
+->name('cashier.login');
+
+// Routes with middleware (protected)
+    Route::middleware('cashier.auth')->group(function () {
+        Route::get('/coffee', [CashierController::class, 'showCoffee'])
+            ->name('cashier.coffee');
+        Route::get('/tea', [CashierController::class, 'showTea'])
+            ->name('cashier.tea');
+        Route::get('/cold', [CashierController::class, 'showColdDrinks'])
+            ->name('cashier.cold');
+        Route::get('/pastries', [CashierController::class, 'showPastries'])
+            ->name('cashier.pastries');
+        Route::get('/logout', [CashierController::class, 'logout'])
+            ->name('cashier.logout');
+    });
+
+});
+
 
 // ✅ Welcome page
 Route::get('/', function () {
@@ -26,9 +50,6 @@ Route::get('/login/cashier', function () {
 Route::get('/login/admin', [AdminController::class, 'showLoginForm'])->name('login.admin');
 Route::post('/login/admin', [AdminController::class, 'login'])->name('admin.login.submit');
 Route::post('/logout/admin', [AdminController::class, 'logout'])->name('admin.logout');
-// Cashier login
-Route::get('/login/cashier', [AdminController::class, 'showCashierLoginForm'])->name('cashier.login');
-Route::post('/login/cashier', [AdminController::class, 'cashierLogin'])->name('cashier.login.submit');
 
 // ✅ All admin routes grouped under prefix "admin"
 Route::prefix('admin')->group(function () {
@@ -57,7 +78,8 @@ Route::prefix('admin')->group(function () {
     Route::post('/orders', [OrderController::class, 'store'])->name('admin.orders.store');
 
     // ✅ Order Items
-    Route::get('/orderitem', [OrderItemController::class, 'index'])->name('admin.orderitem');
+    Route::get('/admin/orderitem', [OrderItemController::class, 'index'])->name('admin.orderitem');
+
 
     // ✅ Employees
     Route::get('/employee', [EmployeeController::class, 'index'])->name('admin.employee');
@@ -66,12 +88,16 @@ Route::prefix('admin')->group(function () {
     Route::get('/archived', [EmployeeController::class, 'archived'])->name('admin.archived');
     Route::post('/employee/{id}/restore', [EmployeeController::class, 'restore'])->name('admin.employee.restore');
 
+
     // ✅ Category
     Route::get('/category', [CategoryController::class, 'index'])->name('admin.category');
 
-    // Cashier ordering page
 
     // ✅ Placeholder pages (replace with Blade views later)
+    //Route::view('/orderitem', 'AdminDashboard.OrderItem')->name('admin.orderitem');
+    //Route::view('/employee', 'AdminDashboard.Employee')->name('admin.employee');
+    //Route::view('/archived', 'AdminDashboard.Archived')->name('admin.archived');
     Route::view('/inventory', 'AdminDashboard.Inventory')->name('admin.inventory');
     Route::view('/payment', 'AdminDashboard.Payment')->name('admin.payment');
+    //Route::view('/category', 'AdminDashboard.Category')->name('admin.category');
 });

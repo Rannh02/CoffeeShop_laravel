@@ -6,7 +6,7 @@
     <title>Berde Kopi - Coffee</title>
 
     {{-- CSS Files --}}
-    <link rel="stylesheet" href="{{ asset('css/CashierSystem.css') }}">
+    <link rel="stylesheet" href="{{ asset('Dashboard CSS/cashier.css') }}">
     <link rel="stylesheet" href="{{ asset('css/modalQR.css') }}">
     <link rel="stylesheet" href="{{ asset('css/customerInfo.css') }}">
     <link rel="stylesheet" href="{{ asset('css/ConfirmationOrder.css') }}">
@@ -25,7 +25,7 @@
                 <span class="staff-name">
                     <i style="font-size:20px;" class="bi bi-person-circle"></i> {{ $staffName ?? 'Cashier' }}
                 </span>
-                <a href="{{ route('logout') }}" class="checkout-btn">Logout</a>
+                <a href="{{ route('cashier.logout') }}" class="checkout-btn">Logout</a>
             </div>
         </header>
 
