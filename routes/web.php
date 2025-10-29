@@ -91,6 +91,7 @@ Route::prefix('admin')->group(function () {
 
     // ✅ Category
     Route::get('/category', [CategoryController::class, 'index'])->name('admin.category');
+    Route::post('/category', [CategoryController::class, 'store'])->name('category.store');
 
 
     // ✅ Placeholder pages (replace with Blade views later)
