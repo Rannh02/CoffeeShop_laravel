@@ -38,7 +38,6 @@
 
 
       <div class="register-link">
-        <a href="RegisterAccount.php">Register</a><br>
         <a href="{{ url()->previous() }}" class="back-btn">Back</a>
       </div>
     </div>
