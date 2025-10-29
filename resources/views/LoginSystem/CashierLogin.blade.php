@@ -20,7 +20,7 @@
       <div class="login-section">
         <a href="WelcomeLogin.php"></a>
 
-          <h2>Cashier Login</h2>
+          <h1>Cashier Login</h1>
                 <!--Auto fill error-->
           <?php if (!empty($message)): ?>
             <p style="color:red;"><?= $message ?></p>

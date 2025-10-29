@@ -95,18 +95,18 @@
 }
 
 .Employee-Modal .AddBtn {
-  background-color: #2f6630;
-  color: #fdfeff;
+  background-color: #10b981;
+  color: #000000;
 }
 
 .Employee-Modal .AddBtn:hover {
-  background-color: #285029;
+  background-color: #059669;
   transform: translateY(-1px);
 }
 
 .Employee-Modal .CancelBtn {
   background-color: #ced1d6;
-  color: #374151;
+  color: #000000;
 }
 
 .Employee-Modal .CancelBtn:hover {

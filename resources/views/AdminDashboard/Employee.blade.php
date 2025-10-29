@@ -75,7 +75,7 @@
                 <!-- Products Header -->
                 <div class="products-header">
                     <h1 class="page-title">Employee</h1>
-                    <button id="openCategoryModal" class="add-product-btn">
+                    <button id="openEmployeeModal" class="add-product-btn">
                         <i class="bi bi-plus-circle">   Add Employee</i>
                 </button>
                 </div>

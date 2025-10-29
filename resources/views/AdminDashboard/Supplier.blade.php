@@ -60,8 +60,8 @@
     <main class="main-content">
       <div class="products-header">
         <h1 class="page-title">Suppliers</h1>
-        <button id="openCategoryModal" class="add-product-btn">
-          <i class="bi bi-plus-circle">   Add Supplier</i>
+        <button id="openAddSupplierModal" class="add-product-btn">
+                <i class="bi bi-plus-circle">   Add Category</i>
         </button>
       </div>
 
