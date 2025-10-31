@@ -1,75 +1,48 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const updateButtons = document.querySelectorAll(".update-btn");
-    const editModal = document.getElementById("EditSupplyModal");
-    const closeEditModal = document.getElementById("closeEditSupplierModal");
-    
-    function openEditModal(supplier) {
-    document.getElementById('editSupplierId').value = supplier.Supplier_id;
-    document.getElementById('editSupplierName').value = supplier.Supplier_name;
-    document.getElementById('editContact').value = supplier.Contact_number;
-    document.getElementById('editAddress').value = supplier.Address;
+document.addEventListener('DOMContentLoaded', function() {
+    const editModal = document.getElementById('EditSupplyModal');
+    const closeEditSupplierModal = document.getElementById('closeEditSupplierModal');
+    const editForm = document.getElementById('editSupplierForm');
+    const supplierIdInput = document.getElementById('editSupplierId');
+    const supplierNameInput = document.getElementById('editSupplierName');
+    const contactNumberInput = document.getElementById('editContact');
+    const addressInput = document.getElementById('editAddress');
 
-    // ✅ dynamically set form action
-    const form = document.getElementById('editSupplierForm');
-    form.action = `/admin/suppliers/${supplier.Supplier_id}/update`;
+    // Handle edit (update) button clicks
+    document.querySelectorAll('.update-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const supplierId = this.getAttribute('data-id');
+            const supplierName = this.getAttribute('data-name');
+            const contactNumber = this.getAttribute('data-contact');
+            const address = this.getAttribute('data-address');
 
-    document.getElementById('EditSupplyModal').style.display = 'flex';
-}
+            console.log('Supplier ID:', supplierId); // 🔍 DEBUG
+            console.log('Data:', { supplierName, contactNumber, address }); // 🔍 DEBUG
 
+            // Fill form fields
+            supplierIdInput.value = supplierId;
+            supplierNameInput.value = supplierName;
+            contactNumberInput.value = contactNumber;
+            addressInput.value = address;
 
-        // Open modal and populate data
-        updateButtons.forEach((btn) => {
-        btn.addEventListener("click", () => {
-            supplierIdInput.value = btn.dataset.id;
-            supplierNameInput.value = btn.dataset.name;
-            contactInput.value = btn.dataset.contact;
-            addressInput.value = btn.dataset.address;
-            editModal.style.display = "flex";
+            // Set the form action to match your route: /suppliers/{Supplier_id}/update
+            editForm.action = `/suppliers/${supplierId}/update`;
+            
+            console.log('Form Action:', editForm.action); // 🔍 DEBUG - Check this URL
+
+            // Show modal
+            editModal.style.display = 'flex'; 
         });
-});
-
-        // Close modal
-    closeEditModal.addEventListener("click", () => {
-    editModal.style.display = "none";
-
     });
 
-// Submit form with AJAX (optional enhancement)
-editForm.addEventListener("submit", async (e) => {
-e.preventDefault();
+    // Handle cancel/close button
+    closeEditSupplierModal.addEventListener('click', () => {
+        editModal.style.display = 'none';
+    });
 
-        const formData = {
-        Supplier_id: supplierIdInput.value,
-        Supplier_name: supplierNameInput.value,
-        Contact: contactInput.value,
-        Address: addressInput.value,
-        };
-
-            try {
-            const response = await fetch("/admin/suppliers/update", {
-                method: "POST",
-                headers: {
-                "Content-Type": "application/json",
-                "X-CSRF-TOKEN": document
-                    .querySelector('meta[name=\"csrf-token\"]')
-                    .getAttribute("content"),
-                },
-                body: JSON.stringify(formData),
-            });
-
-        const data = await response.json();
-
-        if (data.success) {
-            alert("Supplier updated successfully!");
-            location.reload();
-        } else {
-            alert("Failed to update supplier. Try again.");
+    // Close modal when clicking outside
+    editModal.addEventListener('click', (e) => {
+        if (e.target === editModal) {
+            editModal.style.display = 'none';
         }
-        } catch (error) {
-        console.error("Error:", error);
-        alert("Error connecting to the server.");
-        }
-
-
     });
 });

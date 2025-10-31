@@ -36,6 +36,7 @@ Route::post('/login/cashier', [CashierController::class, 'login'])
 });
 
 
+
 // ✅ Welcome page
 Route::get('/', function () {
     return view('LoginSystem.WelcomeLogin');
@@ -61,6 +62,9 @@ Route::prefix('admin')->group(function () {
     Route::resource('products', ProductController::class);
 
     // ✅ Ingredients
+    Route::prefix('admin')->group(function () {
+    Route::resource('ingredients', IngredientController::class);
+});
     Route::get('/ingredients', [IngredientController::class, 'index'])->name('admin.ingredients');
     Route::post('/ingredients', [IngredientController::class, 'store'])->name('admin.ingredients.store');
     Route::post('/ingredients/{id}/update', [IngredientController::class, 'update'])->name('admin.ingredients.update');

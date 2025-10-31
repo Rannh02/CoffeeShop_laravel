@@ -5,16 +5,18 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Ingredient;
 use App\Models\Supplier;
+use Illuminate\Support\Facades\Auth;
 
 class IngredientController extends Controller
 {
     // Show all ingredients
     public function index()
     {
+        $fullname = Auth::user()->name ?? 'Admin';
         $ingredients = Ingredient::with('supplier')->get();
         $suppliers = Supplier::all();
 
-        return view('AdminDashboard.Ingredients', compact('ingredients', 'suppliers'));
+        return view('AdminDashboard.Ingredients', compact('fullname', 'ingredients', 'suppliers'));
     }
 
     // Store new ingredient

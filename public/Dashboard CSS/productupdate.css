@@ -1,0 +1,126 @@
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+/* Modal Overlay */
+#UpdateProductModal {
+  display: none; /* hidden by default */
+  position: fixed;
+  inset: 0; /* shorthand for top:0; right:0; bottom:0; left:0 */
+  background: rgba(0,0,0,0.45); /* darker for better focus */
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px); /* subtle blur effect */
+}
+
+/* Form Container */
+#UpdateProductModal form {
+  width: 380px;
+  max-width: 95%;
+  background: #fffdf9;
+  border-radius: 18px;
+  padding: 20px; /* Reduced padding from excessive negative values */
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* Reduced gap between elements */
+  animation: fadeIn 0.25s ease;
+}
+
+/* Title */
+#UpdateProductModal form h1 {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #3a241c;
+  text-align: center;
+  margin-bottom: 8px; /* Reduced margin */
+}
+
+/* Labels / Paragraphs */
+#UpdateProductModal form p, 
+#UpdateProductModal form label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #4b2e2e;
+  margin-bottom: 4px; /* Kept as is, but can be reduced further if needed */
+}
+
+/* Inputs */
+#UpdateProductModal form input[type="text"],
+#UpdateProductModal form input[type="number"],
+#UpdateProductModal form select,
+#UpdateProductModal form input[type="file"] {
+  width: 100%;
+  padding: 8px 10px; /* Reduced padding */
+  border: 1px solid #c9b9af;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.95rem;
+  outline: none;
+  transition: all 0.25s ease;
+}
+
+#UpdateProductModal form input:focus,
+#UpdateProductModal form select:focus {
+  border-color: #8b5e34;
+  box-shadow: 0 0 0 3px rgba(139, 94, 52, 0.18);
+}
+
+/* Buttons Container */
+#UpdateProductModal form .btn-group {
+  display: flex;
+  gap: 8px; /* Reduced gap */
+  margin-top: 10px; /* Reduced margin */
+}
+
+/* Buttons */
+#UpdateProductModal form .UpdateBtn,
+#UpdateProductModal form .CancelBtn {
+  flex: 1;
+  padding: 8px; /* Reduced padding */
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+/* Update Button */
+#UpdateProductModal form .UpdateBtn {
+  background: #8b5e34;
+  color: #fff;
+}
+
+#UpdateProductModal form .UpdateBtn:hover {
+  background: #6d4626;
+  transform: translateY(-2px);
+}
+
+/* Cancel Button */
+#UpdateProductModal form .CancelBtn {
+  background: #e6e6e6;
+  color: #333;
+}
+
+#UpdateProductModal form .CancelBtn:hover {
+  background: #cfcfcf;
+  transform: translateY(-2px);
+}
+
+/* Fade In Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-15px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

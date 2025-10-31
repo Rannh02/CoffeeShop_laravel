@@ -93,12 +93,17 @@
           <tbody>
             @forelse($suppliers as $sup)
               <tr>
-                <td>{{ $sup->id }}</td>
+                <td>{{ $sup->Supplier_id }}</td>
                 <td>{{ $sup->Supplier_name }}</td>
-                <td>{{ $sup->Contact }}</td>
+                <td>{{ $sup->Contact_number }}</td>
                 <td>{{ $sup->Address }}</td>
                 <td>{{ $sup->Status ?? 'N/A' }}</td>
-                <td><button class="update-btn" data-id="{{ $sup->id }}" data-name="{{ $sup->Supplier_name }}" data-contact="{{ $sup->Contact }}" data-address="{{ $sup->Address }}">Update</button></td>
+                <td>
+                  <button class="update-btn" 
+                      data-id="{{ $sup->Supplier_id }}"
+                      data-name="{{ $sup->Supplier_name }}" 
+                      data-contact="{{ $sup->Contact_number }}" 
+                      data-address="{{ $sup->Address }}">Update</button></td>
                 <td>
                   @if($sup->Status === 'active')
                     <button class="archive-btn" data-id="{{ $sup->id }}">Archive</button>
@@ -137,29 +142,35 @@
     </form>
 </div>
 
-
-
-
-    <!-- Update Modal -->
-    <div id="EditSupplyModal" class="modal-overlay" style="display:none;">
-      <form id="editSupplierForm" method="POST">
+      <!-- Update Modal -->
+<div id="EditSupplyModal" class="modal-overlay" style="display:none;">
+  <form id="editSupplierForm" method="POST" class="modal-content">
     @csrf
     <input type="hidden" id="editSupplierId" name="Supplier_id">
-        <h1>Update Supplier</h1>
-        <p>Supplier Name</p>
-        <input type="text" id="editSupplierName" name="Supplier_name" required>
-        <p>Contact</p>
-        <input type="text" id="editContact" name="Contact" required>
-        <p>Address</p>
-        <input type="text" id="editAddress" name="Address" required>
-        <div class="btn-group">
-          <button type="submit" class="AddBtn">Update</button>
-          <button type="button" id="closeEditSupplierModal" class="CancelBtn">Cancel</button>
-        </div>
-      </form>
+    
+    <h1>Update Supplier</h1>
+    
+    <p>Supplier Name</p>
+    <input type="text" id="editSupplierName" name="Supplier_name" required>
+    
+    <p>Contact</p>
+    <input type="text" id="editContact" name="Contact_number" required>
+    
+    <p>Address</p>
+    <input type="text" id="editAddress" name="Address" required>
+    
+    <div class="btn-group">
+      <button type="submit" class="AddBtn">Update</button>
+      <button type="button" id="closeEditSupplierModal" class="CancelBtn">Cancel</button>
     </div>
+  </form>
+</div>
   </div>
 </div>
 <script src="{{ asset('Javascripts/RealTime.js') }}"></script>
+<script src="{{ asset('Javascripts/supplierModal.js') }}"></script>
+<script src="{{ asset('Javascripts/supplierUpdate.js') }}"></script>
+<script src="{{ asset('Javascripts/supplierArchive.js') }}"></script>
+
   </body>
 </html>

@@ -5,7 +5,7 @@
     <title>Admin - Products</title>
     <link rel="stylesheet" href="{{ asset('Dashboard CSS/products.css') }}">
     <link rel="stylesheet" href="{{ asset('Dashboard CSS/productsmodal.css') }}">
-    <link rel="stylesheet" href="{{ asset('DashB_css/UpdateProductModal.css') }}">
+    <link rel="stylesheet" href="{{ asset('Dashboard CSS/productupdate.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 
@@ -231,9 +231,10 @@
     </div>
 </div>
 
-<script src="{{ asset('JS_Dashboard/DeleteProductModal.js') }}"></script>
 <script src="{{ asset('Javascripts/RealTime.js') }}"></script>
 <script src="{{ asset('Javascripts/productmodal.js') }}"></script>
+<script src="{{ asset('Javascripts/productupdate.js') }}"></script>
+<script src="{{ asset('Javascripts/productdelete.js') }}"></script>
 
 
 

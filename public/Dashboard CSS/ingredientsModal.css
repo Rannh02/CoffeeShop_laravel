@@ -1,0 +1,138 @@
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+/* Modal Overlay */
+#ProductModal {
+  display: none; /* hidden by default */
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+/* Form Container */
+#ProductModal form {
+  width: 380px;
+  max-width: 95%;
+  background: #fffdf9;
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: fadeIn 0.25s ease;
+}
+
+/* Title */
+#ProductModal form h1 {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #3a241c;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+/* Labels / Paragraphs */
+#ProductModal form p,
+#ProductModal form label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #4b2e2e;
+  margin-bottom: 4px;
+}
+
+/* Inputs */
+#ProductModal form input[type="number"],
+#ProductModal form input[type="text"]{
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid #c9b9af;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 0.95rem;
+  outline: none;
+  transition: all 0.25s ease;
+}
+
+#ProductModal form input:focus {
+  border-color: #8b5e34;
+  box-shadow: 0 0 0 3px rgba(139, 94, 52, 0.18);
+}
+
+/* Buttons Container */
+#ProductModal form .btn-group {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* Buttons */
+#ProductModal form .AddBtn,
+#ProductModal form .CancelBtn {
+  flex: 1;
+  padding: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+/* Add Button */
+#ProductModal form .AddBtn {
+  background: #8b5e34;
+  color: #fff;
+}
+
+#ProductModal form .AddBtn:hover {
+  background: #6d4626;
+  transform: translateY(-2px);
+}
+
+/* Cancel Button */
+#ProductModal form .CancelBtn {
+  background: #e6e6e6;
+  color: #333;
+}
+
+#ProductModal form .CancelBtn:hover {
+  background: #cfcfcf;
+  transform: translateY(-2px);
+}
+
+/* Fade In Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-15px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+#ProductModal form select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #c9b9af;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.95rem;
+  outline: none;
+  transition: all 0.25s ease;
+}
+
+#ProductModal form select:focus {
+  border-color: #8b5e34;
+  box-shadow: 0 0 0 3px rgba(139, 94, 52, 0.18);
+}
