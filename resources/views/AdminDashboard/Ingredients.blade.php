@@ -56,7 +56,9 @@
         <main class="main-content">
             <div class="products-header">
                 <h1 class="page-title">Ingredients</h1>
-                <button class="add-product-btn" id="openProductModal">Add Ingredient</button>
+                <button id="openProductModal" class="add-product-btn">
+                        <i class="bi bi-plus-circle">   Add Employee</i>
+                </button>
             </div>
 
             <!-- Ingredients Table -->
