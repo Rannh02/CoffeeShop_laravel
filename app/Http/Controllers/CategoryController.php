@@ -20,4 +20,22 @@ class CategoryController extends Controller
             return back()->with('error', 'Error loading categories: ' . $e->getMessage());
         }
     }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'Category_name' => 'required|string|max:255',
+        ]);
+
+        try {
+            Category::create([
+                'Category_name' => $request->input('Category_name'),
+            ]);
+
+            return back()->with('success', 'Category added successfully.');
+        } catch (\Exception $e) {
+            \Log::error('Category Store Error: ' . $e->getMessage());
+            return back()->with('error', 'Error adding category: ' . $e->getMessage());
+        }
+    }
 }
