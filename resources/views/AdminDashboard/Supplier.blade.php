@@ -106,9 +106,9 @@
                       data-address="{{ $sup->Address }}">Update</button></td>
                 <td>
                   @if($sup->Status === 'active')
-                    <button class="archive-btn" data-id="{{ $sup->id }}">Archive</button>
+                    <button class="archive-btn" data-id="{{ $sup->Supplier_id }}">Archive</button>
                   @else
-                    <button class="restore-btn" data-id="{{ $sup->id }}">Restore</button>
+                    <button class="restore-btn" data-id="{{ $sup->supplier_id }}">Restore</button>
                   @endif
                 </td>
               </tr>

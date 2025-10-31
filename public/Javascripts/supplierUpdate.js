@@ -15,19 +15,14 @@ document.addEventListener('DOMContentLoaded', function() {
             const contactNumber = this.getAttribute('data-contact');
             const address = this.getAttribute('data-address');
 
-            console.log('Supplier ID:', supplierId); // 🔍 DEBUG
-            console.log('Data:', { supplierName, contactNumber, address }); // 🔍 DEBUG
-
             // Fill form fields
             supplierIdInput.value = supplierId;
             supplierNameInput.value = supplierName;
             contactNumberInput.value = contactNumber;
             addressInput.value = address;
 
-            // Set the form action to match your route: /suppliers/{Supplier_id}/update
-            editForm.action = `/suppliers/${supplierId}/update`;
-            
-            console.log('Form Action:', editForm.action); // 🔍 DEBUG - Check this URL
+            // FIX: Add 'admin/' prefix to match your route
+            editForm.action = `/admin/suppliers/${supplierId}/update`;
 
             // Show modal
             editModal.style.display = 'flex'; 

@@ -61,7 +61,7 @@
             <div class="products-header">
                 <h1 class="page-title">Products</h1>
                 <button id="openCategoryModal" class="add-product-btn">
-                        <i class="bi bi-plus-circle">   Add Category</i>
+                        <i class="bi bi-plus-circle">   Add Product</i>
                 </button>
             </div>
 
