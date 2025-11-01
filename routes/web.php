@@ -10,16 +10,18 @@ use App\Http\Controllers\OrderItemController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CashierController;
+use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\PaymentController; // ✅ ADD THIS
 
 
 Route::prefix('cashier')->group(function () {
-Route::get('/login/cashier', [CashierController::class, 'showLoginForm'])
-->name('cashier.login.form');
+    Route::get('/login/cashier', [CashierController::class, 'showLoginForm'])
+        ->name('cashier.login.form');
 
-Route::post('/login/cashier', [CashierController::class, 'login'])
-->name('cashier.login');
+    Route::post('/login/cashier', [CashierController::class, 'login'])
+        ->name('cashier.login');
 
-// Routes with middleware (protected)
+    // Routes with middleware (protected)
     Route::middleware('cashier.auth')->group(function () {
         Route::get('/coffee', [CashierController::class, 'showCoffee'])
             ->name('cashier.coffee');
@@ -29,13 +31,10 @@ Route::post('/login/cashier', [CashierController::class, 'login'])
             ->name('cashier.cold');
         Route::get('/pastries', [CashierController::class, 'showPastries'])
             ->name('cashier.pastries');
-        Route::get('/logout', [CashierController::class, 'logout'])
-            ->name('cashier.logout');
+        Route::get('/logout/admin', [AdminController::class, 'logout'])->name('admin.logout');
+
     });
-
 });
-
-
 
 // ✅ Welcome page
 Route::get('/', function () {
@@ -52,6 +51,10 @@ Route::get('/login/admin', [AdminController::class, 'showLoginForm'])->name('log
 Route::post('/login/admin', [AdminController::class, 'login'])->name('admin.login.submit');
 Route::post('/logout/admin', [AdminController::class, 'logout'])->name('admin.logout');
 
+// ✅ API endpoint for POS/Cashier to submit orders with payment (JSON)
+Route::post('/api/orders/payment', [PaymentController::class, 'storeOrderWithPayment'])
+    ->name('api.orders.payment');
+
 // ✅ All admin routes grouped under prefix "admin"
 Route::prefix('admin')->group(function () {
 
@@ -63,8 +66,8 @@ Route::prefix('admin')->group(function () {
 
     // ✅ Ingredients
     Route::prefix('admin')->group(function () {
-    Route::resource('ingredients', IngredientController::class);
-});
+        Route::resource('ingredients', IngredientController::class);
+    });
     Route::get('/ingredients', [IngredientController::class, 'index'])->name('admin.ingredients');
     Route::post('/ingredients', [IngredientController::class, 'store'])->name('admin.ingredients.store');
     Route::post('/ingredients/{id}/update', [IngredientController::class, 'update'])->name('admin.ingredients.update');
@@ -84,7 +87,6 @@ Route::prefix('admin')->group(function () {
     // ✅ Order Items
     Route::get('/admin/orderitem', [OrderItemController::class, 'index'])->name('admin.orderitem');
 
-
     // ✅ Employees
     Route::get('/employee', [EmployeeController::class, 'index'])->name('admin.employee');
     Route::post('/employee', [EmployeeController::class, 'store'])->name('admin.employee.store');
@@ -92,17 +94,14 @@ Route::prefix('admin')->group(function () {
     Route::get('/archived', [EmployeeController::class, 'archived'])->name('admin.archived');
     Route::post('/employee/{id}/restore', [EmployeeController::class, 'restore'])->name('admin.employee.restore');
 
-
     // ✅ Category
     Route::get('/category', [CategoryController::class, 'index'])->name('admin.category');
     Route::post('/category', [CategoryController::class, 'store'])->name('category.store');
 
+    // ✅ INVENTORY (now uses controller)
+    Route::get('/inventory', [InventoryController::class, 'index'])->name('admin.inventory');
+    Route::post('/inventory', [InventoryController::class, 'store'])->name('admin.inventory.store');
 
-    // ✅ Placeholder pages (replace with Blade views later)
-    //Route::view('/orderitem', 'AdminDashboard.OrderItem')->name('admin.orderitem');
-    //Route::view('/employee', 'AdminDashboard.Employee')->name('admin.employee');
-    //Route::view('/archived', 'AdminDashboard.Archived')->name('admin.archived');
-    Route::view('/inventory', 'AdminDashboard.Inventory')->name('admin.inventory');
-    Route::view('/payment', 'AdminDashboard.Payment')->name('admin.payment');
-    //Route::view('/category', 'AdminDashboard.Category')->name('admin.category');
+    // ✅ PAYMENT (now uses controller)
+    Route::get('/payment', [PaymentController::class, 'index'])->name('admin.payment');
 });

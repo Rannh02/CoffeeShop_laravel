@@ -38,12 +38,12 @@
                     </div>
               </form>  
                               
-                @if (session('error'))
-                  <p style="color:white;">{{ session('error') }}</p>
-                @endif
+                
           <!-- back to the welcome page-->
               <a href="{{ url()->previous() }}" class="back-btn">Back</a>
-
+              @if (session('error'))
+                  <p style="color:white;">{{ session('error') }}</p>
+                @endif
     </div>
   </div>
 </body>

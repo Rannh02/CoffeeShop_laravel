@@ -114,6 +114,6 @@ class AdminController extends Controller
         Session::forget('admin_logged_in');
         Session::forget('admin_username');
 
-        return redirect()->route('admin.login')->with('success', 'Logged out successfully!');
+        return redirect()->route('login.admin')->with('success', 'Logged out successfully!');
     }
 }
