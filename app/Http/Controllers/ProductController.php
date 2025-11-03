@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Ingredient;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
@@ -45,27 +46,39 @@ class ProductController extends Controller
     // Store a new product
     public function store(Request $request)
     {
+        Log::info('Product store request received', $request->all());
+        
         $request->validate([
             'Product_name' => 'required|string|max:255',
             'Category_id' => 'required|integer',
-            'Product_price' => 'required|numeric|min:0',
-            'Product_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'Price' => 'required|numeric|min:0',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        $product = new Product();
-        $product->Product_name = $request->Product_name;
-        $product->Category_id = $request->Category_id;
-        $product->Product_price = $request->Product_price;
+        try {
+            $product = new Product();
+            $product->Product_name = $request->Product_name;
+            $product->Category_id = $request->Category_id;
+            $product->Price = $request->Price;
 
-        // Handle image upload
-        if ($request->hasFile('Product_image')) {
-            $file = $request->file('Product_image');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('images/products'), $filename);
-            $product->Product_image = $filename;
+            // Handle image upload
+            if ($request->hasFile('image')) {
+                $file = $request->file('image');
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $file->move(public_path('images/products'), $filename);
+                $product->Image_url = 'images/products/' . $filename;
+            }
+
+            $product->save();
+            Log::info('Product saved successfully', ['product_id' => $product->Product_id]);
+            
+            return redirect()->route('admin.products')->with('success', 'Product added successfully!');
+        } catch (\Exception $e) {
+            Log::error('Error saving product: ' . $e->getMessage());
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Failed to add product: ' . $e->getMessage());
         }
-
-        $product->save();
 
         return redirect()->route('products.index')->with('success', 'Product added successfully!');
     }

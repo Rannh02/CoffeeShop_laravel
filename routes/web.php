@@ -75,7 +75,11 @@ Route::prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
 
     // ✅ Products
-    Route::resource('products', ProductController::class);
+    Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+    Route::post('/products', [ProductController::class, 'store'])->name('admin.products.store');
+    Route::get('/products/{id}/edit', [ProductController::class, 'edit'])->name('admin.products.edit');
+    Route::put('/products/{id}', [ProductController::class, 'update'])->name('admin.products.update');
+    Route::delete('/products/{id}', [ProductController::class, 'destroy'])->name('admin.products.destroy');
 
     // ✅ Ingredients
     Route::prefix('admin')->group(function () {
@@ -98,7 +102,7 @@ Route::prefix('admin')->group(function () {
     Route::post('/orders', [OrderController::class, 'store'])->name('admin.orders.store');
 
     // ✅ Order Items
-    Route::get('/admin/orderitem', [OrderItemController::class, 'index'])->name('admin.orderitem');
+    Route::get('/orderitem', [OrderItemController::class, 'index'])->name('admin.orderitem');
 
     // ✅ Employees
     Route::get('/employee', [EmployeeController::class, 'index'])->name('admin.employee');

@@ -20,7 +20,7 @@
                 <span class="logo-text">Berde Kopi</span>
             </div>
             <div class="header-info">
-                <span class="time">Time</span>
+                <span id="currentTime" class="time">Time</span>
                 <span class="staff-name">
                     <i style="font-size:20px;" class="bi bi-person-circle"></i> {{ $staffName }}
                 </span>
@@ -38,7 +38,7 @@
                         @endphp
                         <button class="nav-item {{ $isActive ? 'active' : '' }}" 
                                 onclick="window.location.href='{{ route('cashier.pos', ['category' => $slug]) }}'">
-                            {{ $categories->Category_name }}
+                            {{ $category->Category_name }}
                         </button>
                     @endforeach
                 </nav>
@@ -132,7 +132,7 @@
     </div>
 
     <script src="{{ asset('javascripts/orderingcoffeeJS.js') }}"></script>
-    <script src="{{ asset('javascripts/Realtime.js') }}"></script>
+    <script src="{{ asset('Javascripts/RealTime.js') }}"></script>
     <script src="{{ asset('javascripts/PaymentSummary.js') }}"></script>
     <script src="{{ asset('javascripts/QRlogic.js') }}"></script>
     <script src="{{ asset('javascripts/OrderTypeButton.js') }}"></script>

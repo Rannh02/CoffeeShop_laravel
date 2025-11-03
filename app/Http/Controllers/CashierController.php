@@ -23,25 +23,31 @@ class CashierController extends Controller
      */
     public function login(Request $request)
     {
+        // validate username (cashier account) and password
         $request->validate([
-            'email' => 'required|email',
+            'username' => 'required|string',
             'password' => 'required'
         ]);
 
-        // Attempt to find the employee
+        // Attempt to find the employee by Cashier_Account
         $employee = DB::table('employee')
-            ->where('Email', $request->email)
+            ->where('Cashier_Account', $request->username)
             ->first();
 
-        // Verify credentials (adjust based on your auth logic)
-        if ($employee && Hash::check($request->password, $employee->Password ?? '')) {
-            Session::put('cashier_id', $employee->employee_id);
-            Session::put('cashier_name', $employee->First_name . ' ' . $employee->Last_name);
-            
+        // Log for debugging (do NOT log sensitive data like passwords)
+        Log::info('Cashier login attempt', ['username' => $request->username, 'found' => $employee ? true : false]);
+
+        // Verify credentials
+        if ($employee && isset($employee->Password) && Hash::check($request->password, $employee->Password)) {
+            // store Employee primary id (Employee_id)
+            $employeeId = $employee->Employee_id ?? ($employee->employee_id ?? null);
+            Session::put('cashier_id', $employeeId);
+            Session::put('cashier_name', trim(($employee->First_name ?? '') . ' ' . ($employee->Last_name ?? '')));
+
             return redirect()->route('cashier.pos');
         }
 
-        return back()->withErrors(['email' => 'Invalid credentials']);
+        return back()->withErrors(['username' => 'Invalid credentials'])->withInput();
     }
 
     /**
@@ -57,7 +63,7 @@ class CashierController extends Controller
             try {
                 $employee = DB::table('employee')
                     ->select('First_name', 'Last_name')
-                    ->where('employee_id', Session::get('cashier_id'))
+                    ->where('Employee_id', Session::get('cashier_id'))
                     ->first();
 
                 if ($employee) {
@@ -69,8 +75,8 @@ class CashierController extends Controller
             }
         }
 
-        // Get the category from URL parameter
-        $categorySlug = $request->get('category', null);
+    // Get the category from URL parameter
+    $categorySlug = $request->get('category', null);
         
         // Initialize with empty collections to prevent undefined variable errors
         $categories = collect([]);
@@ -79,7 +85,8 @@ class CashierController extends Controller
         
         // Fetch all categories for navigation
         try {
-            $categories = DB::table('category')
+            // table name is 'categories'
+            $categories = DB::table('categories')
                 ->select('Category_id', 'Category_name')
                 ->orderBy('Category_id')
                 ->get();
@@ -91,37 +98,37 @@ class CashierController extends Controller
         }
 
         // Only proceed if we have categories
-        if ($categories->isNotEmpty()) {
+            if ($categories->isNotEmpty()) {
             // Find the selected category
-            if ($categorySlug) {
-                $selectedCategory = $categories->firstWhere(function($cat) use ($categorySlug) {
-                    return strtolower(str_replace(' ', '-', $cat->category_name)) === strtolower($categorySlug);
-                });
-            }
+                if ($categorySlug) {
+                    $selectedCategory = $categories->firstWhere(function($cat) use ($categorySlug) {
+                        return strtolower(str_replace(' ', '-', $cat->Category_name)) === strtolower($categorySlug);
+                    });
+                }
             
             // If no category selected or not found, default to first category
             if (!$selectedCategory) {
                 $selectedCategory = $categories->first();
-                $categorySlug = strtolower(str_replace(' ', '-', $selectedCategory->category_name));
+                $categorySlug = strtolower(str_replace(' ', '-', $selectedCategory->Category_name));
             }
 
             // Fetch products for the selected category WITH stock info
             if ($selectedCategory) {
                 try {
-                    $products = DB::table('product as p')
+                    $products = DB::table('products as p')
                         ->leftJoin('inventory as i', 'p.Product_id', '=', 'i.Product_id')
                         ->select(
                             'p.Product_id',
                             'p.Product_name',
                             'p.Price',
-                            'p.Image',
+                            DB::raw('COALESCE(p.Image_url, \'\') as Image'),
                             DB::raw('COALESCE(i.QuantityInStock, 0) as QuantityInStock')
                         )
                         ->where('p.Category_id', $selectedCategory->Category_id)
                         ->orderBy('p.Product_id', 'desc')
                         ->get();
 
-                    Log::info('Products fetched for category ' . $selectedCategory->category_name . ': ' . $products->count());
+                    Log::info('Products fetched for category ' . $selectedCategory->Category_name . ': ' . $products->count());
                 } catch (\Exception $e) {
                     Log::error('Error fetching products: ' . $e->getMessage());
                 }
@@ -136,7 +143,7 @@ class CashierController extends Controller
             'staffName' => $staffName,
             'categories_count' => $categories->count(),
             'products_count' => $products->count(),
-            'selectedCategory' => $selectedCategory ? $selectedCategory->category_name : 'none',
+            'selectedCategory' => $selectedCategory ? $selectedCategory->Category_name : 'none',
             'categorySlug' => $categorySlug
         ]);
 

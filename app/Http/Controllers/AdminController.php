@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\Ingredient;
 use App\Models\Supplier;
+use Illuminate\Support\Facades\Auth;
 
 class AdminController extends Controller
 {
@@ -96,9 +97,8 @@ class AdminController extends Controller
             'chartSales'
         ));
     }
-
     public function showProducts() {
-        $fullname = auth()->user()->name;
+        $fullname = Auth::check() ? Auth::user()->name : 'Admin';
         $products = Product::join('categories', 'products.Category_id', '=', 'categories.Category_id')
                             ->select('products.*', 'categories.Category_name')
                             ->get();
