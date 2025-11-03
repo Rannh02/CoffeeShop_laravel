@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Berde Kopi - {{ $selectedCategory->category_name ?? 'POS' }}</title>
+    <title>Berde Kopi - {{ $selectedCategory->Category_name ?? 'POS' }}</title>
     <link rel="stylesheet" href="{{ asset('Dashboard CSS/cashier.css') }}">
     <link rel="stylesheet" href="{{ asset('css/modalQR.css') }}">
     <link rel="stylesheet" href="{{ asset('css/customerInfo.css') }}">
@@ -33,12 +33,12 @@
                 <nav class="menu-nav">
                     @foreach($categories ?? [] as $category)
                         @php
-                            $slug = strtolower(str_replace(' ', '-', $category->category_name));
+                            $slug = strtolower(str_replace(' ', '-', $category->Category_name));
                             $isActive = $slug === $categorySlug;
                         @endphp
                         <button class="nav-item {{ $isActive ? 'active' : '' }}" 
-                                onclick="window.location.href='{{ route('cashier.pos', ['category' => $slug]) }}';">
-                            {{ $category->category_name }}
+                                onclick="window.location.href='{{ route('cashier.pos', ['category' => $slug]) }}'">
+                            {{ $categories->Category_name }}
                         </button>
                     @endforeach
                 </nav>
