@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <title>Admin - Products</title>
+    <title>Admin - Supplier</title>
     <link rel="stylesheet" href="{{ asset('Dashboard CSS/supplierModal.css') }}">
     <link rel="stylesheet" href="{{ asset('Dashboard CSS/supplier.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -61,7 +61,7 @@
       <div class="products-header">
         <h1 class="page-title">Suppliers</h1>
         <button id="openAddSupplierModal" class="add-product-btn">
-                <i class="bi bi-plus-circle">   Add Category</i>
+                <i class="bi bi-plus-circle">   Add Supplier</i>
         </button>
       </div>
 

@@ -11,30 +11,7 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CashierController;
 use App\Http\Controllers\InventoryController;
-use App\Http\Controllers\PaymentController; // ✅ ADD THIS
-
-
-Route::prefix('cashier')->group(function () {
-    Route::get('/login/cashier', [CashierController::class, 'showLoginForm'])
-        ->name('cashier.login.form');
-
-    Route::post('/login/cashier', [CashierController::class, 'login'])
-        ->name('cashier.login');
-
-    // Routes with middleware (protected)
-    Route::middleware('cashier.auth')->group(function () {
-        Route::get('/coffee', [CashierController::class, 'showCoffee'])
-            ->name('cashier.coffee');
-        Route::get('/tea', [CashierController::class, 'showTea'])
-            ->name('cashier.tea');
-        Route::get('/cold', [CashierController::class, 'showColdDrinks'])
-            ->name('cashier.cold');
-        Route::get('/pastries', [CashierController::class, 'showPastries'])
-            ->name('cashier.pastries');
-        Route::get('/logout/admin', [AdminController::class, 'logout'])->name('admin.logout');
-
-    });
-});
+use App\Http\Controllers\PaymentController;
 
 // ✅ Welcome page
 Route::get('/', function () {
@@ -55,13 +32,49 @@ Route::post('/logout/admin', [AdminController::class, 'logout'])->name('admin.lo
 Route::post('/api/orders/payment', [PaymentController::class, 'storeOrderWithPayment'])
     ->name('api.orders.payment');
 
-// ✅ All admin routes grouped under prefix "admin"
+// ============================================
+// 🆕 CASHIER ROUTES - DYNAMIC POS SYSTEM
+// ============================================
+Route::prefix('cashier')->group(function () {
+    // Login routes (public)
+    Route::get('/login/cashier', [CashierController::class, 'showLoginForm'])
+        ->name('cashier.login.form');
+
+    Route::post('/login/cashier', [CashierController::class, 'login'])
+        ->name('cashier.login');
+
+    // Protected routes with middleware
+    Route::middleware('cashier.auth')->group(function () {
+        // 🆕 DYNAMIC POS ROUTE - Shows all categories dynamically
+        Route::get('/pos', [CashierController::class, 'index'])
+            ->name('cashier.pos');
+        
+        // 🆕 Logout route for cashier
+        Route::get('/logout', [CashierController::class, 'logout'])
+            ->name('cashier.logout');
+
+        // ⚠️ LEGACY ROUTES - You can keep these for backward compatibility
+        // or remove them if you want to use only the dynamic route
+        Route::get('/coffee', [CashierController::class, 'showCoffee'])
+            ->name('cashier.coffee');
+        Route::get('/tea', [CashierController::class, 'showTea'])
+            ->name('cashier.tea');
+        Route::get('/cold', [CashierController::class, 'showColdDrinks'])
+            ->name('cashier.cold');
+        Route::get('/pastries', [CashierController::class, 'showPastries'])
+            ->name('cashier.pastries');
+    });
+});
+
+// ============================================
+// ADMIN ROUTES
+// ============================================
 Route::prefix('admin')->group(function () {
 
     // Dashboard
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
 
-    // ✅ Products (uses default route names like products.index, products.create, etc.)
+    // ✅ Products
     Route::resource('products', ProductController::class);
 
     // ✅ Ingredients
@@ -80,7 +93,7 @@ Route::prefix('admin')->group(function () {
     Route::post('/suppliers/{Supplier_id}/archive', [SupplierController::class, 'archive'])->name('suppliers.archive');
     Route::delete('/suppliers/{Supplier_id}', [SupplierController::class, 'destroy'])->name('suppliers.destroy');
 
-    // ✅ Orders (UPDATED - now uses controller)
+    // ✅ Orders
     Route::get('/orders', [OrderController::class, 'index'])->name('admin.orders');
     Route::post('/orders', [OrderController::class, 'store'])->name('admin.orders.store');
 
@@ -98,10 +111,10 @@ Route::prefix('admin')->group(function () {
     Route::get('/category', [CategoryController::class, 'index'])->name('admin.category');
     Route::post('/category', [CategoryController::class, 'store'])->name('category.store');
 
-    // ✅ INVENTORY (now uses controller)
+    // ✅ Inventory
     Route::get('/inventory', [InventoryController::class, 'index'])->name('admin.inventory');
     Route::post('/inventory', [InventoryController::class, 'store'])->name('admin.inventory.store');
 
-    // ✅ PAYMENT (now uses controller)
+    // ✅ Payment
     Route::get('/payment', [PaymentController::class, 'index'])->name('admin.payment');
 });
