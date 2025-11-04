@@ -54,12 +54,25 @@ class SupplierController extends Controller
 }
 
     // Archive / Restore
-    public function toggleStatus($id)
-    {
-        $supplier = Supplier::findOrFail($id);
+  public function archive(Request $request, $Supplier_id)
+{
+    try {
+        $supplier = Supplier::findOrFail($Supplier_id);
+        
+        // Toggle status between active and archived
         $supplier->Status = $supplier->Status === 'active' ? 'archived' : 'active';
         $supplier->save();
 
-        return redirect()->back()->with('success', 'Supplier status updated.');
+        return response()->json([
+            'success' => true,
+            'message' => 'Supplier status updated successfully.',
+            'new_status' => $supplier->Status
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to update supplier status: ' . $e->getMessage()
+        ], 500);
     }
+}
 }
