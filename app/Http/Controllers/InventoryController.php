@@ -34,7 +34,7 @@ class InventoryController extends Controller
     {
         $request->validate([
             'Product_id' => 'required|exists:product,Product_id',
-            'QuantityToAdd' => 'required|integer|min:1'
+            'QuantityInStock' => 'required|integer|min:1'
         ]);
 
         DB::beginTransaction();

@@ -24,12 +24,12 @@
                 <!--Auto fill error-->
           {{-- legacy PHP message removed; use Blade errors instead --}}
           @if($errors->any())
-            <div class="error-messages" style="color: #fdd; margin-bottom:10px;">
+            <div class="error-messages" style="color: rgba(255, 0, 0, 1); margin-bottom:5px; margin-left:8%; font-size:15px;">
               @foreach($errors->all() as $err)
                 <div>{{ $err }}</div>
               @endforeach
             </div>
-          @endif
+          @endif  
           <!-- Until here -->
             <!-- Form -->
            <form method="POST" action="{{ route('cashier.login') }}">

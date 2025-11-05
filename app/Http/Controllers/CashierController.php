@@ -47,7 +47,7 @@ class CashierController extends Controller
             return redirect()->route('cashier.pos');
         }
 
-        return back()->withErrors(['username' => 'Invalid credentials'])->withInput();
+        return back()->withErrors(['username' => 'Cashier Account is not valid.'])->withInput();
     }
 
     /**

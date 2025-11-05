@@ -60,7 +60,7 @@
             <div class="products-header">
                 <h1 class="page-title">Ingredients</h1>
                 <button id="openProductModal" class="add-product-btn">
-                        <i class="bi bi-plus-circle">   Add Employee</i>
+                        <i class="bi bi-plus-circle">   Add Ingredients</i>
                 </button>
             </div>
 
