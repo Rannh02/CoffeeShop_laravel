@@ -128,7 +128,7 @@ body {
 }
 
 .add-product-btn {
-  background-color: #10b981;
+  background-color: #f59e0b;
   color: #1f2937;
   border: none;
   padding: 12px 24px;
@@ -140,7 +140,7 @@ body {
 }
 
 .add-product-btn:hover {
-  background-color: #059669;
+  background-color: #d97706;
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }

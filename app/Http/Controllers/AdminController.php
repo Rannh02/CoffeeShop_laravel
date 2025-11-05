@@ -9,7 +9,6 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\Ingredient;
 use App\Models\Supplier;
-use Illuminate\Support\Facades\Auth;
 
 class AdminController extends Controller
 {
@@ -97,8 +96,9 @@ class AdminController extends Controller
             'chartSales'
         ));
     }
+
     public function showProducts() {
-        $fullname = Auth::check() ? Auth::user()->name : 'Admin';
+        $fullname = auth()->user()->name;
         $products = Product::join('categories', 'products.Category_id', '=', 'categories.Category_id')
                             ->select('products.*', 'categories.Category_name')
                             ->get();
@@ -114,6 +114,6 @@ class AdminController extends Controller
         Session::forget('admin_logged_in');
         Session::forget('admin_username');
 
-        return redirect()->route('login.admin')->with('success', 'Logged out successfully!');
+        return redirect()->route('admin.login')->with('success', 'Logged out successfully!');
     }
 }

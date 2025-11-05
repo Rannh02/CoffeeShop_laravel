@@ -10,12 +10,9 @@ class Product extends Model
     use HasFactory;
 
     protected $fillable = [
-        'Product_name',
-        'Category_id',
-        'Price',
-        'Image_url'
+        'product_name',
+        'price',
+        'category_id',
+        'stock',
     ];
-
-    protected $table = 'products';
-    protected $primaryKey = 'Product_id';
 }

@@ -140,20 +140,11 @@
 
     <!-- Add Product Modal -->
     <div id="ProductModal" class="modal-overlay">
-        <form action="{{ route('admin.products.store') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('products.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
-            @if($errors->any())
-                <div class="alert alert-danger">
-                    <ul>
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
             <h1>Add Products</h1>
             <p>Product name</p>
-            <input type="text" name="Product_name" value="{{ old('Product_name') }}" required>
+            <input type="text" name="Product_name" required>
 
             <p>Category name</p>
             <select name="Category_id" required>
@@ -210,7 +201,7 @@
         <p>Category</p>
         <select name="Category_id" id="updateProductCategory">
             @foreach ($categories as $category)
-                <option value="{{ $category->Category_id }}">{{ $category->Category_name }}</option>
+                <option value="{{ $category->id }}">{{ $category->name }}</option>
             @endforeach
         </select>
 
@@ -224,10 +215,12 @@
         <div class="modal-content">
             <h2>Confirm Deletion</h2>
             <p>Are you sure you want to delete <strong id="productName"></strong>?</p>
-            <form id="deleteForm" action="" method="POST">
+            <form id="deleteForm" action="{{ route('products.destroy', 0) }}" method="POST">
                 @csrf
                 @method('DELETE')
                 <input type="hidden" name="Product_id" id="deleteProductId">
+                ...
+            </form>
 
                 <div class="btn-group">
                     <button type="submit" class="AddBtn">Yes, Delete</button>
@@ -242,6 +235,8 @@
 <script src="{{ asset('Javascripts/productmodal.js') }}"></script>
 <script src="{{ asset('Javascripts/productupdate.js') }}"></script>
 <script src="{{ asset('Javascripts/productdelete.js') }}"></script>
+
+
 
 </body>
 </html>

@@ -34,8 +34,8 @@
             <!-- Form -->
            <form method="POST" action="{{ route('cashier.login') }}">
                 @csrf
-        <p>Username:</p>
-          <input type="text" name="username" placeholder="Cashier Account" value="{{ old('username') }}" required>
+              <p>Username:</p>
+                  <input type="text" name="username" placeholder="Cashier Account" required>
               <p>Password:</p>
                   <input type="password" name="password" placeholder="Password" required>
                     <div class="login">
@@ -43,12 +43,12 @@
                     </div>
               </form>  
                               
-                
-          <!-- back to the welcome page-->
-              <a href="{{ url()->previous() }}" class="back-btn">Back</a>
-              @if (session('error'))
+                @if (session('error'))
                   <p style="color:white;">{{ session('error') }}</p>
                 @endif
+          <!-- back to the welcome page-->
+              <a href="{{ url()->previous() }}" class="back-btn">Back</a>
+
     </div>
   </div>
 </body>

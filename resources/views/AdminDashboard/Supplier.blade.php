@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Admin - Supplier</title>
     <link rel="stylesheet" href="{{ asset('Dashboard CSS/supplierModal.css') }}">
     <link rel="stylesheet" href="{{ asset('Dashboard CSS/supplier.css') }}">
@@ -61,7 +62,7 @@
       <div class="products-header">
         <h1 class="page-title">Suppliers</h1>
         <button id="openAddSupplierModal" class="add-product-btn">
-                <i class="bi bi-plus-circle">   Add Supplier</i>
+                <i class="bi bi-plus-circle">   Add Category</i>
         </button>
       </div>
 
@@ -108,7 +109,7 @@
                   @if($sup->Status === 'active')
                     <button class="archive-btn" data-id="{{ $sup->Supplier_id }}">Archive</button>
                   @else
-                    <button class="restore-btn" data-id="{{ $sup->supplier_id }}">Restore</button>
+                    <button class="restore-btn" data-id="{{ $sup->Supplier_id }}">Restore</button>
                   @endif
                 </td>
               </tr>
