@@ -76,7 +76,6 @@
                             <th>Category Name</th>
                             <th>Price</th>
                             <th>Image</th>
-                            <th>Status</th>
                             <th>Update</th>
                             <th>Delete</th>
                         </tr>
@@ -95,13 +94,6 @@
                                             {{ basename($prod->Image) }}
                                         @else
                                             No Image
-                                        @endif
-                                    </td>
-                                    <td>
-                                        @if(($prod->QuantityInStock ?? 0) > 0)
-                                            <span style="color:green; font-weight:bold;">In Stock ({{ $prod->QuantityInStock }})</span>
-                                        @else
-                                            <span style="color:red; font-weight:bold;">Out of Stock</span>
                                         @endif
                                     </td>
                                     <td>
@@ -140,11 +132,20 @@
 
     <!-- Add Product Modal -->
     <div id="ProductModal" class="modal-overlay">
-        <form action="{{ route('products.store') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('admin.products.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
+            @if($errors->any())
+                <div class="alert alert-danger">
+                    <ul>
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
             <h1>Add Products</h1>
             <p>Product name</p>
-            <input type="text" name="Product_name" required>
+            <input type="text" name="Product_name" value="{{ old('Product_name') }}" required>
 
             <p>Category name</p>
             <select name="Category_id" required>
@@ -154,13 +155,15 @@
                 @endforeach
             </select>
 
-            <p>Ingredients</p>
-            <select name="Ingredient_id" required>
-                <option value="">-- Select Ingredient --</option>
-                @foreach($ingredients as $ing)
-                    <option value="{{ $ing->Ingredient_id }}">{{ $ing->Ingredient_name }}</option>
-                @endforeach
-            </select>
+             <label>Ingredients</label>
+    <select id="ingredientSelect" name="ingredient_ids[]" multiple required>
+        @foreach ($ingredients as $ingredient)
+            <option value="{{ $ingredient->Ingredient_id }}">{{ $ingredient->Ingredient_name }}</option>
+        @endforeach
+    </select>
+
+    <!-- Container where quantity inputs will appear -->
+    <div id="ingredientQuantities"></div>
 
             <p>Supplier</p>
             <select name="Supplier_id" required>
@@ -196,12 +199,13 @@
         <input type="text" name="Product_name" id="updateProductName" required>
 
         <p>Price</p>
-        <input type="number" name="Product_price" id="updateProductPrice" required>
+        <input type="number" name="Price" id="updateProductPrice" required>
+
 
         <p>Category</p>
         <select name="Category_id" id="updateProductCategory">
             @foreach ($categories as $category)
-                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                <option value="{{ $category->Category_id }}">{{ $category->Category_name }}</option>
             @endforeach
         </select>
 
@@ -215,12 +219,10 @@
         <div class="modal-content">
             <h2>Confirm Deletion</h2>
             <p>Are you sure you want to delete <strong id="productName"></strong>?</p>
-            <form id="deleteForm" action="{{ route('products.destroy', 0) }}" method="POST">
+            <form id="deleteForm" action="" method="POST">
                 @csrf
                 @method('DELETE')
                 <input type="hidden" name="Product_id" id="deleteProductId">
-                ...
-            </form>
 
                 <div class="btn-group">
                     <button type="submit" class="AddBtn">Yes, Delete</button>
@@ -236,7 +238,36 @@
 <script src="{{ asset('Javascripts/productupdate.js') }}"></script>
 <script src="{{ asset('Javascripts/productdelete.js') }}"></script>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ingredientSelect = document.getElementById('ingredientSelect');
+    const ingredientQuantities = document.getElementById('ingredientQuantities');
 
+    ingredientSelect.addEventListener('change', function() {
+        ingredientQuantities.innerHTML = ''; // clear old inputs
+
+        // loop through all selected options
+        [...this.selectedOptions].forEach(option => {
+            const div = document.createElement('div');
+            div.classList.add('ingredient-input');
+            div.innerHTML = `
+                <label>${option.text} Quantity Used:</label>
+                <input type="number" name="quantities[${option.value}]" step="0.01" min="0.01" required>
+            `;
+            ingredientQuantities.appendChild(div);
+        });
+    });
+});
+</script>
+
+<style>
+#ingredientQuantities {
+    margin-top: 10px;
+}
+.ingredient-input {
+    margin-bottom: 10px;
+}
+</style>
 
 </body>
 </html>

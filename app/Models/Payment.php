@@ -15,6 +15,6 @@ class Payment extends Model
         'Payment_method',
         'Amount_Paid',
         'PaymentDate',
-        'Reference_Code'
+        'TransactionReference'
     ];
 }

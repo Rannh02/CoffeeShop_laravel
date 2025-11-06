@@ -4,9 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Admin - Inventory</title>
-    <link rel="stylesheet" href="{{ asset('Dashboard CSS/inventory.css') }}">
-    <link rel="stylesheet" href="{{ asset('Dashboard CSS/InventoryModal.css') }}">
+    <title>Admin - Payments</title>
+    <link rel="stylesheet" href="{{ asset('Dashboard CSS/Payment.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
@@ -55,10 +56,7 @@
         <!-- Main Content -->
         <main class="main-content">
             <div class="products-header">
-                <h1 class="page-title">Inventory</h1>
-                <button id="stockInBtn" class="add-product-btn">
-                        <i class="bi bi-plus-circle">   Stock In</i>
-                </button>
+                <h1 class="page-title">Payments</h1>
             </div>
 
             @if(session('success'))
@@ -77,25 +75,27 @@
                 <table class="products-table">
                     <thead>
                         <tr>
-                            <th>Inventory_id</th>
-                            <th>Product_id</th>
-                            <th>QuantityInStock</th>
-                            <th>ReorderLevel</th>
-                            <th>LastRestockDate</th>
+                            <th>Payment_id</th>
+                            <th>Order_id</th>
+                            <th>Payment_method</th>
+                            <th>Amount</th>
+                            <th>Date/Time</th>
+                            <th>Transaction Reference</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($inventories as $inventory)
+                        @forelse($payments as $payment)
                             <tr>
-                                <td>{{ $inventory->Inventory_id }}</td>
-                                <td>{{ $inventory->Product_id }}</td>
-                                <td>{{ $inventory->QuantityInStock }}</td>
-                                <td>{{ $inventory->ReorderLevel }}</td>
-                                <td>{{ $inventory->LastRestockDate }}</td>
+                                <td>{{ $payment->PaymentID }}</td>
+                                <td>{{ $payment->Order_id }}</td>
+                                <td>{{ $payment->Payment_method }}</td>
+                                <td>{{ number_format($payment->Amount_Paid, 2) }}</td>
+                                <td>{{ $payment->PaymentDate->format('Y-m-d H:i:s') }}</td>
+                                <td>{{ $payment->TransactionReference ?? '-' }}</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" style="text-align: center;">No inventory records found</td>
+                                <td colspan="6" style="text-align: center;">No payment records found</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -103,65 +103,7 @@
             </div>
         </main>
     </div>
-
-    <!-- Modal for Adding Inventory -->
-    <div id="ProductModal" class="modal-overlay" style="display: none;">
-        <form action="{{ route('admin.inventory.store') }}" method="POST">
-            @csrf
-            <h1>Stock In</h1>
-
-            <p>Select Product</p>
-            <select name="Product_id" required>
-                <option value="">-- Select Product --</option>
-                @foreach($products as $product)
-                    <option value="{{ $product->Product_id }}">
-                        {{ $product->Product_name }}
-                    </option>
-                @endforeach
-            </select>
-            @error('Product_id')
-                <span class="error" style="color: red; font-size: 12px;">{{ $message }}</span>
-            @enderror
-
-            <p>Quantity to Add</p>
-            <input type="number" name="QuantityToAdd" required min="1" value="{{ old('QuantityToAdd') }}">
-            @error('QuantityToAdd')
-                <span class="error" style="color: red; font-size: 12px;">{{ $message }}</span>
-            @enderror
-
-            <div class="btn-group">
-                <button type="submit" class="AddBtn">Add Stock</button>
-                <button type="button" id="closeProductModal" class="CancelBtn">Cancel</button>
-            </div>
-        </form>
-    </div>
 </div>
-
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    const modal = document.getElementById("ProductModal");
-    const closeBtn = document.getElementById("closeProductModal");
-    const stockInBtn = document.getElementById("stockInBtn");
-
-    if (stockInBtn) {
-        stockInBtn.addEventListener("click", () => {
-            modal.style.display = "flex";
-        });
-    }
-
-    if (closeBtn) {
-        closeBtn.addEventListener("click", () => {
-            modal.style.display = "none";
-        });
-    }
-
-    window.addEventListener("click", (e) => {
-        if (e.target === modal) {
-            modal.style.display = "none";
-        }
-    });
-});
-</script>
 <script type="module" src="{{ asset('JS_Dashboard/DashboardsTime.js') }}"></script>
 </body>
 </html>

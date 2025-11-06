@@ -24,18 +24,18 @@
                 <!--Auto fill error-->
           {{-- legacy PHP message removed; use Blade errors instead --}}
           @if($errors->any())
-            <div class="error-messages" style="color: rgba(255, 0, 0, 1); margin-bottom:5px; margin-left:8%; font-size:15px;">
+            <div class="error-messages" style="color: #fdd; margin-bottom:10px;">
               @foreach($errors->all() as $err)
                 <div>{{ $err }}</div>
               @endforeach
             </div>
-          @endif  
+          @endif
           <!-- Until here -->
             <!-- Form -->
            <form method="POST" action="{{ route('cashier.login') }}">
                 @csrf
-              <p>Username:</p>
-                  <input type="text" name="username" placeholder="Cashier Account" required>
+        <p>Username:</p>
+          <input type="text" name="username" placeholder="Cashier Account" value="{{ old('username') }}" required>
               <p>Password:</p>
                   <input type="password" name="password" placeholder="Password" required>
                     <div class="login">
@@ -43,12 +43,12 @@
                     </div>
               </form>  
                               
-                @if (session('error'))
-                  <p style="color:white;">{{ session('error') }}</p>
-                @endif
+                
           <!-- back to the welcome page-->
               <a href="{{ url()->previous() }}" class="back-btn">Back</a>
-
+              @if (session('error'))
+                  <p style="color:white;">{{ session('error') }}</p>
+                @endif
     </div>
   </div>
 </body>

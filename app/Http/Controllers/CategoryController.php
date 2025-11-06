@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class CategoryController extends Controller
 {
@@ -16,7 +17,7 @@ class CategoryController extends Controller
             
             return view('AdminDashboard.Category', compact('categories', 'fullname'));
         } catch (\Exception $e) {
-            \Log::error('Category Index Error: ' . $e->getMessage());
+            Log::error('Category Index Error: ' . $e->getMessage());
             return back()->with('error', 'Error loading categories: ' . $e->getMessage());
         }
     }
@@ -34,7 +35,7 @@ class CategoryController extends Controller
 
             return back()->with('success', 'Category added successfully.');
         } catch (\Exception $e) {
-            \Log::error('Category Store Error: ' . $e->getMessage());
+            Log::error('Category Store Error: ' . $e->getMessage());
             return back()->with('error', 'Error adding category: ' . $e->getMessage());
         }
     }

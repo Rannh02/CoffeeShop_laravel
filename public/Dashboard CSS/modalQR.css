@@ -1,0 +1,43 @@
+.modal-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      overflow: auto;
+  background: white;
+  border-radius: 20px;  /* slightly bigger corners */
+  text-align: center;
+  position: relative;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);       /* prevent from going out of screen */
+  width: 500px;  
+  height: 550px;       /* make modal wider */
+  font-size: 1.1rem;    /* enlarge text slightly */
+}
+    .close-btn {
+      position: absolute;
+      top: 10px; right: 15px;
+      background: none;
+      border: none;
+      font-size: 28px;
+      cursor: pointer;
+      color: #333;
+    }
+    .modal-content h2{
+      margin-top: 5%;
+        font-size: 20px;
+    }
+    .modal-content p{
+        font-size: 12px;
+    }
+    .modal-content img {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}

@@ -42,7 +42,7 @@
                 <a href="{{ route('admin.employee') }}" class="nav-item"><i class="bi bi-person-circle"></i> Employee</a>
                 <a href="{{ route('admin.archived') }}" class="nav-item"><i class="bi bi-person-x"></i> Archived</a>
                 <a href="{{ route('admin.inventory') }}" class="nav-item"><i class="bi bi-cart-check"></i> Inventory</a>
-                <a href="{{ route('admin.ingredients') }}" class="nav-item"><i class="bi bi-check2-square"></i> Ingredients</a>
+                <a href="{{ route('admin.ingredients') }}" class="nav-item active"><i class="bi bi-check2-square"></i> Ingredients</a>
                 <a href="{{ route('suppliers.index') }}" class="nav-item"><i class="bi bi-box-fill"></i> Supplier</a>
                 <a href="{{ route('admin.payment') }}" class="nav-item"><i class="bi bi-cash-coin"></i> Payment</a>
                 <a href="{{ route('admin.category') }}" class="nav-item"><i class="bi bi-tags"></i> Category</a>
@@ -56,9 +56,7 @@
         <main class="main-content">
             <div class="products-header">
                 <h1 class="page-title">Ingredients</h1>
-                <button id="openProductModal" class="add-product-btn">
-                        <i class="bi bi-plus-circle">   Add Ingredients</i>
-                </button>
+                <button class="add-product-btn" id="openProductModal">Add Ingredient</button>
             </div>
 
             <!-- Ingredients Table -->
@@ -66,11 +64,11 @@
                 <table class="products-table">
                     <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Supplier</th>
-                        <th>Name</th>
-                        <th>Quantity</th>
+                        <th>Ingredient ID</th>
+                        <th>Ingredient Name</th>
                         <th>Unit</th>
+                        <th>Stock Quantity</th>
+                        <th>Reorder Level</th>
                         <th>Status</th>
                         <th>Action</th>
                     </tr>
@@ -79,11 +77,18 @@
                     @foreach ($ingredients as $ingredient)
                         <tr>
                             <td>{{ $ingredient->Ingredient_id }}</td>
-                            <td>{{ $ingredient->supplier->Supplier_name ?? 'N/A' }}</td>
                             <td>{{ $ingredient->Ingredient_name }}</td>
-                            <td>{{ $ingredient->Quantity }}</td>
-                            <td>{{ $ingredient->Unit }}</td>
-                            <td style="color: green;">Available</td>
+                            <td>{{ $ingredient->StockQuantity }}</td>
+                            <td>{{ $ingredient->Unit ?? 'N/A' }}</td>
+                            <td>{{ $ingredient->ReorderLevel }}</td>
+
+                            <!-- Status Check -->
+                            @if ($ingredient->StockQuantity <= $ingredient->ReorderLevel)
+                                <td style="color: red; font-weight:bold;">Low Stock</td>
+                            @else
+                                <td style="color: green;">Available</td>
+                            @endif
+
                             <td>
                                 <form action="{{ route('ingredients.destroy', $ingredient->Ingredient_id) }}" method="POST">
                                     @csrf
@@ -108,19 +113,14 @@
             <label>Ingredient Name</label>
             <input type="text" name="Ingredient_name" required>
 
-            <label>Quantity</label>
-            <input type="number" min="1" name="Quantity" required>
+            <label>Stock Quantity</label>
+            <input type="number" step="0.01" min="0" name="StockQuantity" required>
 
-            <label>Unit</label>
+            <label>Unit (e.g., g, ml, pcs)</label>
             <input type="text" name="Unit" required>
 
-            <label>Supplier</label>
-            <select id="Supplier_id" name="Supplier_id" required>
-                <option value="">-- Select Supplier --</option>
-                @foreach ($suppliers as $sup)
-                    <option value="{{ $sup->Supplier_id }}">{{ $sup->Supplier_name }}</option>
-                @endforeach
-            </select>
+            <label>Reorder Level</label>
+            <input type="number" min="0" name="ReorderLevel" required>
 
             <div class="btn-group">
                 <button type="submit" class="AddBtn">Add Ingredient</button>
@@ -130,7 +130,7 @@
     </div>
 </div>
 <script src="{{ asset('Javascripts/RealTime.js') }}"></script>
-<script src= "{{ asset('Javascripts/ingredientsDelete.js')}}"> </script>
+<script src="{{ asset('Javascripts/ingredientsDelete.js') }}"></script>
 <script src="{{ asset('Javascripts/ingredientsModal.js') }}"></script>
 </body>
 </html>

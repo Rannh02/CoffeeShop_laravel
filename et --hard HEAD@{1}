@@ -1,0 +1,36 @@
+[33mb0abd17[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mrestored-origin[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m HEAD@{0}: checkout: moving from main to restored-origin
+[33mb0abd17[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mrestored-origin[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m HEAD@{1}: pull origin main: Fast-forward
+[33mdcd8ed8[m HEAD@{2}: checkout: moving from main to main
+[33mdcd8ed8[m HEAD@{3}: checkout: moving from dcd8ed88e6e9277f7170a72c4ee70721e1b605e6 to main
+[33mdcd8ed8[m HEAD@{4}: checkout: moving from 523b9b5de888f10825fd759ab9382fdc770edefa to dcd8ed88e6e9277f7170a72c4ee70721e1b605e6
+[33m523b9b5[m HEAD@{5}: checkout: moving from f275be94126fd9079a1682f1ae2dd24f47bdde75 to 523b9b5de888f10825fd759ab9382fdc770edefa
+[33mf275be9[m HEAD@{6}: checkout: moving from 4b56a8ffed24711dc0a22d5130722e1a98f94a04 to f275be94126fd9079a1682f1ae2dd24f47bdde75
+[33m4b56a8f[m HEAD@{7}: commit: update
+[33m0d0eae2[m HEAD@{8}: commit: update (fix error on inventory plus add the payment blade, css, controller, model)
+[33mf275be9[m HEAD@{9}: commit: update all for changes
+[33m523b9b5[m HEAD@{10}: commit: update
+[33mdcd8ed8[m HEAD@{11}: pull origin main: Fast-forward
+[33mb3eb156[m HEAD@{12}: checkout: moving from dcd8ed88e6e9277f7170a72c4ee70721e1b605e6 to b3eb1568be840541a4a1d1c2e2eba2f4ca1dbf62
+[33mdcd8ed8[m HEAD@{13}: pull origin main: Fast-forward
+[33mb3eb156[m HEAD@{14}: checkout: moving from dcd8ed88e6e9277f7170a72c4ee70721e1b605e6 to b3eb1568be840541a4a1d1c2e2eba2f4ca1dbf62
+[33mdcd8ed8[m HEAD@{15}: pull origin main: Fast-forward
+[33mb3eb156[m HEAD@{16}: checkout: moving from dcd8ed88e6e9277f7170a72c4ee70721e1b605e6 to b3eb1568be840541a4a1d1c2e2eba2f4ca1dbf62
+[33mdcd8ed8[m HEAD@{17}: checkout: moving from main to dcd8ed88e6e9277f7170a72c4ee70721e1b605e6
+[33mdcd8ed8[m HEAD@{18}: commit (merge): Merge branch 'main' of https://github.com/Rannh02/CoffeeShop_laravel
+[33maef4663[m HEAD@{19}: commit: update supplier
+[33m5041ecd[m HEAD@{20}: commit: update the supplier update modal is word
+[33m45678ff[m HEAD@{21}: commit: update (need tarongon and supplier update (di siya mag update) (ingredients okay na maka add na)
+[33m34a1379[m HEAD@{22}: commit: update category (store)
+[33m86b8b5c[m HEAD@{23}: pull https://github.com/Rannh02/CoffeeShop_laravel.git: Fast-forward
+[33mb7f7cb5[m HEAD@{24}: commit: update category modal plus css, js
+[33mab9133d[m HEAD@{25}: commit: Update small upadate in archive and the coffee ordering page works properly
+[33m58802f7[m HEAD@{26}: pull https://github.com/Rannh02/CoffeeShop_laravel.git: Fast-forward
+[33mbae3a97[m HEAD@{27}: commit: update employeemodal form
+[33m6c10c73[m HEAD@{28}: commit: Update for orderitems
+[33m39120d3[m HEAD@{29}: pull https://github.com/Rannh02/CoffeeShop_laravel.git: Fast-forward
+[33mfba8952[m HEAD@{30}: commit: Max Update
+[33m8881936[m HEAD@{31}: pull https://github.com/Rannh02/CoffeeShop_laravel.git: Fast-forward
+[33mede0b1f[m HEAD@{32}: commit: update
+[33m638a0e6[m HEAD@{33}: commit: Updated AdminDashboard and Products
+[33m4e6857d[m HEAD@{34}: pull https://github.com/Rannh02/CoffeeShop_laravel.git: Fast-forward
+[33me7931c6[m HEAD@{35}: clone: from https://github.com/Rannh02/CoffeeShop_laravel.git

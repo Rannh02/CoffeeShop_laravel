@@ -168,4 +168,38 @@ class OrderController extends Controller
             'message' => 'Invalid request'
         ], 400);
     }
+     public function storeOrder(Request $request)
+    {
+        $validated = $request->validate([
+            'customer_name' => 'required|string',
+            'order_type' => 'required|string',
+            'total' => 'required|numeric',
+            'orders' => 'required|array',
+        ]);
+
+        $order = Order::create([
+            'Customer_name' => $validated['customer_name'],
+            'Order_type' => $validated['order_type'],
+            'Total_amount' => $validated['total'],
+        ]);
+
+        foreach ($validated['orders'] as $item) {
+            OrderItem::create([
+                'order_id' => $order->id,
+                'product_name' => $item['name'],
+                'quantity' => $item['quantity'],
+                'price' => $item['price'],
+            ]);
+
+            $product = Product::where('Product_name', $item['name'])->first();
+            if ($product && $product->ingredients) {
+                foreach ($product->ingredients as $ingredient) {
+                    $ingredient->Stock -= ($ingredient->pivot->Quantity_used * $item['quantity']);
+                    $ingredient->save();
+                }
+            }
+        }
+
+        return response()->json(['success' => true, 'message' => 'Order placed successfully!']);
+    }
 }

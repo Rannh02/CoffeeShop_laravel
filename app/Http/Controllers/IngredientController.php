@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Ingredient;
-use App\Models\Supplier;
 use Illuminate\Support\Facades\Auth;
 
 class IngredientController extends Controller
@@ -13,23 +12,27 @@ class IngredientController extends Controller
     public function index()
     {
         $fullname = Auth::user()->name ?? 'Admin';
-        $ingredients = Ingredient::with('supplier')->get();
-        $suppliers = Supplier::all();
+        $ingredients = Ingredient::all(); // no supplier relation now
 
-        return view('AdminDashboard.Ingredients', compact('fullname', 'ingredients', 'suppliers'));
+        return view('AdminDashboard.Ingredients', compact('fullname', 'ingredients'));
     }
 
-    // Store new ingredient
+    // Store a new ingredient
     public function store(Request $request)
     {
         $request->validate([
             'Ingredient_name' => 'required|string|max:255',
-            'Quantity' => 'required|numeric|min:0',
-            'Unit' => 'required|string|max:50',
-            'Supplier_id' => 'nullable|exists:suppliers,Supplier_id',
+            'Unit' => 'nullable|string|max:50',
+            'StockQuantity' => 'required|numeric|min:0',
+            'ReorderLevel' => 'required|integer|min:0',
         ]);
 
-        Ingredient::create($request->all());
+        Ingredient::create([
+            'Ingredient_name' => $request->Ingredient_name,
+            'Unit' => $request->Unit,
+            'StockQuantity' => $request->StockQuantity,
+            'ReorderLevel' => $request->ReorderLevel,
+        ]);
 
         return redirect()->back()->with('success', 'Ingredient added successfully.');
     }
@@ -41,15 +44,28 @@ class IngredientController extends Controller
 
         $request->validate([
             'Ingredient_name' => 'required|string|max:255',
-            'Quantity' => 'required|numeric|min:0',
-            'Unit' => 'required|string|max:50',
-            'Supplier_id' => 'nullable|exists:suppliers,Supplier_id',
+            'Unit' => 'nullable|string|max:50',
+            'StockQuantity' => 'required|numeric|min:0',
+            'ReorderLevel' => 'required|integer|min:0',
         ]);
 
-        $ingredient->update($request->all());
+        $ingredient->update([
+            'Ingredient_name' => $request->Ingredient_name,
+            'Unit' => $request->Unit,
+            'StockQuantity' => $request->StockQuantity,
+            'ReorderLevel' => $request->ReorderLevel,
+        ]);
 
         return redirect()->back()->with('success', 'Ingredient updated successfully.');
     }
+
+    public function products()
+{
+    return $this->belongsToMany(Product::class, 'product_ingredients', 'Ingredient_id', 'Product_id')
+                ->withPivot('Quantity_used')
+                ->withTimestamps();
+}
+
 
     // Delete an ingredient
     public function destroy($id)

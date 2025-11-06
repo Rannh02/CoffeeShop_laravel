@@ -14,20 +14,18 @@ class Ingredient extends Model
     
     protected $fillable = [
         'Ingredient_name',
-        'Quantity',
+        'StockQuantity',
         'Unit',
-        'Supplier_id',
+        'ReorderLevel',
     ];
-
-    // Relationship with Supplier - Add this method
-    public function supplier()
-    {
-        return $this->belongsTo(Supplier::class, 'Supplier_id', 'Supplier_id');
-    }
 
     // Relationship: One ingredient can belong to many products
     public function products()
-    {
-        return $this->belongsToMany(Product::class, 'product_ingredients', 'Ingredient_id', 'Product_id');
-    }
+{
+    return $this->belongsToMany(Product::class, 'ingredient_product')
+                ->withPivot('quantity_used')
+                ->withTimestamps();
+}
+
+
 }

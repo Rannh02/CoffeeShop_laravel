@@ -11,13 +11,11 @@ return new class extends Migration
         Schema::create('ingredients', function (Blueprint $table) {
             $table->id('Ingredient_id');
             $table->string('Ingredient_name');
-            $table->text('Description')->nullable();
-            $table->decimal('Quantity', 10, 2)->default(0);
             $table->string('Unit')->nullable(); // kg, liters, pieces, etc.
-            $table->foreignId('Supplier_id')
-                  ->nullable()
-                  ->constrained('suppliers', 'Supplier_id')
-                  ->onDelete('set null');
+            $table->decimal('StockQuantity', 10, 2)->default(0);
+            $table->integer('ReorderLevel')->default(10); 
+            
+            
             $table->timestamps();
         });
     }

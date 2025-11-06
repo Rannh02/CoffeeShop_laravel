@@ -1,30 +1,41 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const deleteButtons = document.querySelectorAll(".delete-btn");
-    const deleteModal = document.getElementById("deleteModal");
-    const cancelDelete = document.getElementById("cancelDelete");
-    const productNameEl = document.getElementById("productName");
-    const deleteProductId = document.getElementById("deleteProductId");
-    const deleteForm = document.getElementById("deleteForm");
+document.addEventListener('DOMContentLoaded', () => {
+    const updateButtons = document.querySelectorAll('.update-btn');
+    const updateModal = document.getElementById('UpdateProductModal');
+    const updateForm = document.getElementById('updateForm');
+    const closeButtons = updateModal.querySelectorAll('.CancelBtn');
 
-    deleteButtons.forEach(btn => {
-        btn.addEventListener("click", () => {
-            const id = btn.getAttribute("data-id");
-            const name = btn.getAttribute("data-name");
+    updateButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const productId = button.getAttribute('data-product-id');
+            const row = button.closest('tr');
+            const name = row.querySelector('td:nth-child(3)').textContent.trim();
+            const price = row.querySelector('td:nth-child(5)').textContent.replace('₱', '').trim();
+            const categoryId = row.querySelector('td:nth-child(2)').textContent.trim();
 
-            productNameEl.textContent = name;
-            deleteProductId.value = id;
-            deleteModal.style.display = "flex";
+            // Fill modal fields
+            document.getElementById('updateProductId').value = productId;
+            document.getElementById('updateProductName').value = name;
+            document.getElementById('updateProductPrice').value = price;
+            document.getElementById('updateProductCategory').value = categoryId;
+
+            // Set form action dynamically
+            updateForm.action = `/products/${productId}`;
+
+            // Show modal
+            updateModal.style.display = 'flex';
         });
     });
 
-    cancelDelete.addEventListener("click", () => {
-        deleteModal.style.display = "none";
+    // Close modal on cancel or outside click
+    document.getElementById('closeProductModal')?.addEventListener('click', () => {
+        updateModal.style.display = 'none';
     });
-
-    // Optional: close modal when clicking outside
-    deleteModal.addEventListener("click", (e) => {
-        if (e.target === deleteModal) {
-            deleteModal.style.display = "none";
+    document.getElementById('cancelUpdate')?.addEventListener('click', () => {
+        updateModal.style.display = 'none';
+    });
+    updateModal.addEventListener('click', e => {
+        if (e.target === updateModal) {
+            updateModal.style.display = 'none';
         }
     });
 });
