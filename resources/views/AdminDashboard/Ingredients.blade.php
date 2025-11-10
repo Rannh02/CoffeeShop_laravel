@@ -79,7 +79,7 @@
                             <td>{{ $ingredient->Ingredient_id }}</td>
                             <td>{{ $ingredient->Ingredient_name }}</td>
                             <td>{{ $ingredient->StockQuantity }}</td>
-                            <td>{{ $ingredient->Unit ?? 'N/A' }}</td>
+                            <td>{{ $ingredient->Unit }}</td>
                             <td>{{ $ingredient->ReorderLevel }}</td>
 
                             <!-- Status Check -->

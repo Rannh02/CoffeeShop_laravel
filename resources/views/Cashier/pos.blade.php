@@ -113,8 +113,8 @@
             <button id="closeEwalletModal" class="close-btn">&times;</button>
             <h2>E-Wallet Payment</h2>
             <p>Please scan the QR code with your preferred wallet app.</p>
-            <img src="{{ asset('CashQRCode/GCASHSHOP.jpg') }}" alt="E-Wallet QR Code" 
-                 style="width: 400px; height: 450px; object-fit:cover;">
+            <img src="../Images/QRcode.png" alt="E-Wallet QR Code" 
+                 style="width: 1000px; height: 500px; object-fit:cover;">
         </div>
     </div>
 
@@ -132,10 +132,10 @@
     </div>
 
     <script src="{{ asset('Javascripts/RealTime.js') }}"></script>
-    <script src="{{ asset('javascripts/PaymentSummary.js') }}"></script>
-    <script src="{{ asset('javascripts/QRlogic.js') }}"></script>
-    <script src="{{ asset('javascripts/OrderTypeButton.js') }}"></script>
-    <script src="{{ asset('javascripts/Inputs.js') }}"></script>
-    <script src="{{ asset('javascripts/PlaceOrderModal.js') }}"></script>
+    <script src="{{ asset('Javascripts/orderSystem.js') }}"></script>
+    <script src="{{ asset('Javascripts/QRlogic.js') }}"></script>
+    <script src="{{ asset('Javascripts/OrderTypeButton.js') }}"></script>
+    <script src="{{ asset('Javascripts/Inputs.js') }}"></script>
+    <script src="{{ asset('Javascripts/PlaceOrderModal.js') }}"></script>
 </body>
 </html>

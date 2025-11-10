@@ -7,41 +7,47 @@ use App\Models\Ingredient;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+
 
 class ProductController extends Controller
 {
     // Display the list of products
     public function index(Request $request)
-    {
-        $page = $request->input('page', 1);
+{
+    $page = $request->input('page', 1);
+    $perPage = 5;
 
-        // ✅ How many items per page
-        $perPage = 5;
+    // ✅ JOIN categories table so Category_name is available
+    $products = DB::table('products')
+        ->join('categories', 'products.Category_id', '=', 'categories.Category_id')
+        ->select(
+            'products.*',
+            'categories.Category_name'
+        )
+        ->skip(($page - 1) * $perPage)
+        ->take($perPage)
+        ->get();
 
-        // ✅ Get all products count
-        $totalProducts = Product::count();
+    // ✅ Total count (for pagination)
+    $totalProducts = DB::table('products')->count();
+    $totalPages = ceil($totalProducts / $perPage);
 
-        // ✅ Calculate total pages
-        $totalPages = ceil($totalProducts / $perPage);
+    // ✅ Get for dropdowns
+    $categories = Category::all();
+    $ingredients = Ingredient::all();
+    $suppliers = Supplier::all();
 
-        // ✅ Get the correct subset of products for the current page
-        $products = Product::skip(($page - 1) * $perPage)
-                           ->take($perPage)
-                           ->get();
+    return view('AdminDashboard.Products', compact(
+        'products',
+        'categories',
+        'ingredients',
+        'suppliers',
+        'totalPages',
+        'page'
+    ));
+}
 
-        // Retrieve all categories for the dropdown
-        $categories = Category::all();
-        $ingredients = Ingredient::all();
-        $suppliers = Supplier::all();
-
-           return view('AdminDashboard.Products', compact(
-            'products',
-            'categories',
-            'ingredients',
-            'suppliers',
-            'totalPages', 
-            'page'));
-    }
 
     // Store a new product
     public function store(Request $request)

@@ -87,11 +87,11 @@
                                     <td>{{ $prod->Product_id }}</td>
                                     <td>{{ $prod->Category_id }}</td>
                                     <td>{{ $prod->Product_name }}</td>
-                                    <td>{{ $prod->Category_name ?? 'N/A' }}</td>
+                                    <td>{{ $prod->Category_name }}</td>
                                     <td>₱{{ number_format($prod->Price, 2) }}</td>
                                     <td>
-                                        @if(!empty($prod->Image))
-                                            {{ basename($prod->Image) }}
+                                        @if(!empty($prod->Image_url))
+                                            {{ basename($prod->Image_url) }}
                                         @else
                                             No Image
                                         @endif

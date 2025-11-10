@@ -9,13 +9,13 @@
       z-index: 1000;
     }
 
-    .modal-content {
-      overflow: auto;
+  .modal-content {
+
   background: white;
-  border-radius: 20px;  /* slightly bigger corners */
+  border-radius: 5px;  /* slightly bigger corners */
   text-align: center;
   position: relative;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);       /* prevent from going out of screen */
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);    /* prevent from going out of screen */
   width: 500px;  
   height: 550px;       /* make modal wider */
   font-size: 1.1rem;    /* enlarge text slightly */
@@ -31,13 +31,12 @@
     }
     .modal-content h2{
       margin-top: 5%;
-        font-size: 20px;
+      font-size: 20px;
     }
     .modal-content p{
         font-size: 12px;
     }
     .modal-content img {
   max-width: 100%;
-  height: auto;
-  object-fit: contain;
+  height: 700px;
 }
