@@ -40,7 +40,7 @@
                 <a href="{{ route('admin.orders') }}" class="nav-item"><i class="bi bi-bag-check-fill"></i> Orders</a>
                 <a href="{{ route('admin.orderitem') }}" class="nav-item"><i class="bi bi-basket"></i> OrderItem</a>
                 <a href="{{ route('admin.employee') }}" class="nav-item"><i class="bi bi-person-circle"></i> Employee</a>
-                <a href="{{ route('admin.archived') }}" class="nav-item"><i class="bi bi-person-x"></i> Archived</a>
+                <a href="{{ route('admin.archived') }}" class="nav-item"><i class="bi bi-person-x"></i> Employee Archived</a>
                 <a href="{{ route('admin.inventory') }}" class="nav-item"><i class="bi bi-cart-check"></i> Inventory</a>
                 <a href="{{ route('admin.ingredients') }}" class="nav-item active"><i class="bi bi-check2-square"></i> Ingredients</a>
                 <a href="{{ route('suppliers.index') }}" class="nav-item"><i class="bi bi-box-fill"></i> Supplier</a>
@@ -56,7 +56,7 @@
         <main class="main-content">
             <div class="products-header">
                 <h1 class="page-title">Ingredients</h1>
-                <button class="add-product-btn" id="openProductModal">Add Ingredient</button>
+                <button class="add-product-btn" id="openProductModal">Stock In</button>
             </div>
 
             <!-- Ingredients Table -->

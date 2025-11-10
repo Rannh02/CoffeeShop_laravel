@@ -92,12 +92,12 @@
 
 /* Add Button */
 #SupplyModal form .AddBtn {
-  background: #8b5e34;
+  background: #19a375;
   color: #fff;
 }
 
 #SupplyModal form .AddBtn:hover {
-  background: #6d4626;
+  background: #0b815a;
   transform: translateY(-2px);
 }
 

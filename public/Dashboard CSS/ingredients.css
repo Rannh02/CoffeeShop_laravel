@@ -96,7 +96,7 @@ body {
 .nav-item.active {
   background-color: #4b5563;
   color: #ffffff;
-  border-left-color: #f59e0b;
+  border-left-color: #12b82d;
 }
 
 .nav-item.logout {
@@ -128,7 +128,7 @@ body {
 }
 
 .add-product-btn {
-  background-color: #f59e0b;
+  background-color: #10b981;
   color: #1f2937;
   border: none;
   padding: 12px 24px;
