@@ -34,7 +34,7 @@
                     @foreach($categories ?? [] as $category)
                         @php
                             $slug = strtolower(str_replace(' ', '-', $category->Category_name));
-                            $isActive = $slug === $categorySlug;
+                            $isActive = ($selectedCategory->Category_id ?? null) === $category->Category_id;
                         @endphp
                         <button class="nav-item {{ $isActive ? 'active' : '' }}" 
                                 onclick="window.location.href='{{ route('cashier.pos', ['category' => $slug]) }}'">
@@ -48,16 +48,16 @@
                     @if(count($products) > 0)
                         @foreach($products as $prod)
                             @php
-                                $isOutOfStock = $prod->QuantityInStock <= 0;
+                                $isOutOfStock = $prod->StockQuantity <= 0;
                             @endphp
                             <div class="product-card {{ $isOutOfStock ? 'out-of-stock' : '' }}"
                                 data-name="{{ $prod->Product_name }}"
                                 data-price="{{ $prod->Price }}"
-                                data-stock="{{ $prod->QuantityInStock }}"
+                                data-stock="{{ $prod->StockQuantity }}"
                                 @if($isOutOfStock) style="pointer-events:none; opacity:0.5;" @endif>
                                 <div class="product-image">
-                                    @if(!empty($prod->Image))
-                                        <img src="{{ asset($prod->Image) }}" 
+                                    @if(!empty($prod->Image_url))
+                                        <img src="{{ asset($prod->Image_url) }}" 
                                             alt="{{ $prod->Product_name }}">
                                     @else
                                         <img src="{{ asset('ProductImages/default.jpg') }}" alt="No Image">
@@ -113,7 +113,7 @@
             <button id="closeEwalletModal" class="close-btn">&times;</button>
             <h2>E-Wallet Payment</h2>
             <p>Please scan the QR code with your preferred wallet app.</p>
-            <img src="../Images/QRcode.png" alt="E-Wallet QR Code" 
+            <img src="{{ asset('Images/QRcode.png') }}" alt="E-Wallet QR Code" 
                  style="width: 1000px; height: 500px; object-fit:cover;">
         </div>
     </div>

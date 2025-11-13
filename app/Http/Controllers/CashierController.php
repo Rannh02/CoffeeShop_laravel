@@ -121,7 +121,7 @@ class CashierController extends Controller
                             'p.Product_id',
                             'p.Product_name',
                             'p.Price',
-                            DB::raw('COALESCE(p.Image_url, \'\') as Image'),
+                            'p.Image_url',
                             DB::raw('COALESCE(i.QuantityInStock, 0) as QuantityInStock')
                         )
                         ->where('p.Category_id', $selectedCategory->Category_id)

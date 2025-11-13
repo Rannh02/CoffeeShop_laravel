@@ -100,6 +100,9 @@ Route::prefix('admin')->group(function () {
     // ✅ Orders
     Route::get('/orders', [OrderController::class, 'index'])->name('admin.orders');
     Route::post('/orders', [OrderController::class, 'store'])->name('admin.orders.store');
+    // to get all the products in POS
+    Route::get('/admin/pos', [OrderController::class, 'showPOS'])->name('admin.pos');
+
 
     // ✅ Order Items
     Route::get('/orderitem', [OrderItemController::class, 'index'])->name('admin.orderitem');

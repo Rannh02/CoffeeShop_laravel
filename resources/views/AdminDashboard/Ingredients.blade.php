@@ -9,7 +9,7 @@
     {{-- Styles --}}
     <link rel="stylesheet" href="{{ asset('Dashboard CSS/ingredients.css') }}">
     <link rel="stylesheet" href="{{ asset('Dashboard CSS/ingredientsModal.css') }}">
-    <link rel="stylesheet" href="{{ asset('products.css') }}">
+    <link rel="stylesheet" href="{{ asset('Dashboard CSS/products.css') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -78,8 +78,8 @@
                         <tr>
                             <td>{{ $ingredient->Ingredient_id }}</td>
                             <td>{{ $ingredient->Ingredient_name }}</td>
-                            <td>{{ $ingredient->StockQuantity }}</td>
                             <td>{{ $ingredient->Unit }}</td>
+                            <td>{{ $ingredient->StockQuantity }}</td>
                             <td>{{ $ingredient->ReorderLevel }}</td>
 
                             <!-- Status Check -->
@@ -116,8 +116,19 @@
             <label>Stock Quantity</label>
             <input type="number" step="0.01" min="0" name="StockQuantity" required>
 
-            <label>Unit (e.g., g, ml, pcs)</label>
-            <input type="text" name="Unit" required>
+            <label>Unit</label>
+            <select name="Unit" required>
+                <option value="" disabled selected>Select Unit</option>
+                <option value="Kilo">Kilo</option>
+                <option value="Gram">Gram</option>
+                <option value="Liter">Liter</option>
+                <option value="Milliliter">Milliliter</option>
+                <option value="Piece">Piece</option>
+                <option value="Pack">Pack</option>
+                <option value="Teaspoon">Teaspoon</option>
+                <option value="Tablespoon">Tablespoon</option>
+                <option value="Box">Box</option>
+            </select>
 
             <label>Reorder Level</label>
             <input type="number" min="0" name="ReorderLevel" required>

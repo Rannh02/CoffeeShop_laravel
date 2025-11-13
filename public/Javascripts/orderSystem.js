@@ -7,25 +7,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const clearOrderBtn = document.getElementById("clearOrder");
 
     if (!orderList || !totalPriceEl || !changePriceEl || !amountPaidInput || !clearOrderBtn) {
-        console.error("⚠️ Some elements not found in the DOM. Please check your HTML IDs.");
+        console.error("⚠️ Some elements not found in the DOM.");
         return;
     }
 
-    let total = parseFloat(localStorage.getItem("total")) || 0;
     let savedOrders = JSON.parse(localStorage.getItem("orders")) || [];
+    let total = parseFloat(localStorage.getItem("total")) || 0;
 
-    // Initial render
     renderOrderList();
-    totalPriceEl.textContent = `₱${total.toFixed(2)}`;
-    calculateChange();
-
-    console.log("✅ Product cards found:", productCards.length);
+    updateTotals();
 
     // Add product to order
     productCards.forEach(card => {
         card.addEventListener("click", () => {
             const name = card.dataset.name;
             const price = parseFloat(card.dataset.price);
+            const img = card.querySelector(".product-image img")?.src || "";
 
             const existingOrder = savedOrders.find(order => order.name === name);
 
@@ -37,7 +34,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     name: name,
                     price: price,
                     quantity: 1,
-                    totalPrice: price
+                    totalPrice: price,
+                    img: img
                 });
             }
 
@@ -45,30 +43,36 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // Render the order list with controls
+    // Render the order list
     function renderOrderList() {
-        orderList.innerHTML = '';
+        orderList.innerHTML = "";
 
         savedOrders.forEach((order, index) => {
-            const itemCard = document.createElement("div");
-            itemCard.classList.add("order-item-card");
+            const div = document.createElement("div");
+            div.classList.add("order-item-card");
+            div.style.display = "flex";
+            div.style.alignItems = "center";
+            div.style.marginBottom = "10px";
 
-            itemCard.innerHTML = `
-                <div class="item-top">
-                    <strong class="item-name">${order.name}</strong>
-                    <span class="item-price">₱${order.totalPrice.toFixed(2)}</span>
-                </div>
-                <div class="item-controls">
-                    <button class="qty-btn minus">-</button>
-                    <span class="quantity">x${order.quantity}</span>
-                    <button class="qty-btn plus">+</button>
-                    <button class="remove-btn">❌</button>
+            div.innerHTML = `
+                <img src="${order.img}" alt="${order.name}" style="width:50px;height:50px;object-fit:cover;margin-right:10px;">
+                <div style="flex:1;">
+                    <div style="display:flex; justify-content:space-between;">
+                        <strong>${order.name}</strong>
+                        <span>₱${order.totalPrice.toFixed(2)}</span>
+                    </div>
+                    <div style="margin-top:5px;">
+                        <button class="qty-btn minus">-</button>
+                        <span class="quantity">x${order.quantity}</span>
+                        <button class="qty-btn plus">+</button>
+                        <button class="remove-btn" style="margin-left:10px;">❌</button>
+                    </div>
                 </div>
             `;
 
-            const minusBtn = itemCard.querySelector(".minus");
-            const plusBtn = itemCard.querySelector(".plus");
-            const removeBtn = itemCard.querySelector(".remove-btn");
+            const minusBtn = div.querySelector(".minus");
+            const plusBtn = div.querySelector(".plus");
+            const removeBtn = div.querySelector(".remove-btn");
 
             minusBtn.addEventListener("click", () => {
                 if (order.quantity > 1) {
@@ -91,36 +95,36 @@ document.addEventListener("DOMContentLoaded", () => {
                 updateOrderState();
             });
 
-            orderList.appendChild(itemCard);
+            orderList.appendChild(div);
         });
     }
 
-    // Update total, UI, and storage
-    function updateOrderState() {
+    // Update totals and storage
+    function updateTotals() {
         total = savedOrders.reduce((sum, item) => sum + item.totalPrice, 0);
         totalPriceEl.textContent = `₱${total.toFixed(2)}`;
-        calculateChange();
-        renderOrderList();
-        localStorage.setItem("orders", JSON.stringify(savedOrders));
-        localStorage.setItem("total", total);
-    }
 
-    // Calculate change
-    function calculateChange() {
         const paid = parseFloat(amountPaidInput.value) || 0;
         const change = paid - total;
         changePriceEl.textContent = change >= 0 ? `₱${change.toFixed(2)}` : "₱0.00";
     }
 
-    // Recalculate change on input
-    amountPaidInput.addEventListener("input", calculateChange);
+    function updateOrderState() {
+        renderOrderList();
+        updateTotals();
+        localStorage.setItem("orders", JSON.stringify(savedOrders));
+        localStorage.setItem("total", total);
+    }
 
-    // Clear all orders
+    // Recalculate change on input
+    amountPaidInput.addEventListener("input", updateTotals);
+
+    // Clear order
     clearOrderBtn.addEventListener("click", () => {
+        savedOrders = [];
+        total = 0;
         orderList.innerHTML = '';
         amountPaidInput.value = '';
-        total = 0;
-        savedOrders = [];
         totalPriceEl.textContent = '₱0.00';
         changePriceEl.textContent = '₱0.00';
         localStorage.removeItem("orders");

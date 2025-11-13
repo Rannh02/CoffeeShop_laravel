@@ -35,139 +35,134 @@ class OrderController extends Controller
 
     // Store a new order (API endpoint)
     public function store(Request $request)
-    {
-        // Check if request is JSON
-        if ($request->isJson()) {
-            try {
-                $data = $request->all();
+{
+    if ($request->isJson()) {
+        try {
+            $data = $request->all();
 
-                if (empty($data['orders'])) {
-                    return response()->json([
-                        'status' => 'error',
-                        'message' => 'No orders found'
-                    ], 400);
-                }
-
-                $customerName = $data['customerName'];
-                $orderType = $data['orderType'];
-                
-                // Get employee_id from session/auth
-                $employee_id = session('cashier_id') ?? Auth::id();
-                
-                if (!$employee_id) {
-                    return response()->json([
-                        'status' => 'error',
-                        'message' => 'No employee logged in.'
-                    ], 401);
-                }
-
-                DB::beginTransaction();
-
-                // Handle customer
-                $customer = Customer::where('Name', $customerName)->first();
-                
-                if (!$customer) {
-                    $customer = Customer::create([
-                        'Name' => $customerName,
-                        'Date_Time' => now()
-                    ]);
-                }
-                $customerId = $customer->Customer_id;
-
-                // Compute total amount
-                $totalAmount = 0;
-                foreach ($data['orders'] as $item) {
-                    $qty = $item['quantity'] ?? $item['qty'] ?? 1;
-                    $totalAmount += ($item['price'] * $qty);
-                }
-
-                // Insert order
-                $order = Order::create([
-                    'Customer_id' => $customerId,
-                    'Employee_id' => $employee_id,
-                    'Customers Name' => $customerName,
-                    'OrderDate' => now(),
-                    'TotalAmount' => $totalAmount,
-                    'OrderType' => $orderType
-                ]);
-
-                $orderId = $order->Order_id;
-
-                // Insert each product into orderitem
-                foreach ($data['orders'] as $item) {
-                    $qty = $item['quantity'] ?? $item['qty'] ?? 1;
-                    $price = $item['price'];
-
-                    // Determine product_id
-                    if (isset($item['product_id'])) {
-                        $productId = $item['product_id'];
-                    } elseif (isset($item['name'])) {
-                        $product = Product::where('Product_name', $item['name'])->first();
-                        if (!$product) {
-                            throw new \Exception("Product not found: " . $item['name']);
-                        }
-                        $productId = $product->Product_id;
-                    } else {
-                        throw new \Exception("Product information missing in order item.");
-                    }
-
-                    // Create order item
-                    OrderItem::create([
-                        'Order_id' => $orderId,
-                        'Product_id' => $productId,
-                        'Quantity' => $qty,
-                        'Price_sale' => $price
-                    ]);
-
-                    // Deduct stock from inventory
-                    $inventory = Inventory::where('Product_id', $productId)->first();
-                    
-                    if (!$inventory) {
-                        throw new \Exception("No inventory record found for Product ID: $productId");
-                    }
-
-                    if ($inventory->QuantityInStock < $qty) {
-                        throw new \Exception("Not enough stock for Product ID: $productId (Available: {$inventory->QuantityInStock}, Needed: $qty)");
-                    }
-
-                    $inventory->QuantityInStock -= $qty;
-                    $inventory->save();
-                }
-
-                // Insert payment record
-                $paymentMethod = $data['paymentMethod'] ?? 'Cash';
-                $amountPaid = $data['amountPaid'] ?? $totalAmount;
-                $referenceCode = $data['referenceCode'] ?? null;
-
-                Payment::create([
-                    'Order_id' => $orderId,
-                    'Payment_method' => $paymentMethod,
-                    'Amount_Paid' => $amountPaid,
-                    'PaymentDate' => now(),
-                    'Reference_Code' => $referenceCode
-                ]);
-
-                DB::commit();
-
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'Order, items, and payment recorded successfully'
-                ]);
-
-            } catch (\Exception $e) {
-                DB::rollBack();
+            if (empty($data['orders'])) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => $e->getMessage()
-                ], 500);
+                    'message' => 'No orders found'
+                ], 400);
+            }
+
+            $customerName = $data['customerName'];
+            $orderType = $data['orderType'];
+            $employee_id = session('cashier_id') ?? Auth::id();
+
+            if (!$employee_id) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'No employee logged in.'
+                ], 401);
+            }
+
+            DB::beginTransaction();
+
+            // ✅ Handle or create customer
+            $customer = Customer::firstOrCreate(
+                ['Name' => $customerName],
+                ['Date_Time' => now()]
+            );
+
+            // ✅ Compute total
+            $totalAmount = collect($data['orders'])->sum(function ($item) {
+                $qty = $item['quantity'] ?? $item['qty'] ?? 1;
+                return $item['price'] * $qty;
+            });
+
+            // ✅ Create order
+            $order = Order::create([
+                'Customer_id' => $customer->Customer_id,
+                'Employee_id' => $employee_id,
+                'Customers Name' => $customerName,
+                'OrderDate' => now(),
+                'TotalAmount' => $totalAmount,
+                'OrderType' => $orderType
+            ]);
+
+            // ✅ Loop through order items
+            foreach ($data['orders'] as $item) {
+                $qty = $item['quantity'] ?? $item['qty'] ?? 1;
+                $price = $item['price'];
+
+                // Find product
+                $product = Product::where('Product_name', $item['name'])->first();
+                if (!$product) {
+                    throw new \Exception("Product not found: " . $item['name']);
+                }
+
+                // Create order item
+                OrderItem::create([
+                    'Order_id' => $order->Order_id,
+                    'Product_id' => $product->Product_id,
+                    'Quantity' => $qty,
+                    'Price_sale' => $price
+                ]);
+
+                // ✅ Deduct ingredients and log to inventory
+                if ($product->ingredients) {
+                foreach ($product->ingredients as $ingredient) {
+                    $totalUsed = $ingredient->pivot->Quantity_used * $qty;
+
+                    // Deduct from ingredient stock
+                    if ($ingredient->StockQuantity < $totalUsed) {
+                        throw new \Exception("Not enough {$ingredient->Ingredient_name} in stock!");
+                    }
+
+                    $ingredient->StockQuantity -= $totalUsed;
+                    $ingredient->save();
+
+                    // Log to inventory usage
+                    DB::table('inventories')->insert([
+                        'Product_id' => $product->Product_id,
+                        'Ingredient_id' => $ingredient->Ingredient_id,
+                        'QuantityUsed' => $totalUsed,
+                        'RemainingStock' => $ingredient->StockQuantity,
+                        'DateUsed' => now(),
+                        'Remarks' => "Used for order #{$order->Order_id}",
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+                }
             }
         }
 
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Invalid request'
-        ], 400);
+            // ✅ Payment record
+            $paymentMethod = $data['paymentMethod'] ?? 'Cash';
+            $amountPaid = $data['amountPaid'] ?? $totalAmount;
+            $referenceCode = $data['referenceCode'] ?? null;
+
+            Payment::create([
+                'Order_id' => $order->Order_id,
+                'Payment_method' => $paymentMethod,
+                'Amount_Paid' => $amountPaid,
+                'PaymentDate' => now(),
+                'Reference_Code' => $referenceCode
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Order and ingredients recorded successfully.'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
+
+    return response()->json([
+        'status' => 'error',
+        'message' => 'Invalid request format.'
+    ], 400);
+}
+
      public function storeOrder(Request $request)
     {
         $validated = $request->validate([
@@ -202,4 +197,10 @@ class OrderController extends Controller
 
         return response()->json(['success' => true, 'message' => 'Order placed successfully!']);
     }
+    public function showPOS()
+{
+    $products = Product::all();
+    return view('AdminDashboard.pos', compact('products'));
+}
+
 }

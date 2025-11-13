@@ -11,17 +11,24 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('inventory', function (Blueprint $table) {
+        Schema::create('inventories', function (Blueprint $table) {
             $table->id('Inventory_id');
             $table->unsignedBigInteger('Product_id');
-            $table->integer('QuantityInStock')->default(0);
-            $table->integer('ReorderLevel')->default(10);
-            $table->dateTime('LastRestockDate')->nullable();
+            $table->unsignedBigInteger('Ingredient_id');
+            $table->decimal('QuantityUsed', 10, 2)->default(0);
+            $table->decimal('RemainingStock', 10, 2)->nullable();
+            $table->enum('Action', ['add', 'deduct'])->default('deduct'); // ✅ Added this
+            $table->timestamp('DateUsed')->nullable();
             $table->timestamps();
-            
+
             $table->foreign('Product_id')
                 ->references('Product_id')
                 ->on('products')
+                ->onDelete('cascade');
+
+            $table->foreign('Ingredient_id')
+                ->references('Ingredient_id')
+                ->on('ingredients')
                 ->onDelete('cascade');
         });
     }
@@ -31,6 +38,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('inventory');
+        Schema::dropIfExists('inventories');
     }
 };

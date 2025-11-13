@@ -9,23 +9,25 @@ class Ingredient extends Model
 {
     use HasFactory;
 
-    protected $table = 'ingredients';
-    protected $primaryKey = 'Ingredient_id'; // Add this line
-    
+    protected $primaryKey = 'Ingredient_id';
     protected $fillable = [
         'Ingredient_name',
-        'StockQuantity',
         'Unit',
-        'ReorderLevel',
+        'StockQuantity',
+        'ReorderLevel'
     ];
 
-    // Relationship: One ingredient can belong to many products
+    // ✅ Many products use this ingredient
     public function products()
-{
-    return $this->belongsToMany(Product::class, 'ingredient_product')
-                ->withPivot('quantity_used')
-                ->withTimestamps();
-}
+    {
+        return $this->belongsToMany(Product::class, 'product_ingredients', 'Ingredient_id', 'Product_id')
+                    ->withPivot('quantity_used')
+                    ->withTimestamps();
+    }
 
-
+    // ✅ Logs of inventory usage
+    public function inventories()
+    {
+        return $this->hasMany(Inventory::class, 'Ingredient_id', 'Ingredient_id');
+    }
 }

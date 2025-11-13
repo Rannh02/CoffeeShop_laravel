@@ -14,23 +14,19 @@
     <!-- Header -->
     <header class="header">
         <div class="header-left">
-            <div class="logo">
-                <span>Berde Kopi</span>
-            </div>
+            <div class="logo"><span>Berde Kopi</span></div>
         </div>
         <div class="header-right">
             <div class="admin-profile">
                 <span class="time" id="currentTime">Time</span>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                     <path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 
                     14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 
                     9.76142 9.23858 12 12 12Z" fill="currentColor"/>
                     <path d="M12 14C7.58172 14 4 17.5817 
                     4 22H20C20 17.5817 16.4183 14 12 14Z" fill="currentColor"/>
                 </svg>
-                <span>
-                    <strong style="color:green; font-weight:bolder;">Admin: </strong>
-                </span>
+                <span><strong style="color:green; font-weight:bolder;">Admin: </strong></span>
             </div>
         </div>
     </header>
@@ -50,9 +46,7 @@
                 <a href="{{ route('suppliers.index') }}" class="nav-item"><i class="bi bi-box-fill"></i> Supplier</a>
                 <a href="{{ route('admin.payment') }}" class="nav-item"><i class="bi bi-cash-coin"></i> Payment</a>
                 <a href="{{ route('admin.category') }}" class="nav-item"><i class="bi bi-tags"></i> Category</a>
-                <a href="{{ route('admin.logout') }}" class="nav-item logout">
-                    <i class="bi bi-box-arrow-left"></i> Logout
-                </a>
+                <a href="{{ route('admin.logout') }}" class="nav-item logout"><i class="bi bi-box-arrow-left"></i> Logout</a>
             </nav>
         </aside>
 
@@ -61,7 +55,7 @@
             <div class="products-header">
                 <h1 class="page-title">Products</h1>
                 <button id="openCategoryModal" class="add-product-btn">
-                        <i class="bi bi-plus-circle">   Add Product</i>
+                    <i class="bi bi-plus-circle"></i> Add Product
                 </button>
             </div>
 
@@ -73,7 +67,6 @@
                             <th>Product ID</th>
                             <th>Category ID</th>
                             <th>Name</th>
-                            <th>Category Name</th>
                             <th>Price</th>
                             <th>Image</th>
                             <th>Update</th>
@@ -87,11 +80,10 @@
                                     <td>{{ $prod->Product_id }}</td>
                                     <td>{{ $prod->Category_id }}</td>
                                     <td>{{ $prod->Product_name }}</td>
-                                    <td>{{ $prod->Category_name }}</td>
                                     <td>₱{{ number_format($prod->Price, 2) }}</td>
                                     <td>
                                         @if(!empty($prod->Image_url))
-                                            {{ basename($prod->Image_url) }}
+                                            <img src="{{ asset($prod->Image_url) }}" alt="Product Image" width="60">
                                         @else
                                             No Image
                                         @endif
@@ -135,7 +127,7 @@
         <form action="{{ route('admin.products.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             @if($errors->any())
-                <div class="alert alert-danger">
+                <div class="alert alert-danger"style="background: #f8d7da; padding: 10px; border-radius: 5px; color: #721c24;">
                     <ul>
                         @foreach($errors->all() as $error)
                             <li>{{ $error }}</li>
@@ -143,11 +135,12 @@
                     </ul>
                 </div>
             @endif
-            <h1>Add Products</h1>
-            <p>Product name</p>
+
+            <h1>Add Product</h1>
+            <p>Product Name</p>
             <input type="text" name="Product_name" value="{{ old('Product_name') }}" required>
 
-            <p>Category name</p>
+            <p>Category</p>
             <select name="Category_id" required>
                 <option value="">-- Select Category --</option>
                 @foreach($categories as $cat)
@@ -155,23 +148,27 @@
                 @endforeach
             </select>
 
-             <label>Ingredients</label>
-    <select id="ingredientSelect" name="ingredient_ids[]" multiple required>
-        @foreach ($ingredients as $ingredient)
-            <option value="{{ $ingredient->Ingredient_id }}">{{ $ingredient->Ingredient_name }}</option>
-        @endforeach
-    </select>
-
-    <!-- Container where quantity inputs will appear -->
-    <div id="ingredientQuantities"></div>
-
-            <p>Supplier</p>
-            <select name="Supplier_id" required>
-                <option value="">-- Select Supplier --</option>
-                @foreach($suppliers as $sup)
-                    <option value="{{ $sup->Supplier_id }}">{{ $sup->Supplier_name }}</option>
-                @endforeach
-            </select>
+            <label>Ingredients</label>
+                <div id="ingredientList">
+                    @foreach($ingredients as $ingredient)
+                        <div style="margin-bottom: 8px;">
+                            <label>
+                                <input type="checkbox" name="ingredient_ids[]" value="{{ $ingredient->Ingredient_id }}" class="ingredient-checkbox">
+                                {{ $ingredient->Ingredient_name }}
+                            </label>
+                            <input 
+                                type="number" 
+                                name="quantities[{{ $ingredient->Ingredient_id }}]" 
+                                class="ingredient-qty" 
+                                placeholder="Qty used"
+                                min="0.01"
+                                step="0.01"
+                                disabled
+                                required
+                            >
+                        </div>
+                    @endforeach
+                </div>
 
             <p>Price</p>
             <input type="number" step="0.01" name="Price" required>
@@ -186,33 +183,31 @@
         </form>
     </div>
 
-   <!-- Update Product Modal -->
-<div id="UpdateProductModal" class="modal-overlay">
-    <form id="updateForm" method="POST" enctype="multipart/form-data">
-        @csrf
-        @method('PUT')
+    <!-- Update Product Modal -->
+    <div id="UpdateProductModal" class="modal-overlay">
+        <form id="updateForm" method="POST" enctype="multipart/form-data">
+            @csrf
+            @method('PUT')
 
-        <input type="hidden" name="Product_id" id="updateProductId">
+            <input type="hidden" name="Product_id" id="updateProductId">
 
-        <h1>Update Product</h1>
-        <p>Product name</p>
-        <input type="text" name="Product_name" id="updateProductName" required>
+            <h1>Update Product</h1>
+            <p>Product name</p>
+            <input type="text" name="Product_name" id="updateProductName" required>
 
-        <p>Price</p>
-        <input type="number" name="Price" id="updateProductPrice" required>
+            <p>Price</p>
+            <input type="number" name="Price" id="updateProductPrice" required>
 
+            <p>Category</p>
+            <select name="Category_id" id="updateProductCategory">
+                @foreach ($categories as $category)
+                    <option value="{{ $category->Category_id }}">{{ $category->Category_name }}</option>
+                @endforeach
+            </select>
 
-        <p>Category</p>
-        <select name="Category_id" id="updateProductCategory">
-            @foreach ($categories as $category)
-                <option value="{{ $category->Category_id }}">{{ $category->Category_name }}</option>
-            @endforeach
-        </select>
-
-        <button type="submit" class="btn btn-primary">Update</button>
-    </form>
-</div>
-
+            <button type="submit" class="btn btn-primary">Update</button>
+        </form>
+    </div>
 
     <!-- Delete Confirmation Modal -->
     <div id="deleteModal" class="modal-overlay" style="display:none;">
@@ -238,36 +233,23 @@
 <script src="{{ asset('Javascripts/productupdate.js') }}"></script>
 <script src="{{ asset('Javascripts/productdelete.js') }}"></script>
 
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const ingredientSelect = document.getElementById('ingredientSelect');
-    const ingredientQuantities = document.getElementById('ingredientQuantities');
-
-    ingredientSelect.addEventListener('change', function() {
-        ingredientQuantities.innerHTML = ''; // clear old inputs
-
-        // loop through all selected options
-        [...this.selectedOptions].forEach(option => {
-            const div = document.createElement('div');
-            div.classList.add('ingredient-input');
-            div.innerHTML = `
-                <label>${option.text} Quantity Used:</label>
-                <input type="number" name="quantities[${option.value}]" step="0.01" min="0.01" required>
-            `;
-            ingredientQuantities.appendChild(div);
+    document.querySelectorAll('.ingredient-checkbox').forEach(cb => {
+        cb.addEventListener('change', function() {
+            const qtyInput = this.closest('div').querySelector('.ingredient-qty');
+            qtyInput.disabled = !this.checked;
+            if (!this.checked) qtyInput.value = ''; // clear if unchecked
         });
     });
 });
 </script>
 
-<style>
-#ingredientQuantities {
-    margin-top: 10px;
-}
-.ingredient-input {
-    margin-bottom: 10px;
-}
-</style>
+<!-- <style>
+#ingredientQuantities { margin-top: 10px; }
+.ingredient-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+</style> -->
 
 </body>
 </html>

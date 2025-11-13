@@ -1,14 +1,13 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Ingredient;
-use App\Models\Supplier;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
@@ -18,33 +17,28 @@ class ProductController extends Controller
     $page = $request->input('page', 1);
     $perPage = 5;
 
-    // ✅ JOIN categories table so Category_name is available
     $products = DB::table('products')
-        ->join('categories', 'products.Category_id', '=', 'categories.Category_id')
+        ->leftJoin('categories', 'products.Category_id', '=', 'categories.Category_id')
         ->select(
-            'products.*',
+            'products.Product_id',
+            'products.Category_id as Category_id',
+            'products.Product_name',
+            'products.Price',
+            'products.Image_url',
             'categories.Category_name'
         )
         ->skip(($page - 1) * $perPage)
         ->take($perPage)
         ->get();
 
-    // ✅ Total count (for pagination)
     $totalProducts = DB::table('products')->count();
     $totalPages = ceil($totalProducts / $perPage);
 
-    // ✅ Get for dropdowns
     $categories = Category::all();
     $ingredients = Ingredient::all();
-    $suppliers = Supplier::all();
 
     return view('AdminDashboard.Products', compact(
-        'products',
-        'categories',
-        'ingredients',
-        'suppliers',
-        'totalPages',
-        'page'
+        'products', 'categories', 'ingredients', 'totalPages', 'page'
     ));
 }
 
@@ -55,24 +49,23 @@ class ProductController extends Controller
     Log::info('Product store request received', $request->all());
 
     $request->validate([
-        'Product_name' => 'required|string|max:255',
-        'Category_id' => 'required|integer',
-        'Price' => 'required|numeric|min:0',
-        'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-        'ingredient_ids' => 'required|array',
-        'quantities' => 'required|array',
+    'Product_name' => 'required|string|max:255',
+    'Category_id' => 'required|integer|exists:categories,Category_id',
+    'Price' => 'required|numeric|min:0',
+    'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+    'ingredient_ids' => 'required|array|min:1',
+    'quantities' => 'required|array|min:1',
     ]);
+
 
     try {
         $product = new Product();
         $product->Product_name = $request->Product_name;
         $product->Category_id = $request->Category_id;
         $product->Price = $request->Price;
-
-        // ✅ Save first to get product_id
         $product->save();
 
-        // ✅ Handle image upload (after product is created)
+        // ✅ Handle image
         if ($request->hasFile('image')) {
             $file = $request->file('image');
             $filename = time() . '_' . $file->getClientOriginalName();
@@ -87,8 +80,9 @@ class ProductController extends Controller
             $product->ingredients()->attach($ingredient_id, ['quantity_used' => $qty]);
         }
 
-        Log::info('Product saved successfully', ['product_id' => $product->id]);
-        return redirect()->route('admin.products')->with('success', 'Product added successfully!');
+        Log::info('Product saved successfully', ['product_id' => $product->Product_id]);
+        return redirect()->route('products.index')->with('success', 'Product added successfully!');
+
     } catch (\Exception $e) {
         Log::error('Error saving product: ' . $e->getMessage());
         return redirect()->back()
@@ -98,7 +92,7 @@ class ProductController extends Controller
 }
 
 
-    // Edit product form
+    // Edit product
     public function edit($id)
     {
         $product = Product::findOrFail($id);
@@ -106,27 +100,26 @@ class ProductController extends Controller
         return view('AdminDashboard.EditProduct', compact('product', 'categories'));
     }
 
-    // Update product data
+    // Update product
     public function update(Request $request, $id)
     {
         $request->validate([
             'Product_name' => 'required|string|max:255',
             'Category_id' => 'required|integer',
-            'Product_price' => 'required|numeric|min:0',
-            'Product_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'Price' => 'required|numeric|min:0',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         $product = Product::findOrFail($id);
         $product->Product_name = $request->Product_name;
         $product->Category_id = $request->Category_id;
-        $product->Product_price = $request->Product_price;
+        $product->Price = $request->Price;
 
-        // Handle new image upload
-        if ($request->hasFile('Product_image')) {
-            $file = $request->file('Product_image');
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
             $filename = time() . '_' . $file->getClientOriginalName();
             $file->move(public_path('images/products'), $filename);
-            $product->Product_image = $filename;
+            $product->Image_url = 'images/products/' . $filename;
         }
 
         $product->save();
@@ -134,14 +127,13 @@ class ProductController extends Controller
         return redirect()->route('products.index')->with('success', 'Product updated successfully!');
     }
 
-    // Delete a product
+    // Delete product
     public function destroy($id)
     {
         $product = Product::findOrFail($id);
 
-        // Optional: delete the product image from public folder
-        if ($product->Product_image && file_exists(public_path('images/products/' . $product->Product_image))) {
-            unlink(public_path('images/products/' . $product->Product_image));
+        if ($product->Image_url && file_exists(public_path($product->Image_url))) {
+            unlink(public_path($product->Image_url));
         }
 
         $product->delete();

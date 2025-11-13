@@ -79,9 +79,11 @@
                         <tr>
                             <th>Inventory_id</th>
                             <th>Product_id</th>
-                            <th>QuantityInStock</th>
-                            <th>ReorderLevel</th>
-                            <th>LastRestockDate</th>
+                            <th>Ingredient_id</th>
+                            <th>QuantityUsed</th>
+                            <th>RemainingStock</th>
+                            <th>Action</th>
+                            <th>DateUsed</th>
                         </tr>
                     </thead>
                     <tbody>
