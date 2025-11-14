@@ -245,11 +245,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-
-<!-- <style>
-#ingredientQuantities { margin-top: 10px; }
-.ingredient-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-</style> -->
-
 </body>
 </html>

@@ -44,35 +44,40 @@
                 </nav>
 
                 <!-- Product Grid Fetched from DB -->
-                <div class="product-grid">
-                    @if(count($products) > 0)
-                        @foreach($products as $prod)
-                            @php
-                                $isOutOfStock = $prod->StockQuantity <= 0;
-                            @endphp
-                            <div class="product-card {{ $isOutOfStock ? 'out-of-stock' : '' }}"
-                                data-name="{{ $prod->Product_name }}"
-                                data-price="{{ $prod->Price }}"
-                                data-stock="{{ $prod->StockQuantity }}"
-                                @if($isOutOfStock) style="pointer-events:none; opacity:0.5;" @endif>
-                                <div class="product-image">
-                                    @if(!empty($prod->Image_url))
-                                        <img src="{{ asset($prod->Image_url) }}" 
-                                            alt="{{ $prod->Product_name }}">
-                                    @else
-                                        <img src="{{ asset('ProductImages/default.jpg') }}" alt="No Image">
-                                    @endif
+                    <div class="product-grid">
+                        @if(count($products) > 0)
+                            @foreach($products as $prod)
+                                @php
+                                    $isOutOfStock = $prod->StockQuantity <= 0;
+                                @endphp
+
+                                <div class="product-card {{ $isOutOfStock ? 'out-of-stock' : '' }}"
+                                    data-name="{{ $prod->Product_name }}"
+                                    data-price="{{ $prod->Price }}"
+                                    data-stock="{{ $prod->StockQuantity }}"
+                                    @if($isOutOfStock) style="pointer-events:none; opacity:0.5;" @endif>
+
+                                    <div class="product-image">
+                                        @if(!empty($prod->Image_url))
+                                            <img src="{{ asset($prod->Image_url) }}" alt="{{ $prod->Product_name }}">
+                                        @else
+                                            <img src="{{ asset('ProductImages/default.jpg') }}" alt="No Image">
+                                        @endif
+                                    </div>
+
+                                    <div class="product-info">
+                                        <h3 class="product-name">{{ $prod->Product_name }}</h3>
+                                        <span class="product-price">₱{{ number_format($prod->Price, 2) }}</span>
+                                    </div>
+
                                 </div>
-                                <div class="product-info">
-                                    <h3 class="product-name">{{ $prod->Product_name }}</h3>
-                                    <span class="product-price">₱{{ number_format($prod->Price, 2) }}</span>
-                                </div>
-                            </div>
-                        @endforeach
-                    @else
-                        <p>No products available in this category.</p>
-                    @endif
-                </div>
+
+                            @endforeach
+                        @else
+                            <p>No products available in this category.</p>
+                        @endif
+                    </div>
+
             </div>
 
             <div class="order-panel">
