@@ -11,10 +11,13 @@ use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {
-    // Display the list of orders
+    /**
+     * Display the list of orders
+     */
     public function index(Request $request)
     {
         $page = $request->input('page', 1);
@@ -24,8 +27,9 @@ class OrderController extends Controller
         $totalOrders = Order::count();
         $totalPages = ceil($totalOrders / $perPage);
 
-        // Fetch orders for the current page
-        $orders = Order::orderBy('Order_date', 'desc')
+        // Fetch orders for the current page with relationships
+        $orders = Order::with(['customer', 'employee', 'orderItems', 'payment'])
+                       ->orderBy('Order_date', 'desc')
                        ->skip(($page - 1) * $perPage)
                        ->take($perPage)
                        ->get();
@@ -33,67 +37,70 @@ class OrderController extends Controller
         return view('AdminDashboard.Orders', compact('orders', 'totalPages', 'page'));
     }
 
-    // Store a new order (API endpoint)
+    /**
+     * Store a new order (handles both JSON API and form requests)
+     */
     public function store(Request $request)
-{
-    if ($request->isJson()) {
+    {
         try {
-            $data = $request->all();
+            // Validate incoming data
+            $validated = $request->validate([
+                'customerName' => 'required|string|max:255',
+                'orderType' => 'required|string|in:Dine In,Takeout',
+                'orders' => 'required|array|min:1',
+                'orders.*.name' => 'required|string',
+                'orders.*.price' => 'required|numeric|min:0',
+                'orders.*.quantity' => 'nullable|integer|min:1',
+                'orders.*.qty' => 'nullable|integer|min:1',
+                'paymentMethod' => 'nullable|string|in:Cash,GCash,Card',
+                'amountPaid' => 'nullable|numeric|min:0',
+                'referenceCode' => 'nullable|string|max:100'
+            ]);
 
-            if (empty($data['orders'])) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'No orders found'
-                ], 400);
-            }
-
-            $customerName = $data['customerName'];
-            $orderType = $data['orderType'];
+            // Get employee ID from session or auth
             $employee_id = session('cashier_id') ?? Auth::id();
 
             if (!$employee_id) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'No employee logged in.'
-                ], 401);
+                return $this->jsonResponse(false, 'No employee logged in.', null, 401);
             }
 
             DB::beginTransaction();
 
-            // ✅ Handle or create customer
+            // Create or find customer
             $customer = Customer::firstOrCreate(
-                ['Name' => $customerName],
+                ['Name' => $validated['customerName']],
                 ['Date_Time' => now()]
             );
 
-            // ✅ Compute total
-            $totalAmount = collect($data['orders'])->sum(function ($item) {
+            // Calculate total amount
+            $totalAmount = collect($validated['orders'])->sum(function ($item) {
                 $qty = $item['quantity'] ?? $item['qty'] ?? 1;
                 return $item['price'] * $qty;
             });
 
-            // ✅ Create order
+            // Create order record
             $order = Order::create([
                 'Customer_id' => $customer->Customer_id,
                 'Employee_id' => $employee_id,
-                'Customers Name' => $customerName,
-                'OrderDate' => now(),
+                'Customer_name' => $validated['customerName'],
+                'Order_date' => now(),
                 'TotalAmount' => $totalAmount,
-                'OrderType' => $orderType
+                'Order_Type' => $validated['orderType']
             ]);
 
-            // ✅ Loop through order items
-            foreach ($data['orders'] as $item) {
+            // Process each order item
+            foreach ($validated['orders'] as $item) {
                 $qty = $item['quantity'] ?? $item['qty'] ?? 1;
                 $price = $item['price'];
 
                 // Find product
                 $product = Product::where('Product_name', $item['name'])->first();
+                
                 if (!$product) {
-                    throw new \Exception("Product not found: " . $item['name']);
+                    throw new \Exception("Product '{$item['name']}' not found in inventory.");
                 }
 
-                // Create order item
+                // Create order item record
                 OrderItem::create([
                     'Order_id' => $order->Order_id,
                     'Product_id' => $product->Product_id,
@@ -101,38 +108,43 @@ class OrderController extends Controller
                     'Price_sale' => $price
                 ]);
 
-                // ✅ Deduct ingredients and log to inventory
-                if ($product->ingredients) {
-                foreach ($product->ingredients as $ingredient) {
-                    $totalUsed = $ingredient->pivot->Quantity_used * $qty;
+                // Deduct ingredients from stock
+                if ($product->ingredients && $product->ingredients->count() > 0) {
+                    foreach ($product->ingredients as $ingredient) {
+                        $quantityUsedPerUnit = $ingredient->pivot->Quantity_used ?? 0;
+                        $totalUsed = $quantityUsedPerUnit * $qty;
 
-                    // Deduct from ingredient stock
-                    if ($ingredient->StockQuantity < $totalUsed) {
-                        throw new \Exception("Not enough {$ingredient->Ingredient_name} in stock!");
+                        // Check if enough stock available
+                        if ($ingredient->StockQuantity < $totalUsed) {
+                            throw new \Exception(
+                                "Insufficient stock for '{$ingredient->Ingredient_name}'. " .
+                                "Required: {$totalUsed}, Available: {$ingredient->StockQuantity}"
+                            );
+                        }
+
+                        // Deduct from ingredient stock
+                        $ingredient->StockQuantity -= $totalUsed;
+                        $ingredient->save();
+
+                        // Log inventory usage
+                        DB::table('inventories')->insert([
+                            'Product_id' => $product->Product_id,
+                            'Ingredient_id' => $ingredient->Ingredient_id,
+                            'QuantityUsed' => $totalUsed,
+                            'RemainingStock' => $ingredient->StockQuantity,
+                            'DateUsed' => now(),
+                            'Remarks' => "Order #{$order->Order_id} - {$validated['orderType']}",
+                            'created_at' => now(),
+                            'updated_at' => now()
+                        ]);
                     }
-
-                    $ingredient->StockQuantity -= $totalUsed;
-                    $ingredient->save();
-
-                    // Log to inventory usage
-                    DB::table('inventories')->insert([
-                        'Product_id' => $product->Product_id,
-                        'Ingredient_id' => $ingredient->Ingredient_id,
-                        'QuantityUsed' => $totalUsed,
-                        'RemainingStock' => $ingredient->StockQuantity,
-                        'DateUsed' => now(),
-                        'Remarks' => "Used for order #{$order->Order_id}",
-                        'created_at' => now(),
-                        'updated_at' => now()
-                    ]);
                 }
             }
-        }
 
-            // ✅ Payment record
-            $paymentMethod = $data['paymentMethod'] ?? 'Cash';
-            $amountPaid = $data['amountPaid'] ?? $totalAmount;
-            $referenceCode = $data['referenceCode'] ?? null;
+            // Create payment record
+            $paymentMethod = $validated['paymentMethod'] ?? 'Cash';
+            $amountPaid = $validated['amountPaid'] ?? $totalAmount;
+            $referenceCode = $validated['referenceCode'] ?? null;
 
             Payment::create([
                 'Order_id' => $order->Order_id,
@@ -144,63 +156,153 @@ class OrderController extends Controller
 
             DB::commit();
 
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Order and ingredients recorded successfully.'
+            // Log successful order
+            Log::info('Order created successfully', [
+                'order_id' => $order->Order_id,
+                'customer' => $validated['customerName'],
+                'total' => $totalAmount
             ]);
+
+            // Return appropriate response
+            $responseData = [
+                'order_id' => $order->Order_id,
+                'total_amount' => $totalAmount,
+                'change' => $amountPaid - $totalAmount,
+                'customer_name' => $validated['customerName'],
+                'order_type' => $validated['orderType']
+            ];
+
+            if ($request->expectsJson()) {
+                return $this->jsonResponse(true, 'Order placed successfully!', $responseData, 201);
+            }
+
+            return redirect()->route('orders.index')
+                           ->with('success', 'Order placed successfully!');
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            
+            Log::warning('Order validation failed', ['errors' => $e->errors()]);
+            
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Validation failed',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+            
+            return back()->withErrors($e->errors())->withInput();
+
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
-                'status' => 'error',
-                'message' => $e->getMessage()
-            ], 500);
+            
+            Log::error('Order creation failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            if ($request->expectsJson()) {
+                return $this->jsonResponse(false, $e->getMessage(), null, 500);
+            }
+            
+            return back()->with('error', $e->getMessage())->withInput();
         }
     }
 
-    return response()->json([
-        'status' => 'error',
-        'message' => 'Invalid request format.'
-    ], 400);
-}
-
-     public function storeOrder(Request $request)
+    /**
+     * Display POS interface
+     */
+    public function showPOS()
     {
-        $validated = $request->validate([
-            'customer_name' => 'required|string',
-            'order_type' => 'required|string',
-            'total' => 'required|numeric',
-            'orders' => 'required|array',
-        ]);
+        $products = Product::with('ingredients')->get();
+        $customers = Customer::orderBy('Name')->get();
+        
+        return view('AdminDashboard.pos', compact('products', 'customers'));
+    }
 
-        $order = Order::create([
-            'Customer_name' => $validated['customer_name'],
-            'Order_type' => $validated['order_type'],
-            'Total_amount' => $validated['total'],
-        ]);
+    /**
+     * Get order details by ID
+     */
+    public function show($id)
+    {
+        try {
+            $order = Order::with(['customer', 'employee', 'orderItems.product', 'payment'])
+                         ->findOrFail($id);
+            
+            return view('AdminDashboard.OrderDetails', compact('order'));
+        } catch (\Exception $e) {
+            return back()->with('error', 'Order not found.');
+        }
+    }
 
-        foreach ($validated['orders'] as $item) {
-            OrderItem::create([
-                'order_id' => $order->id,
-                'product_name' => $item['name'],
-                'quantity' => $item['quantity'],
-                'price' => $item['price'],
-            ]);
+    /**
+     * Cancel an order
+     */
+    public function cancel($id)
+    {
+        try {
+            DB::beginTransaction();
 
-            $product = Product::where('Product_name', $item['name'])->first();
-            if ($product && $product->ingredients) {
-                foreach ($product->ingredients as $ingredient) {
-                    $ingredient->Stock -= ($ingredient->pivot->Quantity_used * $item['quantity']);
-                    $ingredient->save();
+            $order = Order::with('orderItems.product.ingredients')->findOrFail($id);
+
+            // Restore ingredients to stock
+            foreach ($order->orderItems as $orderItem) {
+                $product = $orderItem->product;
+                
+                if ($product && $product->ingredients) {
+                    foreach ($product->ingredients as $ingredient) {
+                        $quantityUsedPerUnit = $ingredient->pivot->Quantity_used ?? 0;
+                        $totalUsed = $quantityUsedPerUnit * $orderItem->Quantity;
+
+                        // Restore stock
+                        $ingredient->StockQuantity += $totalUsed;
+                        $ingredient->save();
+
+                        // Log restoration
+                        DB::table('inventories')->insert([
+                            'Product_id' => $product->Product_id,
+                            'Ingredient_id' => $ingredient->Ingredient_id,
+                            'QuantityUsed' => -$totalUsed, // Negative to show restoration
+                            'RemainingStock' => $ingredient->StockQuantity,
+                            'DateUsed' => now(),
+                            'Remarks' => "Order #{$order->Order_id} cancelled - stock restored",
+                            'created_at' => now(),
+                            'updated_at' => now()
+                        ]);
+                    }
                 }
             }
+
+            // Delete order (cascade will handle order items and payment)
+            $order->delete();
+
+            DB::commit();
+
+            return back()->with('success', 'Order cancelled successfully.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Order cancellation failed', ['error' => $e->getMessage()]);
+            
+            return back()->with('error', 'Failed to cancel order: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Helper method for JSON responses
+     */
+    private function jsonResponse($success, $message, $data = null, $statusCode = 200)
+    {
+        $response = [
+            'status' => $success ? 'success' : 'error',
+            'message' => $message
+        ];
+
+        if ($data !== null) {
+            $response['data'] = $data;
         }
 
-        return response()->json(['success' => true, 'message' => 'Order placed successfully!']);
+        return response()->json($response, $statusCode);
     }
-    public function showPOS()
-{
-    $products = Product::all();
-    return view('AdminDashboard.pos', compact('products'));
-}
-
 }

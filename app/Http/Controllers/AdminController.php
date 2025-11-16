@@ -109,11 +109,12 @@ class AdminController extends Controller
         return view('AdminDashboard.Products', compact('fullname', 'products', 'categories', 'ingredients', 'suppliers'));
     }
 
-    public function logout() {
-        // Clear admin session
-        Session::forget('admin_logged_in');
-        Session::forget('admin_username');
-
-        return redirect()->route('login.admin')->with('success', 'Logged out successfully!');
-    }
+    public function logout(Request $request)
+{
+    // Clear admin session data
+    $request->session()->flush();
+    $request->session()->regenerateToken();
+    
+    return redirect()->route('welcome')->with('success', 'Logged out successfully');
+}
 }

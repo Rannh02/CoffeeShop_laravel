@@ -21,10 +21,45 @@
             </div>
             <div class="header-info">
                 <span id="currentTime" class="time">Time</span>
-                <span class="staff-name">
-                    <i style="font-size:20px;" class="bi bi-person-circle"></i> {{ $staffName }}
-                </span>
-                <a href="{{ route('cashier.logout') }}" class="checkout-btn">Logout</a>
+                
+                <!-- User Dropdown -->
+                <div class="staff-name" id="userDropdownToggle">
+                    <i style="font-size:24px;" class="bi bi-person-circle"></i>
+                    <span>{{ $staffName }}</span>
+                    <i class="bi bi-chevron-down" style="font-size:14px;"></i>
+                    
+                    <!-- Dropdown Menu -->
+                    <div class="user-dropdown" id="userDropdown">
+                        <!-- User Info Section -->
+                        <div class="dropdown-user-info">
+                            <div class="user-avatar">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                            <div class="user-name">{{ $staffName }}</div>
+                            <div class="user-role">Cashier</div>
+                        </div>
+                        
+                        <!-- Menu Items -->
+                        <div class="dropdown-menu-items">
+                            <a href="#" class="dropdown-item">
+                                <i class="bi bi-person"></i>
+                                <span>My Profile</span>
+                            </a>
+                            <a href="#" class="dropdown-item">
+                                <i class="bi bi-gear"></i>
+                                <span>Settings</span>
+                            </a>
+                            <a href="#" class="dropdown-item">
+                                <i class="bi bi-clock-history"></i>
+                                <span>Activity Log</span>
+                            </a>
+                            <a href="{{ route('cashier.logout') }}" class="dropdown-item logout">
+                                <i class="bi bi-box-arrow-right"></i>
+                                <span>Logout</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </header>
 
@@ -38,7 +73,7 @@
                         @endphp
                         <button class="nav-item {{ $isActive ? 'active' : '' }}" 
                                 onclick="window.location.href='{{ route('cashier.pos', ['category' => $slug]) }}'">
-                            {{ $category->Category_name }}
+                            {{ $category->Category_name }}  
                         </button>
                     @endforeach
                 </nav>
@@ -142,5 +177,31 @@
     <script src="{{ asset('Javascripts/OrderTypeButton.js') }}"></script>
     <script src="{{ asset('Javascripts/Inputs.js') }}"></script>
     <script src="{{ asset('Javascripts/PlaceOrderModal.js') }}"></script>
+    
+    <!-- User Dropdown Script -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const dropdownToggle = document.getElementById('userDropdownToggle');
+        const dropdown = document.getElementById('userDropdown');
+        
+        // Toggle dropdown on click
+        dropdownToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            dropdown.classList.toggle('show');
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!dropdownToggle.contains(e.target)) {
+                dropdown.classList.remove('show');
+            }
+        });
+        
+        // Prevent dropdown from closing when clicking inside it
+        dropdown.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    });
+    </script>
 </body>
 </html>

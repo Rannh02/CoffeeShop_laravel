@@ -334,10 +334,13 @@ class CashierController extends Controller
     /**
      * Handle logout
      */
-    public function logout()
-    {
-        Session::forget('cashier_id');
-        Session::forget('cashier_name');
-        return redirect()->route('login.cashier')->with('success', 'Logged out successfully');
-    }
+    public function logout(Request $request)
+{
+    Session::forget('cashier_id');
+    Session::forget('cashier_name');
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+    
+    return redirect()->route('welcome')->with('success', 'Logged out successfully');
+}
 }

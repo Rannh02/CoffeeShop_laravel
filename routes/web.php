@@ -18,15 +18,10 @@ Route::get('/', function () {
     return view('LoginSystem.WelcomeLogin');
 })->name('welcome');
 
-// ✅ Cashier login page
-Route::get('/login/cashier', function () {
-    return view('LoginSystem.CashierLogin');
-})->name('login.cashier');
-
 // ✅ Admin login routes
 Route::get('/login/admin', [AdminController::class, 'showLoginForm'])->name('login.admin');
 Route::post('/login/admin', [AdminController::class, 'login'])->name('admin.login.submit');
-Route::post('/logout/admin', [AdminController::class, 'logout'])->name('admin.logout');
+Route::get('/logout/admin', [AdminController::class, 'logout'])->name('admin.logout');
 
 // ✅ API endpoint for POS/Cashier to submit orders with payment (JSON)
 Route::post('/api/orders/payment', [PaymentController::class, 'storeOrderWithPayment'])
@@ -37,10 +32,10 @@ Route::post('/api/orders/payment', [PaymentController::class, 'storeOrderWithPay
 // ============================================
 Route::prefix('cashier')->group(function () {
     // Login routes (public)
-    Route::get('/login/cashier', [CashierController::class, 'showLoginForm'])
+    Route::get('/login', [CashierController::class, 'showLoginForm'])
         ->name('cashier.login.form');
 
-    Route::post('/login/cashier', [CashierController::class, 'login'])
+    Route::post('/login', [CashierController::class, 'login'])
         ->name('cashier.login');
 
     // Protected routes with middleware
@@ -52,6 +47,10 @@ Route::prefix('cashier')->group(function () {
         // 🆕 Logout route for cashier
         Route::get('/logout', [CashierController::class, 'logout'])
             ->name('cashier.logout');
+
+        // Place order route
+        Route::post('/place-order', [CashierController::class, 'storeOrder'])
+            ->name('cashier.placeOrder');
 
         // ⚠️ LEGACY ROUTES - You can keep these for backward compatibility
         // or remove them if you want to use only the dynamic route
@@ -100,9 +99,9 @@ Route::prefix('admin')->group(function () {
     // ✅ Orders
     Route::get('/orders', [OrderController::class, 'index'])->name('admin.orders');
     Route::post('/orders', [OrderController::class, 'store'])->name('admin.orders.store');
+    Route::post('/orders/store', [OrderController::class, 'storeOrder'])->name('orders.store');
     // to get all the products in POS
     Route::get('/admin/pos', [OrderController::class, 'showPOS'])->name('admin.pos');
-
 
     // ✅ Order Items
     Route::get('/orderitem', [OrderItemController::class, 'index'])->name('admin.orderitem');
@@ -124,8 +123,4 @@ Route::prefix('admin')->group(function () {
 
     // ✅ Payment
     Route::get('/payment', [PaymentController::class, 'index'])->name('admin.payment');
-
-    // routes/web.php
-    Route::post('/cashier/place-order', [CashierController::class, 'storeOrder'])->name('cashier.placeOrder');
-    Route::post('/orders/store', [OrderController::class, 'storeOrder'])->name('orders.store');
 });
