@@ -131,7 +131,7 @@
             </select>
 
             <label>Reorder Level</label>
-            <input type="number" min="0" name="ReorderLevel" required>
+            <input type="number" step="0.1" min="0" name="ReorderLevel" value="10" required>
 
             <div class="btn-group">
                 <button type="submit" class="AddBtn">Add Ingredient</button>

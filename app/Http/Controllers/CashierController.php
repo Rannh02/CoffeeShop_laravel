@@ -193,21 +193,22 @@ class CashierController extends Controller
         
         $orderData = $request->validate([
             'customer_name' => 'required|string',
-            'order_type' => 'required|string',
-            'total' => 'required|numeric',
-            'orders' => 'required|array',
+            'order_type' => 'required|string|in:Dine In,Take Out',
+            'total' => 'required|numeric|min:0',
+            'orders' => 'required|array|min:1',
+            'orders.*.name' => 'required|string',
+            'orders.*.quantity' => 'required|integer|min:1',
+            'orders.*.price' => 'required|numeric|min:0',
         ]);
 
-        // Get employee ID from session
         $employeeId = Session::get('cashier_id');
         
         if (!$employeeId) {
             return response()->json(['success' => false, 'message' => 'Not logged in'], 401);
         }
 
-        // Create the order
+        // 1. Create the order
         $orderId = DB::table('orders')->insertGetId([
-            'Customer_id' => null, // or create customer record
             'Employee_id' => $employeeId,
             'Customers Name' => $orderData['customer_name'],
             'OrderDate' => now(),
@@ -217,7 +218,9 @@ class CashierController extends Controller
             'updated_at' => now(),
         ]);
 
-        // Process each order item
+        Log::info("Order created: ID={$orderId}, Customer={$orderData['customer_name']}, Total={$orderData['total']}");
+
+        // 2. Process each order item
         foreach ($orderData['orders'] as $item) {
             // Find the product
             $product = DB::table('products')
@@ -238,30 +241,69 @@ class CashierController extends Controller
                 'updated_at' => now(),
             ]);
 
-            // Deduct ingredients from inventory
+            Log::info("Order item: {$product->Product_name} x{$item['quantity']} @ ₱{$item['price']}");
+
+            // 3. Get all ingredients needed for this product
             $ingredients = DB::table('product_ingredients')
                 ->where('Product_id', $product->Product_id)
                 ->get();
 
+            if ($ingredients->isEmpty()) {
+                Log::warning("No ingredients configured for product: {$product->Product_name}");
+                continue;
+            }
+
+            // 4. Deduct each ingredient from inventory
             foreach ($ingredients as $ingredient) {
-                $quantityToDeduct = $ingredient->quantity_used * $item['quantity'];
+                $totalQuantityUsed = $ingredient->Quantity_used * $item['quantity'];
                 
-                // Update inventory - deduct from RemainingStock
+                // Get current inventory record
+                $inventory = DB::table('inventories')
+                    ->where('Product_id', $product->Product_id)
+                    ->where('Ingredient_id', $ingredient->Ingredient_id)
+                    ->first();
+                
+                if (!$inventory) {
+                    throw new \Exception("No inventory record for {$product->Product_name} - Ingredient ID {$ingredient->Ingredient_id}. Please add the product again.");
+                }
+                
+                // Check if we have enough stock
+                if ($inventory->RemainingStock < $totalQuantityUsed) {
+                    $ingredientInfo = DB::table('ingredients')
+                        ->where('Ingredient_id', $ingredient->Ingredient_id)
+                        ->first();
+                    
+                    throw new \Exception("Insufficient stock! {$product->Product_name} needs {$totalQuantityUsed} {$ingredientInfo->Unit} of {$ingredientInfo->Ingredient_name}, but only {$inventory->RemainingStock} {$ingredientInfo->Unit} available.");
+                }
+                
+                // 5. Update inventory record (deduct stock and track usage)
+                // Update inventory record
                 DB::table('inventories')
                     ->where('Product_id', $product->Product_id)
                     ->where('Ingredient_id', $ingredient->Ingredient_id)
                     ->update([
-                        'RemainingStock' => DB::raw("RemainingStock - {$quantityToDeduct}"),
+                        'QuantityUsed' => DB::raw("QuantityUsed + {$totalQuantityUsed}"),
+                        'RemainingStock' => DB::raw("RemainingStock - {$totalQuantityUsed}"),
                         'Action' => 'deduct',
                         'DateUsed' => now(),
                         'updated_at' => now(),
                     ]);
-                
-                Log::info("Deducted {$quantityToDeduct} of ingredient {$ingredient->Ingredient_id} for product {$product->Product_name}");
+
+                // Calculate new remaining stock for logging
+                $newRemainingStock = $inventory->RemainingStock - $totalQuantityUsed;
+
+                // Also update the main ingredients table stock
+                DB::table('ingredients')
+                    ->where('Ingredient_id', $ingredient->Ingredient_id)
+                    ->decrement('StockQuantity', $totalQuantityUsed, ['updated_at' => now()]);
+
+                Log::info("Stock deducted: Ingredient={$ingredient->Ingredient_id}, Used={$totalQuantityUsed}, Remaining={$newRemainingStock}");
+              }
             }
-        }
 
         DB::commit();
+        
+        Log::info("Order {$orderId} completed successfully!");
         
         return response()->json([
             'success' => true, 
@@ -269,12 +311,22 @@ class CashierController extends Controller
             'order_id' => $orderId
         ]);
         
-    } catch (\Exception $e) {
+    } catch (\Illuminate\Validation\ValidationException $e) {
         DB::rollBack();
-        Log::error('Error placing order: ' . $e->getMessage());
+        Log::error('Validation error: ' . json_encode($e->errors()));
         return response()->json([
             'success' => false, 
-            'message' => 'Failed to place order: ' . $e->getMessage()
+            'message' => 'Invalid order data',
+            'errors' => $e->errors()
+        ], 422);
+        
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Order error: ' . $e->getMessage());
+        Log::error('Stack trace: ' . $e->getTraceAsString());
+        return response()->json([
+            'success' => false, 
+            'message' => $e->getMessage()
         ], 500);
     }
 }

@@ -21,7 +21,7 @@
         </div>
         <div class="header-right">
             <div class="admin-profile">
-                <span class="time">Time</span>
+                <span class="time" id="currentTime">Time</span>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" fill="currentColor"/>
                     <path d="M12 14C7.58172 14 4 17.5817 4 22H20C20 17.5817 16.4183 14 12 14Z" fill="currentColor"/>
@@ -55,10 +55,7 @@
         <!-- Main Content -->
         <main class="main-content">
             <div class="products-header">
-                <h1 class="page-title">Inventory</h1>
-                <button id="stockInBtn" class="add-product-btn">
-                        <i class="bi bi-plus-circle">   Stock In</i>
-                </button>
+                <h1 class="page-title">Inventory Tracking</h1>
             </div>
 
             @if(session('success'))
@@ -77,27 +74,69 @@
                 <table class="products-table">
                     <thead>
                         <tr>
-                            <th>Inventory_id</th>
-                            <th>Product_id</th>
-                            <th>Ingredient_id</th>
-                            <th>QuantityUsed</th>
-                            <th>RemainingStock</th>
+                            <th>Inventory ID</th>
+                            <th>Product</th>
+                            <th>Ingredient</th>
+                            <th>Quantity Used</th>
+                            <th>Remaining Stock</th>
                             <th>Action</th>
-                            <th>DateUsed</th>
+                            <th>Date Used</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($inventories as $inventory)
                             <tr>
                                 <td>{{ $inventory->Inventory_id }}</td>
-                                <td>{{ $inventory->Product_id }}</td>
-                                <td>{{ $inventory->QuantityInStock }}</td>
-                                <td>{{ $inventory->ReorderLevel }}</td>
-                                <td>{{ $inventory->LastRestockDate }}</td>
+                                <td>
+                                    @if($inventory->product)
+                                        {{ $inventory->product->Product_name }}
+                                    @else
+                                        <span style="color: #999;">N/A</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($inventory->ingredient)
+                                        {{ $inventory->ingredient->Ingredient_name }}
+                                        <small style="color: #666;">({{ $inventory->ingredient->Unit }})</small>
+                                    @else
+                                        <span style="color: #999;">N/A</span>
+                                    @endif
+                                </td>
+                                <td>{{ number_format($inventory->QuantityUsed, 2) }}</td>
+                                <td>
+                                    <span style="font-weight: 600; color: {{ $inventory->RemainingStock > 10 ? '#28a745' : ($inventory->RemainingStock > 5 ? '#ffc107' : '#dc3545') }};">
+                                        {{ number_format($inventory->RemainingStock, 2) }}
+                                    </span>
+                                </td>
+                                <td>
+                                    @if($inventory->Action == 'add')
+                                        <span style="background: #28a745; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">
+                                            ADD
+                                        </span>
+                                    @elseif($inventory->Action == 'deduct')
+                                        <span style="background: #dc3545; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">
+                                            DEDUCT
+                                        </span>
+                                    @else
+                                        <span style="background: #6c757d; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px;">
+                                            {{ strtoupper($inventory->Action ?? 'N/A') }}
+                                        </span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($inventory->DateUsed)
+                                        {{ \Carbon\Carbon::parse($inventory->DateUsed)->format('M d, Y h:i A') }}
+                                    @else
+                                        <span style="color: #999;">N/A</span>
+                                    @endif
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" style="text-align: center;">No inventory records found</td>
+                                <td colspan="7" style="text-align: center; padding: 40px; color: #999;">
+                                    <i class="bi bi-inbox" style="font-size: 48px; display: block; margin-bottom: 10px;"></i>
+                                    No inventory records found
+                                </td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -105,65 +144,7 @@
             </div>
         </main>
     </div>
-
-    <!-- Modal for Adding Inventory -->
-    <div id="ProductModal" class="modal-overlay" style="display: none;">
-        <form action="{{ route('admin.inventory.store') }}" method="POST">
-            @csrf
-            <h1>Stock In</h1>
-
-            <p>Select Product</p>
-            <select name="Product_id" required>
-                <option value="">-- Select Product --</option>
-                @foreach($products as $product)
-                    <option value="{{ $product->Product_id }}">
-                        {{ $product->Product_name }}
-                    </option>
-                @endforeach
-            </select>
-            @error('Product_id')
-                <span class="error" style="color: red; font-size: 12px;">{{ $message }}</span>
-            @enderror
-
-            <p>Quantity to Add</p>
-            <input type="number" name="QuantityToAdd" required min="1" value="{{ old('QuantityToAdd') }}">
-            @error('QuantityToAdd')
-                <span class="error" style="color: red; font-size: 12px;">{{ $message }}</span>
-            @enderror
-
-            <div class="btn-group">
-                <button type="submit" class="AddBtn">Add Stock</button>
-                <button type="button" id="closeProductModal" class="CancelBtn">Cancel</button>
-            </div>
-        </form>
-    </div>
 </div>
-
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    const modal = document.getElementById("ProductModal");
-    const closeBtn = document.getElementById("closeProductModal");
-    const stockInBtn = document.getElementById("stockInBtn");
-
-    if (stockInBtn) {
-        stockInBtn.addEventListener("click", () => {
-            modal.style.display = "flex";
-        });
-    }
-
-    if (closeBtn) {
-        closeBtn.addEventListener("click", () => {
-            modal.style.display = "none";
-        });
-    }
-
-    window.addEventListener("click", (e) => {
-        if (e.target === modal) {
-            modal.style.display = "none";
-        }
-    });
-});
-</script>
-<script type="module" src="{{ asset('JS_Dashboard/DashboardsTime.js') }}"></script>
+<script src="{{ asset('Javascripts/RealTime.js') }}"></script>
 </body>
-</html>
+</html> 

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Ingredient;
+use Illuminate\Support\Facades\DB; 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 
 class IngredientController extends Controller
@@ -19,23 +21,32 @@ class IngredientController extends Controller
 
     // Store a new ingredient
     public function store(Request $request)
-    {
-        $request->validate([
-            'Ingredient_name' => 'required|string|max:255',
-            'Unit' => 'nullable|string|max:50',
-            'StockQuantity' => 'required|numeric|min:0',
-            'ReorderLevel' => 'required|integer|min:0',
-        ]);
+{
+    $request->validate([
+        'Ingredient_name' => 'required|string|max:255|unique:ingredients,Ingredient_name',
+        'StockQuantity' => 'required|numeric|min:0',
+        'Unit' => 'required|string',
+        'ReorderLevel' => 'required|numeric|min:0',
+    ]);
 
-        Ingredient::create([
+    try {
+        DB::table('ingredients')->insert([
             'Ingredient_name' => $request->Ingredient_name,
-            'Unit' => $request->Unit,
             'StockQuantity' => $request->StockQuantity,
+            'Unit' => $request->Unit,
             'ReorderLevel' => $request->ReorderLevel,
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
-        return redirect()->back()->with('success', 'Ingredient added successfully.');
+        Log::info("Ingredient added: {$request->Ingredient_name}, Stock: {$request->StockQuantity} {$request->Unit}");
+        return redirect()->route('admin.ingredients')->with('success', 'Ingredient added successfully!');
+        
+    } catch (\Exception $e) {
+        Log::error('Error adding ingredient: ' . $e->getMessage());
+        return redirect()->back()->withInput()->with('error', 'Failed to add ingredient: ' . $e->getMessage());
     }
+}
 
     // Update an existing ingredient
     public function update(Request $request, $id)
