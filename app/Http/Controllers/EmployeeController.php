@@ -12,7 +12,22 @@ class EmployeeController extends Controller
 {   
     public function index()
     {
-        $employees = Employee::where('Status', 'Active')->get();
+        $search = request('search');
+
+        $employees = Employee::where('Status', 'Active')
+            ->when($search, function($query, $search) {
+                $query->where('First_name', 'like', "%$search%")
+                      ->orWhere('Last_name', 'like', "%$search%")
+                      ->orWhere('Employee_id', 'like', "%$search%")
+                      ->orWhere('Position', 'like', "%$search%")
+                      ->orWhere('Cashier_Account', 'like', "%$search%")
+                      ->orWhere('Gender', 'like', "%$search%")
+                      ->orWhere('Contact_number', 'like', "%$search%");
+            })
+            ->orderBy('Date_of_Hire', 'desc')
+            ->paginate(5)
+            ->withQueryString();
+
         $fullname = Auth::user()->name ?? 'Admin'; // Adjust based on your auth setup
         
         return view('AdminDashboard.Employee', compact('employees', 'fullname'));

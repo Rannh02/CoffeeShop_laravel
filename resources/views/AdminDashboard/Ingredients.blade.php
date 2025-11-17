@@ -14,6 +14,56 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        .search-container {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+        
+        .search-btn {
+            padding: 10px 20px;
+            background-color: #8f8f8fff;
+            color: #1f2937;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .search-btn i {
+            font-size: 15px; 
+            -webkit-text-stroke: 1px;
+        }
+
+        
+        
+        .search-btn:hover {
+            background-color: #747474ff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        
+        }
+    </style>
 </head>
 <body>
 <div id="app">
@@ -56,7 +106,21 @@
         <main class="main-content">
             <div class="products-header">
                 <h1 class="page-title">Ingredients</h1>
-                <button class="add-product-btn" id="openProductModal">Stock In</button>
+                <button class="add-product-btn" id="openProductModal">Add Ingredients</button>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="search-container">
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    class="search-input" 
+                    placeholder="Search for Ingredients."
+                    value="{{ request('search') }}"
+                >
+                <button class="search-btn" onclick="performSearch()">
+                    <i class="bi bi-search"></i>
+                </button>
             </div>
 
             <!-- Ingredients Table -->
@@ -74,7 +138,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    @foreach ($ingredients as $ingredient)
+                    @forelse ($ingredients as $ingredient)
                         <tr>
                             <td>{{ $ingredient->Ingredient_id }}</td>
                             <td>{{ $ingredient->Ingredient_name }}</td>
@@ -97,9 +161,38 @@
                                 </form>
                             </td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="7" style="text-align: center;">No ingredients found.</td>
+                        </tr>
+                    @endforelse
                     </tbody>
                 </table>
+
+                <div class="pagination-container">
+                    {{-- Previous Button --}}
+                    @if ($ingredients->currentPage() > 1)
+                        <a class="page-btn" href="{{ $ingredients->previousPageUrl() }}">Previous</a>
+                    @else
+                        <span class="page-btn disabled">Previous</span>
+                    @endif
+
+                    {{-- Page Numbers --}}
+                    @for ($i = 1; $i <= $ingredients->lastPage(); $i++)
+                        @if ($i == $ingredients->currentPage())
+                            <span class="page-number active">{{ $i }}</span>
+                        @else
+                            <a class="page-number" href="{{ $ingredients->url($i) }}">{{ $i }}</a>
+                        @endif
+                    @endfor
+
+                    {{-- Next Button --}}
+                    @if ($ingredients->currentPage() < $ingredients->lastPage())
+                        <a class="page-btn" href="{{ $ingredients->nextPageUrl() }}">Next</a>
+                    @else
+                        <span class="page-btn disabled">Next</span>
+                    @endif
+                </div>
             </div>
         </main>
     </div>
@@ -143,5 +236,28 @@
 <script src="{{ asset('Javascripts/RealTime.js') }}"></script>
 <script src="{{ asset('Javascripts/ingredientsDelete.js') }}"></script>
 <script src="{{ asset('Javascripts/ingredientsModal.js') }}"></script>
+<script>
+// Search functionality
+function performSearch() {
+    const searchValue = document.getElementById('searchInput').value;
+    const currentUrl = new URL(window.location.href);
+    
+    if (searchValue.trim()) {
+        currentUrl.searchParams.set('search', searchValue);
+        currentUrl.searchParams.set('page', '1');
+    } else {
+        currentUrl.searchParams.delete('search');
+    }
+    
+    window.location.href = currentUrl.toString();
+}
+
+// Allow search on Enter key
+document.getElementById('searchInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        performSearch();
+    }
+});
+</script>
 </body>
 </html>

@@ -7,6 +7,53 @@
     <link rel="stylesheet" href="{{ asset('Dashboard CSS/productsmodal.css') }}">
     <link rel="stylesheet" href="{{ asset('Dashboard CSS/productupdate.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        .search-container {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+        
+        .search-btn {
+            padding: 10px 20px;
+            background-color: #8f8f8fff;
+            color: #1f2937;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .search-btn i {
+            font-size: 15px; 
+            -webkit-text-stroke: 1px;
+        }
+
+        .search-btn:hover {
+            background-color: #747474ff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
 
 <body>
@@ -59,6 +106,20 @@
                 </button>
             </div>
 
+            <!-- Search Bar -->
+            <div class="search-container">
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    class="search-input" 
+                    placeholder="Search for Products."
+                    value="{{ request('search') }}"
+                >
+                <button class="search-btn" onclick="performSearch()">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+
             <!-- Products Table -->
             <div class="table-container">
                 <table class="products-table">
@@ -102,22 +163,27 @@
                     </tbody>
                 </table>
 
-                <!-- Pagination -->
-                @if($totalPages > 1)
-                    <div class="pagination">
-                        @if($page > 1)
-                            <a href="?page={{ $page - 1 }}" class="page-btn">Previous</a>
-                        @endif
+                <div class="pagination-container">
+                    @if ($page > 1)
+                        <a class="page-btn" href="{{ request()->fullUrlWithQuery(['page' => $page - 1]) }}">Previous</a>
+                    @else
+                        <span class="page-btn disabled">Previous</span>
+                    @endif
 
-                        @for($i = 1; $i <= $totalPages; $i++)
-                            <a href="?page={{ $i }}" class="page-btn {{ $i == $page ? 'active' : '' }}">{{ $i }}</a>
-                        @endfor
-
-                        @if($page < $totalPages)
-                            <a href="?page={{ $page + 1 }}" class="page-btn">Next</a>
+                    @for ($i = 1; $i <= $totalPages; $i++)
+                        @if ($i == $page)
+                            <span class="page-number active">{{ $i }}</span>
+                        @else
+                            <a class="page-number" href="{{ request()->fullUrlWithQuery(['page' => $i]) }}">{{ $i }}</a>
                         @endif
-                    </div>
-                @endif
+                    @endfor
+
+                    @if ($page < $totalPages)
+                        <a class="page-btn" href="{{ request()->fullUrlWithQuery(['page' => $page + 1]) }}">Next</a>
+                    @else
+                        <span class="page-btn disabled">Next</span>
+                    @endif
+                </div>
             </div>
         </main>
     </div>
@@ -127,7 +193,7 @@
         <form action="{{ route('admin.products.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             @if($errors->any())
-                <div class="alert alert-danger"style="background: #f8d7da; padding: 10px; border-radius: 5px; color: #721c24;">
+                <div class="alert alert-danger" style="background: #f8d7da; padding: 10px; border-radius: 5px; color: #721c24;">
                     <ul>
                         @foreach($errors->all() as $error)
                             <li>{{ $error }}</li>
@@ -149,26 +215,45 @@
             </select>
 
             <label>Ingredients</label>
-                <div id="ingredientList">
-                    @foreach($ingredients as $ingredient)
-                        <div style="margin-bottom: 8px;">
-                            <label>
-                                <input type="checkbox" name="ingredient_ids[]" value="{{ $ingredient->Ingredient_id }}" class="ingredient-checkbox">
-                                {{ $ingredient->Ingredient_name }}
-                            </label>
-                            <input 
-                                type="number" 
-                                name="quantities[{{ $ingredient->Ingredient_id }}]" 
-                                class="ingredient-qty" 
-                                placeholder="Qty used"
-                                min="0.01"
-                                step="0.01"
-                                disabled
-                                required
-                            >
-                        </div>
-                    @endforeach
+            <div id="ingredientContainer">
+                <div class="ingredient-row" style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                    <select class="ingredient-select" name="ingredient_ids[]" required style="width: 220px; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+                        <option value="">-- Select Ingredient --</option>
+                        @foreach($ingredients as $ingredient)
+                            <option value="{{ $ingredient->Ingredient_id }}">{{ $ingredient->Ingredient_name }}</option>
+                        @endforeach
+                    </select>
+                    <input 
+                        type="number" 
+                        name="quantities[]" 
+                        class="ingredient-qty" 
+                        placeholder="Qty used"
+                        min="0.01"
+                        step="0.01"
+                        required
+                        style="display: none; width: 100px; padding: 8px; border-radius: 6px; border: 1px solid #ccc;"
+                    >
                 </div>
+            </div>
+            <button type="button" 
+                    id="addIngredientRow" 
+                    style="
+                        margin: 15px 0; 
+                        padding: 8px 12px; 
+                        background: #10b981; 
+                        color: black; 
+                        font-size: 13px; 
+                        border: none; 
+                        border-radius: 10px; 
+                        cursor: pointer; 
+                        font-weight: 500;
+                        transition: all 0.3s ease;
+                        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                    "
+                    onmouseover="this.style.background='#059669'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(0,0,0,0.15)';"
+                    onmouseout="this.style.background='#10b981'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 5px rgba(0,0,0,0.1)';">
+                    Add Ingredient
+            </button>
 
             <p>Price</p>
             <input type="number" step="0.01" name="Price" required>
@@ -188,23 +273,18 @@
         <form id="updateForm" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
-
             <input type="hidden" name="Product_id" id="updateProductId">
-
             <h1>Update Product</h1>
             <p>Product name</p>
             <input type="text" name="Product_name" id="updateProductName" required>
-
             <p>Price</p>
             <input type="number" name="Price" id="updateProductPrice" required>
-
             <p>Category</p>
             <select name="Category_id" id="updateProductCategory">
                 @foreach ($categories as $category)
                     <option value="{{ $category->Category_id }}">{{ $category->Category_name }}</option>
                 @endforeach
             </select>
-
             <button type="submit" class="btn btn-primary">Update</button>
         </form>
     </div>
@@ -218,7 +298,6 @@
                 @csrf
                 @method('DELETE')
                 <input type="hidden" name="Product_id" id="deleteProductId">
-
                 <div class="btn-group">
                     <button type="submit" class="AddBtn">Yes, Delete</button>
                     <button type="button" id="cancelDelete" class="CancelBtn">Cancel</button>
@@ -233,14 +312,105 @@
 <script src="{{ asset('Javascripts/productupdate.js') }}"></script>
 <script src="{{ asset('Javascripts/productdelete.js') }}"></script>
 
-
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.ingredient-checkbox').forEach(cb => {
-        cb.addEventListener('change', function() {
-            const qtyInput = this.closest('div').querySelector('.ingredient-qty');
-            qtyInput.disabled = !this.checked;
-            if (!this.checked) qtyInput.value = ''; // clear if unchecked
+// Search functionality
+function performSearch() {
+    const searchValue = document.getElementById('searchInput').value;
+    const currentUrl = new URL(window.location.href);
+    if (searchValue.trim()) {
+        currentUrl.searchParams.set('search', searchValue);
+        currentUrl.searchParams.set('page', '1');
+    } else {
+        currentUrl.searchParams.delete('search');
+    }
+    window.location.href = currentUrl.toString();
+}
+document.getElementById('searchInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') performSearch();
+});
+
+// ADD ANOTHER INGREDIENT - FULLY WORKING
+document.addEventListener('DOMContentLoaded', function () {
+    const ingredientContainer = document.getElementById('ingredientContainer');
+    const addButton = document.getElementById('addIngredientRow');
+    const ingredients = @json($ingredients);
+
+    function createIngredientRow() {
+        const row = document.createElement('div');
+        row.className = 'ingredient-row';
+        row.style.marginBottom = '15px';
+        row.style.display = 'flex';
+        row.style.alignItems = 'center';
+        row.style.gap = '10px';
+
+        const select = document.createElement('select');
+        select.name = 'ingredient_ids[]';
+        select.className = 'ingredient-select';
+        select.required = true;
+        select.style.width = '220px';
+        select.style.padding = '8px';
+        select.style.borderRadius = '6px';
+        select.style.border = '1px solid #ccc';
+
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = '-- Select Ingredient --';
+        select.appendChild(defaultOption);
+
+        ingredients.forEach(ing => {
+            const option = document.createElement('option');
+            option.value = ing.Ingredient_id;
+            option.textContent = ing.Ingredient_name;
+            select.appendChild(option);
+        });
+
+        const qtyInput = document.createElement('input');
+        qtyInput.type = 'number';
+        qtyInput.name = 'quantities[]';
+        qtyInput.className = 'ingredient-qty';
+        qtyInput.placeholder = 'Qty used';
+        qtyInput.min = '0.01';
+        qtyInput.step = '0.01';
+        qtyInput.required = true;
+        qtyInput.style.display = 'none';
+        qtyInput.style.width = '100px';
+        qtyInput.style.padding = '8px';
+        qtyInput.style.borderRadius = '6px';
+        qtyInput.style.border = '1px solid #ccc';
+
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.textContent = 'Remove';
+        removeBtn.style.background = '#dc3545';
+        removeBtn.style.color = 'white';
+        removeBtn.style.border = 'none';
+        removeBtn.style.padding = '8px 12px';
+        removeBtn.style.borderRadius = '6px';
+        removeBtn.style.cursor = 'pointer';
+        removeBtn.onclick = () => row.remove();
+
+        row.appendChild(select);
+        row.appendChild(qtyInput);
+        row.appendChild(removeBtn);
+
+        select.addEventListener('change', function () {
+            qtyInput.style.display = this.value ? 'inline-block' : 'none';
+            if (!this.value) qtyInput.value = '';
+        });
+
+        return row;
+    }
+
+    addButton.addEventListener('click', () => {
+        ingredientContainer.appendChild(createIngredientRow());
+    });
+
+    // Handle existing first row
+    document.querySelectorAll('.ingredient-select').forEach(select => {
+        select.addEventListener('change', function () {
+            const qty = this.nextElementSibling;
+            qty.style.display = this.value ? 'inline-block' : 'none';
+            if (!this.value) qty.value = '';
         });
     });
 });

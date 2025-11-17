@@ -176,7 +176,7 @@
     <script src="{{ asset('Javascripts/QRlogic.js') }}"></script>
     <script src="{{ asset('Javascripts/OrderTypeButton.js') }}"></script>
     <script src="{{ asset('Javascripts/Inputs.js') }}"></script>
-    <script src="{{ asset('Javascripts/PlaceOrderModal.js') }}"></script>
+    <script src="{{ asset('Javascripts/placeordermodal.js') }}"></script>
     
     <!-- User Dropdown Script -->
     <script>

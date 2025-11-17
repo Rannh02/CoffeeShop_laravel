@@ -381,10 +381,51 @@ body {
 .products-table tbody tr:nth-child(5) {
   animation-delay: 0.4s;
 }
-.pagination {
+
+/* PAGINATION */
+
+.pagination-container {
     margin-top: 20px;
-    text-align: center;
+    display: flex;
+    justify-content: center; /* CENTER the pagination */
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+    width: 100%; /* Ensures it spans full width */
 }
+
+.page-btn,
+.page-number {
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    background: white;
+    border-radius: 4px;
+    text-decoration: none;
+    color: #333;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+.page-btn:hover,
+.page-number:hover {
+    background: #e5e5e5;
+}
+
+.page-number.active {
+    background: #4f46e5;
+    border-color: #4f46e5;
+    color: white;
+    font-weight: bold;
+}
+
+.page-btn.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+
+
+
 
 .page-btn {
     display: inline-block;

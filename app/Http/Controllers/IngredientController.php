@@ -14,7 +14,17 @@ class IngredientController extends Controller
     public function index()
     {
         $fullname = Auth::user()->name ?? 'Admin';
-        $ingredients = Ingredient::all(); // no supplier relation now
+
+        $search = request('search');
+
+        $ingredients = Ingredient::when($search, function($query, $search) {
+                $query->where('Ingredient_name', 'like', "%$search%")
+                      ->orWhere('Ingredient_id', 'like', "%$search%")
+                      ->orWhere('Unit', 'like', "%$search%");
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate(5)
+            ->withQueryString();
 
         return view('AdminDashboard.Ingredients', compact('fullname', 'ingredients'));
     }

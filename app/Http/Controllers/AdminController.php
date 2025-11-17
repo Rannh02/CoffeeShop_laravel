@@ -111,7 +111,7 @@ class AdminController extends Controller
 
     public function logout(Request $request)
 {
-    // Clear admin session data
+
     $request->session()->flush();
     $request->session()->regenerateToken();
     
