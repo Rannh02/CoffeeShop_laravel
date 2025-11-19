@@ -8,7 +8,10 @@ class Customer extends Model
 {
     protected $table = 'customer';
     protected $primaryKey = 'Customer_id';
-    public $timestamps = false;
+    public $timestamps = true;
 
-    protected $fillable = ['Name', 'Date_Time'];
+    protected $fillable = [
+        'Customer_name',  
+        'Date/Time'      
+    ];
 }

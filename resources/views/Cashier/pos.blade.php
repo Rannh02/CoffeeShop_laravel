@@ -177,6 +177,8 @@
     <script src="{{ asset('Javascripts/OrderTypeButton.js') }}"></script>
     <script src="{{ asset('Javascripts/Inputs.js') }}"></script>
     <script src="{{ asset('Javascripts/placeordermodal.js') }}"></script>
+    <script src="{{ asset('Javascripts/orderingcoffee.js') }}"></script>
+    <!-- <script src="{{ asset('Javascripts/PaymentSummary.js') }}"></script> -->
     
     <!-- User Dropdown Script -->
     <script>

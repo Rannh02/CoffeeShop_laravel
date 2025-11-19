@@ -18,10 +18,10 @@ class OrderItemController extends Controller
             ->select(
                 'order_items.OrderItem_id',
                 'order_items.Order_id',
-                'customer.CustomerName',
+                'customer.Customer_name',
                 'products.Product_name',
                 'order_items.Quantity',
-                'order_items.UnitPrice as Price_sale' // ✅ Changed from Price_sale to UnitPrice and aliased it
+                'order_items.UnitPrice' // ✅ Changed from Price_sale to UnitPrice and aliased it
             )
             ->paginate(10); // ✅ Added pagination (10 items per page)
 

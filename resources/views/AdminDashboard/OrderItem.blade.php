@@ -76,10 +76,10 @@
                                 <tr>
                                     <td>{{ $item->OrderItem_id }}</td>
                                     <td>{{ $item->Order_id }}</td>
-                                    <td>{{ $item->CustomerName }}</td>
+                                    <td>{{ $item->Customer_name }}</td>
                                     <td>{{ $item->Product_name }}</td>
                                     <td>{{ $item->Quantity }}</td>
-                                    <td>{{ number_format($item->Price_sale, 2) }}</td>
+                                    <td>{{ number_format($item->UnitPrice, 2) }}</td>
                                 </tr>
                             @empty
                                 <tr>

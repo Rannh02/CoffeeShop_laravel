@@ -30,38 +30,25 @@ Route::post('/api/orders/payment', [PaymentController::class, 'storeOrderWithPay
 // ============================================
 // 🆕 CASHIER ROUTES - DYNAMIC POS SYSTEM
 // ============================================
-Route::prefix('cashier')->group(function () {
-    // Login routes (public)
-    Route::get('/login', [CashierController::class, 'showLoginForm'])
-        ->name('cashier.login.form');
+// ============================================
+// CASHIER ROUTES
+// ============================================
+Route::prefix('cashier')->name('cashier.')->group(function () {
+    // Public routes
+    Route::get('/login', [CashierController::class, 'showLoginForm'])->name('login.form');
+    Route::post('/login', [CashierController::class, 'login'])->name('login');
 
-    Route::post('/login', [CashierController::class, 'login'])
-        ->name('cashier.login');
-
-    // Protected routes with middleware
+    // Protected routes (require cashier authentication)
     Route::middleware('cashier.auth')->group(function () {
-        // 🆕 DYNAMIC POS ROUTE - Shows all categories dynamically
-        Route::get('/pos', [CashierController::class, 'index'])
-            ->name('cashier.pos');
+        Route::get('/pos', [CashierController::class, 'index'])->name('pos');
+        Route::post('/place-order', [CashierController::class, 'storeOrder'])->name('placeOrder');
+        Route::get('/logout', [CashierController::class, 'logout'])->name('logout');
         
-        // 🆕 Logout route for cashier
-        Route::get('/logout', [CashierController::class, 'logout'])
-            ->name('cashier.logout');
-
-        // Place order route
-        Route::post('/place-order', [CashierController::class, 'storeOrder'])
-            ->name('cashier.placeOrder');
-
-        // ⚠️ LEGACY ROUTES - You can keep these for backward compatibility
-        // or remove them if you want to use only the dynamic route
-        Route::get('/coffee', [CashierController::class, 'showCoffee'])
-            ->name('cashier.coffee');
-        Route::get('/tea', [CashierController::class, 'showTea'])
-            ->name('cashier.tea');
-        Route::get('/cold', [CashierController::class, 'showColdDrinks'])
-            ->name('cashier.cold');
-        Route::get('/pastries', [CashierController::class, 'showPastries'])
-            ->name('cashier.pastries');
+        // Legacy category routes
+        Route::get('/coffee', [CashierController::class, 'showCoffee'])->name('coffee');
+        Route::get('/tea', [CashierController::class, 'showTea'])->name('tea');
+        Route::get('/cold', [CashierController::class, 'showColdDrinks'])->name('cold');
+        Route::get('/pastries', [CashierController::class, 'showPastries'])->name('pastries');
     });
 });
 

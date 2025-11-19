@@ -207,13 +207,35 @@ class CashierController extends Controller
             return response()->json(['success' => false, 'message' => 'Not logged in'], 401);
         }
 
+        $customer = DB::table('customer')
+            ->where('Customer_name', $orderData['customer_name'])
+            ->first();
+
+        if (!$customer) {
+            $customerId = DB::table('customer')->insertGetId([
+                'Customer_name' => $orderData['customer_name'],
+                'Date/Time' => now(),
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+        } else {
+            $customerId = $customer->Customer_id;
+        }
+
+        $orderType  = $orderData['order_type'];
+
+        if (strtolower($orderType) === 'take out') {
+        $orderType = 'Takeout';
+        }
+        
         // 1. Create the order
-        $orderId = DB::table('orders')->insertGetId([
+        $orderId = DB::table('orders')->insertGetId([   
+            'Customer_id' => $customerId,
             'Employee_id' => $employeeId,
-            'Customers Name' => $orderData['customer_name'],
-            'OrderDate' => now(),
+            'Customer_name' => $orderData['customer_name'],
+            'Order_date' => now(),   
             'TotalAmount' => $orderData['total'],
-            'OrderType' => $orderData['order_type'],
+            'Order_Type' => $orderType,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -236,7 +258,7 @@ class CashierController extends Controller
                 'Order_id' => $orderId,
                 'Product_id' => $product->Product_id,
                 'Quantity' => $item['quantity'],
-                'Price' => $item['price'],
+                'UnitPrice' => $item['price'],
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

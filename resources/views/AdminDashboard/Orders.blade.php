@@ -81,10 +81,10 @@
                                     <td>{{ $order->Order_id }}</td>
                                     <td>{{ $order->Customer_id }}</td>
                                     <td>{{ $order->Employee_id }}</td>
-                                    <td>{{ $order->{'Customers Name'} }}</td>
-                                    <td>{{ $order->OrderDate }}</td>
+                                    <td>{{ $order->{'Customer_name'} }}</td>
+                                    <td>{{ $order->Order_date }}</td>
                                     <td>₱{{ number_format($order->TotalAmount, 2) }}</td>
-                                    <td>{{ $order->OrderType }}</td>
+                                    <td>{{ $order->Order_Type }}</td>
                                     <td>
                                         <a href="{{ url('/admin/orderitem?order_id=' . $order->Order_id) }}" class="view-items-btn">View Items</a>
                                     </td>
