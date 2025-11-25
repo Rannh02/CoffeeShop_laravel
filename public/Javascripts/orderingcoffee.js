@@ -244,13 +244,13 @@ document.addEventListener('DOMContentLoaded', () => {
   if (printBtn) {
     printBtn.addEventListener('click', () => {
       const printWindow = window.open('', '', 'height=800,width=400');
-      // printWindow.document.write('<html><head><title>Receipt</title>');
-      // printWindow.document.write('<style>body{font-family:monospace; padding:20px;}</style>');
-      // printWindow.document.write('</head><body>');
-      // printWindow.document.write(receiptDiv.innerHTML);
-      // printWindow.document.write('</body></html>');
-      // printWindow.document.close();
-      // printWindow.focus();
+      printWindow.document.write('<html><head><title>Receipt</title>');
+      printWindow.document.write('<style>body{font-family:monospace; padding:20px;}</style>');
+      printWindow.document.write('</head><body>');
+      printWindow.document.write(receiptDiv.innerHTML);
+      printWindow.document.write('</body></html>');
+      printWindow.document.close();
+      printWindow.focus();
       setTimeout(() => {
         printWindow.print();
         printWindow.close();
