@@ -180,6 +180,7 @@
     <script src="{{ asset('Javascripts/orderingcoffee.js') }}"></script>
     <!-- <script src="{{ asset('Javascripts/PaymentSummary.js') }}"></script> -->
     
+    
     <!-- User Dropdown Script -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {

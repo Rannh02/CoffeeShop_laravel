@@ -93,12 +93,12 @@
 
 /* Update Button */
 #UpdateProductModal form .UpdateBtn {
-  background: #8b5e34;
+  background: #12b82d;
   color: #fff;
 }
 
 #UpdateProductModal form .UpdateBtn:hover {
-  background: #6d4626;
+  background: #12b82d;
   transform: translateY(-2px);
 }
 

@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('updateProductCategory').value = categoryId;
 
             // Set form action dynamically
-            updateForm.action = `/products/${productId}`;
+            updateForm.action = `/admin/products/${productId}`;
 
             // Show modal
             updateModal.style.display = 'flex';

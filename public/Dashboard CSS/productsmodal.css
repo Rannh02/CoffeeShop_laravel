@@ -113,13 +113,13 @@
 /* Add & Update Buttons */
 #ProductModal form .AddBtn,
 #UpdateProductModal form .UpdateBtn {
-  background: #8b5e34;
+  background: #219434;
   color: #fff;
 }
 
 #ProductModal form .AddBtn:hover,
 #UpdateProductModal form .UpdateBtn:hover {
-  background: #6d4626;
+  background: #0b5d19;
   transform: translateY(-2px);
 }
 

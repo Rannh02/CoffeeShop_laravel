@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <title>Admin - Products</title>
     <link rel="stylesheet" href="{{ asset('Dashboard CSS/products.css') }}">
+    <link rel="stylesheet" href="{{ asset('Dashboard CSS/productdelete.css') }}">
     <link rel="stylesheet" href="{{ asset('Dashboard CSS/productsmodal.css') }}">
     <link rel="stylesheet" href="{{ asset('Dashboard CSS/productupdate.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -285,7 +286,8 @@
                     <option value="{{ $category->Category_id }}">{{ $category->Category_name }}</option>
                 @endforeach
             </select>
-            <button type="submit" class="btn btn-primary">Update</button>
+            <button type="submit" class="UpdateBtn">Update</button>
+            <button type="button" id="cancelUpdate" class="CancelBtn">Cancel</button>
         </form>
     </div>
 

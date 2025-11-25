@@ -69,23 +69,64 @@
                         <div class="stat-label">Total Sales</div>
                     </div>
                 </div>
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <div class="stat-number">₱{{ number_format($weeklyIncome, 2) }}</div>
+                        <div class="stat-label">Weekly Sales</div>
+                        <div class="stat-sublabel">{{ $chartData['weekRange'] }}</div>
+                    </div>
+                </div>
             </div>
 
             <!-- Charts -->
             <div class="charts-grid">
                 <div class="chart-card">
-                    <h3>Top 5 Products</h3>
+                    <h3>Top 5 Best-Selling Products</h3>
                     <canvas id="topProductsChart"></canvas>
+                    
+                    <!-- Product Details Table -->
+                    <div class="product-details-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Units Sold</th>
+                                    <th>Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($topProducts as $product)
+                                <tr>
+                                    <td>{{ $product->Product_name }}</td>
+                                    <td>{{ number_format($product->total_sold) }}</td>
+                                    <td>₱{{ number_format($product->total_revenue, 2) }}</td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="3" style="text-align: center; color: #999;">No sales data available</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <div class="chart-card">
-                    <h3>Weekly Sales</h3>
+                    <h3>Sales This Week</h3>
+                    <p class="weekly-total">Total: ₱{{ number_format($weeklyIncome, 2) }}</p>
                     <canvas id="weeklySalesChart"></canvas>
                 </div>
             </div>
         </main>
     </div>
 </div>
+
+<!-- Pass PHP data to JavaScript -->
+<script>
+    window.chartData = @json($chartData);
+</script>
+
 <script src="{{ asset('Javascripts/RealTime.js') }}"></script>
+<script src="{{ asset('Javascripts/DashboardCharts.js') }}"></script>
 </body>
 </html>

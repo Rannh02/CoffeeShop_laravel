@@ -406,3 +406,76 @@ body {
 .chart-card:nth-child(2) {
   animation-delay: 0.4s;
 }
+
+/* Additional styles for the new features */
+    .stat-card .stat-sublabel {
+        font-size: 11px;
+        color: #999;
+        margin-top: 5px;
+    }
+
+    .weekly-total {
+        font-size: 18px;
+        font-weight: bold;
+        color: #16A34A;
+        margin: 10px 0 20px 0;
+        text-align: center;
+    }
+
+    .product-details-table {
+        margin-top: 25px;
+        overflow-x: auto;
+    }
+
+    .product-details-table table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+    }
+
+    .product-details-table th,
+    .product-details-table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+    }
+
+    .product-details-table th {
+        background: #f8f9fa;
+        font-weight: 600;
+        color: #333;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .product-details-table td:nth-child(2),
+    .product-details-table td:nth-child(3) {
+        text-align: right;
+    }
+
+    .product-details-table th:nth-child(2),
+    .product-details-table th:nth-child(3) {
+        text-align: right;
+    }
+
+    .product-details-table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    /* Make stats grid responsive */
+    @media (max-width: 1200px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .charts-grid {
+            grid-template-columns: 1fr;
+        }
+    }
