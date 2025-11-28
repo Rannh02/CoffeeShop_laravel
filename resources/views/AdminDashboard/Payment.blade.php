@@ -77,7 +77,7 @@
                         <tr>
                             <th>Payment_id</th>
                             <th>Order_id</th>
-                            <th>Payment_method</th>
+                            <th>Payment Method</th>
                             <th>Amount</th>
                             <th>Date/Time</th>
                             <th>Transaction Reference</th>
@@ -88,8 +88,8 @@
                             <tr>
                                 <td>{{ $payment->Payment_id }}</td>
                                 <td>{{ $payment->Order_id }}</td>
-                                <td>{{ $payment->Payment_method }}</td>
-                                <td>{{ number_format($payment->Amount_Paid, 2) }}</td>
+                                <td>{{ $payment->PaymentMethod ?? '-' }}</td>
+                                <td>{{ number_format($payment->AmountPaid ?? 0, 2) }}</td>
                                 <td>{{ optional($payment->PaymentDate)->format('Y-m-d H:i:s') }}</td>
                                 <td>{{ $payment->TransactionReference ?? '-' }}</td>
                             </tr>

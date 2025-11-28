@@ -25,23 +25,39 @@ document.addEventListener('DOMContentLoaded', () => {
     const items = [];
     if (!list) return items;
 
-    const structured = list.querySelectorAll('.order-item');
-    if (structured.length) {
-      structured.forEach(el => {
-        const nameEl = el.querySelector('.product-name');
-        const qtyEl = el.querySelector('.quantity');
-        const priceEl = el.querySelector('.product-price');
+    // First try to parse our structured order-item-card markup
+    const cards = list.querySelectorAll('.order-item-card');
+    if (cards.length) {
+      cards.forEach(card => {
+        // name is inside <strong> tag
+        const nameEl = card.querySelector('strong');
+        // quantity is inside a span.quantity with text like "x2"
+        const qtyEl = card.querySelector('.quantity');
+        // price is the right-side span in the top row (contains currency)
+        const priceSpan = card.querySelector('div > div > span');
 
-        const name = nameEl ? nameEl.textContent.trim() : el.dataset.name || el.textContent.trim();
-        const qty = qtyEl ? parseInt(qtyEl.textContent) || 1 : parseInt(el.dataset.qty) || 1;
-        const price = priceEl ? parseFloat(priceEl.textContent.replace(/[^0-9.-]+/g, '')) || 0 : parseFloat(el.dataset.price) || 0;
+        const name = nameEl ? nameEl.textContent.trim() : (card.dataset.name || '');
+        let qty = 1;
+        if (qtyEl) {
+          const raw = qtyEl.textContent.replace(/[^0-9]/g, '');
+          qty = parseInt(raw) || 1;
+        } else if (card.dataset.qty) {
+          qty = parseInt(card.dataset.qty) || 1;
+        }
+
+        let price = 0;
+        if (priceSpan) {
+          price = parseFloat(priceSpan.textContent.replace(/[^0-9.-]+/g, '')) || 0;
+        } else if (card.dataset.price) {
+          price = parseFloat(card.dataset.price) || 0;
+        }
 
         items.push({ name, qty, price });
       });
       return items;
     }
 
-    // fallback (if not structured)
+    // Generic fallback: try dataset on children
     Array.from(list.children).forEach(ch => {
       const name = ch.dataset.name || ch.textContent.trim();
       const qty = parseInt(ch.dataset.qty) || 1;
@@ -144,11 +160,70 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Show modal when Place Order clicked
-  placeOrderBtn.addEventListener('click', () => {
+  placeOrderBtn.addEventListener('click', async () => {
+    // Build and display receipt
     receiptDiv.innerHTML = buildReceiptHtml();
     receiptDiv.style.display = 'none';
     modal.style.display = 'flex';
+
+    // Send order to server
+    try {
+      await sendOrderToServer();
+    } catch (err) {
+      console.error('Error sending order to server:', err);
+      // optionally show user-facing error
+      alert('Failed to record order on server: ' + (err.message || err));
+    }
   });
+
+  // Send order JSON to server API
+  async function sendOrderToServer() {
+    const items = getOrderItems();
+    if (!items.length) return;
+
+    const subtotal = items.reduce((s, it) => s + (it.price * it.qty), 0);
+    const vat = subtotal * 0.12;
+    const total = subtotal + vat;
+
+    const payload = {
+      customerName: (document.getElementById('customerName') && document.getElementById('customerName').value.trim()) || 'Guest',
+      orderType: localStorage.getItem('orderType') || 'Dine In',
+      totalAmount: parseFloat(total.toFixed(2)),
+      // Convert item line totals to unit prices (unitPrice = lineTotal / qty)
+      orders: items.map(it => ({ name: it.name, quantity: it.qty, price: parseFloat((it.price / Math.max(1, it.qty)).toFixed(2)) })),
+      paymentMethod: localStorage.getItem('paymentType') || 'Cash',
+      amountPaid: parseFloat((document.getElementById('amountPaid') && document.getElementById('amountPaid').value) || total),
+      transactionReference: (document.getElementById('referenceNumber') && document.getElementById('referenceNumber').value) || null
+    };
+
+    const tokenMeta = document.querySelector('meta[name="csrf-token"]');
+    const headers = {
+      'Content-Type': 'application/json'
+    };
+    if (tokenMeta) headers['X-CSRF-TOKEN'] = tokenMeta.getAttribute('content');
+
+    const resp = await fetch('/api/orders/payment', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload)
+    });
+
+    if (!resp.ok) {
+      const body = await resp.json().catch(() => ({}));
+      throw new Error(body.message || 'Server error');
+    }
+
+    const data = await resp.json();
+    console.log('Order saved', data);
+
+    // Clear client-side order after successful save
+    localStorage.removeItem('orders');
+    localStorage.removeItem('total');
+    // Optionally clear UI elements (keep modal open for print)
+    if (document.getElementById('orderList')) document.getElementById('orderList').innerHTML = '';
+    if (document.getElementById('totalPrice')) document.getElementById('totalPrice').textContent = '₱0';
+    if (document.getElementById('changePrice')) document.getElementById('changePrice').textContent = '₱0';
+  }
 
   // Print receipt
   printBtn.addEventListener('click', () => {

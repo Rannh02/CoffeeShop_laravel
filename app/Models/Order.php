@@ -146,7 +146,7 @@ class Order extends Model
     public function calculateTotal()
     {
         return $this->orderItems()->sum(function ($item) {
-            return $item->Quantity * $item->Price_sale;
+            return $item->Quantity * ($item->UnitPrice ?? ($item->Price_sale ?? 0));
         });
     }
 

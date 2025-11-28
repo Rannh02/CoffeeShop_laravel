@@ -6,14 +6,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class Payment extends Model
 {
+    // Table and primary key match the migration
     protected $table = 'payment';
     protected $primaryKey = 'Payment_id';
-    public $timestamps = false;
+    public $timestamps = true;
 
+    // Match columns created by migration
     protected $fillable = [
         'Order_id',
-        'Payment_method',
-        'Amount_Paid',
+        'PaymentMethod',
+        'AmountPaid',
         'PaymentDate',
         'TransactionReference'
     ];

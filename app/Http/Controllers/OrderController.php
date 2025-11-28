@@ -108,12 +108,12 @@ class OrderController extends Controller
                     throw new \Exception("Product '{$item['name']}' not found in inventory.");
                 }
 
-                // Create order item record
+                // Create order item record (use UnitPrice column)
                 OrderItem::create([
                     'Order_id' => $order->Order_id,
                     'Product_id' => $product->Product_id,
                     'Quantity' => $qty,
-                    'Price_sale' => $price
+                    'UnitPrice' => $price
                 ]);
 
                 // Deduct ingredients from stock
@@ -156,10 +156,10 @@ class OrderController extends Controller
 
             Payment::create([
                 'Order_id' => $order->Order_id,
-                'Payment_method' => $paymentMethod,
-                'Amount_Paid' => $amountPaid,
+                'PaymentMethod' => $paymentMethod,
+                'AmountPaid' => $amountPaid,
                 'PaymentDate' => now(),
-                'Reference_Code' => $referenceCode
+                'TransactionReference' => $referenceCode
             ]);
 
             DB::commit();

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Payment;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
@@ -80,29 +81,32 @@ class PaymentController extends Controller
             $amountPaid = $request->input('amountPaid', $totalAmount);
             $transactionReference = $request->input('transactionReference');
 
-            // Create the order
+            // Create the order (columns match migrations)
             $order = Order::create([
-                'CustomerName' => $customerName,
-                'OrderType' => $orderType,
+                'Customer_name' => $customerName,
+                'Order_Type' => $orderType,
                 'TotalAmount' => $totalAmount,
-                'OrderDate' => now()
+                'Order_date' => now()
             ]);
 
-            // Create order items
+            // Create order items: try to resolve Product_id by name when possible
             foreach ($orders as $item) {
+                $product = Product::where('Product_name', $item['name'])->first();
+                $productId = $product ? $product->Product_id : null;
+
                 OrderItem::create([
                     'Order_id' => $order->Order_id,
-                    'ProductName' => $item['name'],
+                    'Product_id' => $productId,
                     'Quantity' => $item['quantity'],
-                    'Price' => $item['price']
+                    'UnitPrice' => $item['price']
                 ]);
             }
 
-            // Create payment record
+            // Create payment record (column names match migration)
             Payment::create([
                 'Order_id' => $order->Order_id,
-                'Payment_method' => $paymentMethod,
-                'Amount_Paid' => $amountPaid,
+                'PaymentMethod' => $paymentMethod,
+                'AmountPaid' => $amountPaid,
                 'PaymentDate' => now(),
                 'TransactionReference' => $transactionReference
             ]);
