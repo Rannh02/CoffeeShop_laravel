@@ -155,20 +155,37 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('📦 Order data to send:', orderData);
 
     try {
+      // Determine payment method and transaction reference
+      const storedPaymentType = localStorage.getItem('paymentType');
+      let paymentMethodToSend = 'Cash';
+      let transactionRefToSend = null;
+      if (storedPaymentType === 'Card') {
+        paymentMethodToSend = 'Card';
+        transactionRefToSend = document.getElementById('cardNumber')?.value || null;
+      } else if (storedPaymentType === 'GCash') {
+        paymentMethodToSend = 'GCash';
+        transactionRefToSend = document.getElementById('referenceNumber')?.value || null;
+      }
+
+      const amountPaidInput = parseFloat(document.getElementById('amountPaid')?.value || orderData.total);
+
+      const payload = {
+        customerName: customerName,
+        orderType: orderType,
+        totalAmount: orderData.total,
+        orders: orderData.orders,
+        paymentMethod: paymentMethodToSend,
+        amountPaid: amountPaidInput,
+        transactionReference: transactionRefToSend
+      };
+
       const response = await fetch('/api/orders/payment', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
         },
-        body: JSON.stringify({
-          customerName: customerName,
-          orderType: orderType,
-          totalAmount: orderData.total,
-          orders: orderData.orders,
-          paymentMethod: 'Cash',
-          amountPaid: orderData.total
-        })
+        body: JSON.stringify(payload)
       });
 
       console.log('📡 Response status:', response.status);

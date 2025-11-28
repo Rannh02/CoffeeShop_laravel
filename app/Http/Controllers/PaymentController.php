@@ -109,13 +109,33 @@ class PaymentController extends Controller
                 ]);
             }
 
+            // Format transaction reference for display/storage
+            $txRef = null;
+            $pm = strtolower(trim($paymentMethod));
+            if ($pm === 'card') {
+                if (!empty($transactionReference)) {
+                    $txRef = 'Card Number: ' . $transactionReference;
+                } else {
+                    $txRef = 'Card';
+                }
+            } elseif ($pm === 'gcash' || $pm === 'e-wallet' || $pm === 'ewallet') {
+                if (!empty($transactionReference)) {
+                    $txRef = 'Reference Number: ' . $transactionReference;
+                } else {
+                    $txRef = 'GCash';
+                }
+            } else {
+                // default to Cash
+                $txRef = 'Cash';
+            }
+
             // Create payment record (column names match migration)
             Payment::create([
                 'Order_id' => $order->Order_id,
                 'PaymentMethod' => $paymentMethod,
                 'AmountPaid' => $amountPaid,
                 'PaymentDate' => now(),
-                'TransactionReference' => $transactionReference
+                'TransactionReference' => $txRef
             ]);
 
             DB::commit();
