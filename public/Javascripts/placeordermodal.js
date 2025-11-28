@@ -25,45 +25,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const items = [];
     if (!list) return items;
 
-    // First try to parse our structured order-item-card markup
-    const cards = list.querySelectorAll('.order-item-card');
-    if (cards.length) {
-      cards.forEach(card => {
-        // name is inside <strong> tag
-        const nameEl = card.querySelector('strong');
-        // quantity is inside a span.quantity with text like "x2"
-        const qtyEl = card.querySelector('.quantity');
-        // price is the right-side span in the top row (contains currency)
-        const priceSpan = card.querySelector('div > div > span');
-
-        const name = nameEl ? nameEl.textContent.trim() : (card.dataset.name || '');
-        let qty = 1;
-        if (qtyEl) {
-          const raw = qtyEl.textContent.replace(/[^0-9]/g, '');
-          qty = parseInt(raw) || 1;
-        } else if (card.dataset.qty) {
-          qty = parseInt(card.dataset.qty) || 1;
-        }
-
-        let price = 0;
-        if (priceSpan) {
-          price = parseFloat(priceSpan.textContent.replace(/[^0-9.-]+/g, '')) || 0;
-        } else if (card.dataset.price) {
-          price = parseFloat(card.dataset.price) || 0;
-        }
-
+    // Use the same source as `orderSystem.js` and `orderingcoffee.js`: localStorage 'orders'
+    try {
+      const saved = JSON.parse(localStorage.getItem('orders')) || [];
+      saved.forEach(it => {
+        // saved object has properties: name, price (unit), quantity, totalPrice, img
+        const name = it.name || '';
+        const qty = parseInt(it.quantity) || 1;
+        const price = parseFloat(it.price) || 0;
         items.push({ name, qty, price });
       });
-      return items;
+    } catch (e) {
+      console.warn('Failed to parse orders from localStorage', e);
     }
-
-    // Generic fallback: try dataset on children
-    Array.from(list.children).forEach(ch => {
-      const name = ch.dataset.name || ch.textContent.trim();
-      const qty = parseInt(ch.dataset.qty) || 1;
-      const price = parseFloat(ch.dataset.price) || 0;
-      items.push({ name, qty, price });
-    });
 
     return items;
   }
@@ -159,21 +133,14 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>`;
   }
 
-  // Show modal when Place Order clicked
-  placeOrderBtn.addEventListener('click', async () => {
-    // Build and display receipt
+  // Show modal when Place Order clicked (render receipt only)
+  placeOrderBtn.addEventListener('click', () => {
+    // Build and display receipt from localStorage items; saving to DB
+    // is handled by `orderingcoffee.js` which also attaches a handler to the
+    // same button and performs validation + server save.
     receiptDiv.innerHTML = buildReceiptHtml();
-    receiptDiv.style.display = 'none';
+    receiptDiv.style.display = 'block';
     modal.style.display = 'flex';
-
-    // Send order to server
-    try {
-      await sendOrderToServer();
-    } catch (err) {
-      console.error('Error sending order to server:', err);
-      // optionally show user-facing error
-      alert('Failed to record order on server: ' + (err.message || err));
-    }
   });
 
   // Send order JSON to server API
@@ -189,8 +156,8 @@ document.addEventListener('DOMContentLoaded', () => {
       customerName: (document.getElementById('customerName') && document.getElementById('customerName').value.trim()) || 'Guest',
       orderType: localStorage.getItem('orderType') || 'Dine In',
       totalAmount: parseFloat(total.toFixed(2)),
-      // Convert item line totals to unit prices (unitPrice = lineTotal / qty)
-      orders: items.map(it => ({ name: it.name, quantity: it.qty, price: parseFloat((it.price / Math.max(1, it.qty)).toFixed(2)) })),
+      // items already contain unit `price` (read from localStorage)
+      orders: items.map(it => ({ name: it.name, quantity: it.qty, price: parseFloat(Number(it.price).toFixed(2)) })),
       paymentMethod: localStorage.getItem('paymentType') || 'Cash',
       amountPaid: parseFloat((document.getElementById('amountPaid') && document.getElementById('amountPaid').value) || total),
       transactionReference: (document.getElementById('referenceNumber') && document.getElementById('referenceNumber').value) || null

@@ -75,6 +75,13 @@ class PaymentController extends Controller
             // Get validated data with defaults
             $customerName = $request->input('customerName', 'Guest');
             $orderType = $request->input('orderType', 'Dine In');
+            // Normalize order type to match DB enum values ('Dine In' or 'Takeout')
+            $otype = trim(strtolower($orderType));
+            if (in_array($otype, ['take out', 'take-out', 'takeout'])) {
+                $orderType = 'Takeout';
+            } elseif (in_array($otype, ['dine in', 'dine-in', 'dinein'])) {
+                $orderType = 'Dine In';
+            }
             $totalAmount = $request->input('totalAmount');
             $orders = $request->input('orders');
             $paymentMethod = $request->input('paymentMethod', 'Cash');

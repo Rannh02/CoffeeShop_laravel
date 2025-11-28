@@ -155,26 +155,33 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('📦 Order data to send:', orderData);
 
     try {
-      const response = await fetch('/cashier/place-order', {  // ← Add /cashier prefix
+      const response = await fetch('/api/orders/payment', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
         },
-        body: JSON.stringify(orderData)
+        body: JSON.stringify({
+          customerName: customerName,
+          orderType: orderType,
+          totalAmount: orderData.total,
+          orders: orderData.orders,
+          paymentMethod: 'Cash',
+          amountPaid: orderData.total
+        })
       });
 
       console.log('📡 Response status:', response.status);
 
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
       console.log('📥 Response data:', data);
 
-      if (data.success) {
+      if (response.ok && data.status === 'success') {
         console.log('✅ Order saved successfully! Order ID:', data.order_id);
         return true;
       } else {
-        console.error('❌ Failed to save order:', data.message);
-        alert('Failed to save order: ' + data.message);
+        console.error('❌ Failed to save order:', data.message || data);
+        alert('Failed to save order: ' + (data.message || 'Server error'));
         return false;
       }
     } catch (err) {

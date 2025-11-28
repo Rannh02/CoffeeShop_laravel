@@ -127,7 +127,7 @@
                     <div class="order-type">
                         <p><strong>Order Type:</strong></p>
                         <button class="order-type-btn" data-type="Dine In">🍽️ Dine In</button>
-                        <button class="order-type-btn" data-type="Take Out">🥡 Take Out</button>
+                        <button class="order-type-btn" data-type="Takeout">🥡 Take Out</button>
                         <button id="clearOrder" class="clear-btn">Clear Order</button>
                     </div>
                     
