@@ -34,7 +34,7 @@ class InventoryController extends Controller
                 });
             })
             ->orderBy('DateUsed', 'desc')
-            ->paginate(5)
+            ->paginate(10)
             ->withQueryString(); // Preserve query parameters in pagination links
 
         $products = Product::orderBy('Product_name', 'asc')->get();

@@ -9,10 +9,22 @@ use Illuminate\Support\Facades\Log;
 
 class CategoryController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $categories = Category::orderBy('Category_id', 'ASC')->get();
+            $search = $request->input('search');
+
+            // Query with optional search
+            $query = Category::orderBy('Category_id', 'ASC');
+
+            if (!empty($search)) {
+                $query->where('Category_id', 'LIKE', "%$search%")
+                      ->orWhere('Category_name', 'LIKE', "%$search%");
+            }
+
+            // PAGINATION (change 7 to any number of items per page)
+            $categories = $query->paginate(5);
+
             $fullname = Auth::user()->name ?? 'Admin';
             
             return view('AdminDashboard.Category', compact('categories', 'fullname'));

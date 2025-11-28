@@ -23,7 +23,7 @@ class IngredientController extends Controller
                       ->orWhere('Unit', 'like', "%$search%");
             })
             ->orderBy('created_at', 'desc')
-            ->paginate(5)
+            ->paginate(10)
             ->withQueryString();
 
         return view('AdminDashboard.Ingredients', compact('fullname', 'ingredients'));

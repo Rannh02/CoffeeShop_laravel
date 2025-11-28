@@ -15,7 +15,7 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $page = $request->input('page', 1);
-        $perPage = 5;
+        $perPage = 7;
         $search = $request->input('search');
 
         // Base query with JOIN

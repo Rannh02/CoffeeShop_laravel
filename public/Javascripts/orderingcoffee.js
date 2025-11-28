@@ -49,7 +49,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Build receipt HTML
   function buildReceiptHtml() {
     const customerName = (document.getElementById('customerName')?.value.trim()) || 'Guest';
-    const cashierName = (document.querySelector('.staff-name')?.textContent.trim()) || 'Cashier';
+    // ✅ FIXED: Get ONLY the cashier name from the span inside .staff-name
+    const cashierName = (document.querySelector('.staff-name > span')?.textContent.trim()) || 'Cashier';
     const orderType = getOrderType();
     const items = getOrderItems();
 
@@ -85,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <hr style="border:1px dashed #333; margin:10px 0;">
         <div style="font-size:11px; line-height:1.6;">
           Date: ${dateStr} ${timeStr}<br>
-          Cashier: ${cashierName}<br>
+          Cashier: ${escapeHtml(cashierName)}<br>
           Customer: ${customerName}<br>
           Type: ${orderType}
         </div>

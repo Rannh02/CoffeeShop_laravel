@@ -16,25 +16,27 @@ use Illuminate\Support\Facades\Log;
 class OrderController extends Controller
 {
     /**
-     * Display the list of orders
+     * Display the list of orders with search functionality
      */
     public function index(Request $request)
     {
-        $page = $request->input('page', 1);
-        $perPage = 8;
+        $search = request('search');
+        $perPage = 10;
 
-        // Get total orders count
-        $totalOrders = Order::count();
-        $totalPages = ceil($totalOrders / $perPage);
-
-        // Fetch orders for the current page with relationships
+        // Fetch orders with search and pagination
         $orders = Order::with(['customer', 'employee', 'orderItems', 'payment'])
+                       ->when($search, function($query, $search) {
+                           $query->where('Customer_name', 'like', "%$search%")
+                                 ->orWhere('Order_id', 'like', "%$search%")
+                                 ->orWhere('Employee_id', 'like', "%$search%")
+                                 ->orWhere('Order_Type', 'like', "%$search%")
+                                 ->orWhere('TotalAmount', 'like', "%$search%");
+                       })
                        ->orderBy('Order_date', 'desc')
-                       ->skip(($page - 1) * $perPage)
-                       ->take($perPage)
-                       ->get();
+                       ->paginate($perPage)
+                       ->withQueryString(); // ✅ Preserves search query in pagination links
 
-        return view('AdminDashboard.Orders', compact('orders', 'totalPages', 'page'));
+        return view('AdminDashboard.Orders', compact('orders'));
     }
 
     /**
@@ -45,7 +47,9 @@ class OrderController extends Controller
         try {
             // Validate incoming data
             $validated = $request->validate([
+                'customer_name' => 'required|string|max:255',
                 'customerName' => 'required|string|max:255',
+                'order_type' => 'required|string|in:Dine In,Takeout',
                 'orderType' => 'required|string|in:Dine In,Takeout',
                 'orders' => 'required|array|min:1',
                 'orders.*.name' => 'required|string',
@@ -66,9 +70,13 @@ class OrderController extends Controller
 
             DB::beginTransaction();
 
+            // Handle both customerName and customer_name
+            $customerName = $validated['customerName'] ?? $validated['customer_name'];
+            $orderType = $validated['orderType'] ?? $validated['order_type'];
+
             // Create or find customer
             $customer = Customer::firstOrCreate(
-                ['Name' => $validated['customerName']],
+                ['Name' => $customerName],
                 ['Date_Time' => now()]
             );
 
@@ -82,10 +90,10 @@ class OrderController extends Controller
             $order = Order::create([
                 'Customer_id' => $customer->Customer_id,
                 'Employee_id' => $employee_id,
-                'Customer_name' => $validated['customerName'],
+                'Customer_name' => $customerName,
                 'Order_date' => now(),
                 'TotalAmount' => $totalAmount,
-                'Order_Type' => $validated['orderType']
+                'Order_Type' => $orderType
             ]);
 
             // Process each order item
@@ -133,7 +141,7 @@ class OrderController extends Controller
                             'QuantityUsed' => $totalUsed,
                             'RemainingStock' => $ingredient->StockQuantity,
                             'DateUsed' => now(),
-                            'Remarks' => "Order #{$order->Order_id} - {$validated['orderType']}",
+                            'Remarks' => "Order #{$order->Order_id} - {$orderType}",
                             'created_at' => now(),
                             'updated_at' => now()
                         ]);
@@ -159,7 +167,7 @@ class OrderController extends Controller
             // Log successful order
             Log::info('Order created successfully', [
                 'order_id' => $order->Order_id,
-                'customer' => $validated['customerName'],
+                'customer' => $customerName,
                 'total' => $totalAmount
             ]);
 
@@ -168,15 +176,15 @@ class OrderController extends Controller
                 'order_id' => $order->Order_id,
                 'total_amount' => $totalAmount,
                 'change' => $amountPaid - $totalAmount,
-                'customer_name' => $validated['customerName'],
-                'order_type' => $validated['orderType']
+                'customer_name' => $customerName,
+                'order_type' => $orderType
             ];
 
             if ($request->expectsJson()) {
                 return $this->jsonResponse(true, 'Order placed successfully!', $responseData, 201);
             }
 
-            return redirect()->route('orders.index')
+            return redirect()->route('admin.orders')
                            ->with('success', 'Order placed successfully!');
 
         } catch (\Illuminate\Validation\ValidationException $e) {
