@@ -136,6 +136,22 @@
                     <input type="number" id="amountPaid" min="0" step="any" placeholder="Amount Paid">
                     <input id="cardNumber" type="text" placeholder="Card Number" style="display:none; font-size:15px; width:100%;">
                     <input id="referenceNumber" type="text" placeholder="Reference Number" style="display:none; font-size:15px; width:100%;">
+                    
+                    <div style="margin-top: 15px; padding: 10px; background: #f9f9f9; border-radius: 4px;">
+                        <p><strong>Discounts (12%):</strong></p>
+                        <div style="display: flex; gap: 15px; margin-top: 8px;">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" id="pwdCheckbox" style="width: 18px; height: 18px;">
+                                <span>PWD</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" id="seniorCheckbox" style="width: 18px; height: 18px;">
+                                <span>Senior Citizen</span>
+                            </label>
+                        </div>
+                        <p style="margin-top: 8px; font-size: 12px; color: #666;">Discount: <span id="discountAmount">₱0.00</span></p>
+                        <p style="margin: 5px 0 0 0; font-weight: bold; font-size: 14px;">After Discount: <span id="finalTotalPrice">₱0.00</span></p>
+                    </div>
                 </div>
 
                 <div class="payment-buttons">

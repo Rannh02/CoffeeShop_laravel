@@ -59,7 +59,9 @@ class PaymentController extends Controller
             'orders.*.price' => 'required|numeric|min:0',
             'paymentMethod' => 'nullable|string|max:50',
             'amountPaid' => 'nullable|numeric|min:0',
-            'transactionReference' => 'nullable|string|max:100'
+            'transactionReference' => 'nullable|string|max:100',
+            'isPWD' => 'nullable|boolean',
+            'isSenior' => 'nullable|boolean'
         ]);
 
         if ($validator->fails()) {
@@ -82,17 +84,31 @@ class PaymentController extends Controller
             } elseif (in_array($otype, ['dine in', 'dine-in', 'dinein'])) {
                 $orderType = 'Dine In';
             }
+            
             $totalAmount = $request->input('totalAmount');
+            
+            // Apply discount if PWD or Senior Citizen
+            $isPWD = $request->input('isPWD', false);
+            $isSenior = $request->input('isSenior', false);
+            $discountedAmount = $totalAmount;
+            $discountPercent = '';
+            
+            if ($isPWD || $isSenior) {
+                $discountedAmount = $totalAmount * 0.88; // 12% discount
+                $discountPercent = $isPWD ? ' (PWD)' : ' (Senior Citizen)';
+                Log::info('Discount applied: ' . $discountPercent . ' - Original: ' . $totalAmount . ', Discounted: ' . $discountedAmount);
+            }
+            
             $orders = $request->input('orders');
             $paymentMethod = $request->input('paymentMethod', 'Cash');
-            $amountPaid = $request->input('amountPaid', $totalAmount);
+            $amountPaid = $request->input('amountPaid', $discountedAmount);
             $transactionReference = $request->input('transactionReference');
 
-            // Create the order (columns match migrations)
+            // Create the order with the discounted amount
             $order = Order::create([
                 'Customer_name' => $customerName,
                 'Order_Type' => $orderType,
-                'TotalAmount' => $totalAmount,
+                'TotalAmount' => $discountedAmount,
                 'Order_date' => now()
             ]);
 
@@ -127,6 +143,11 @@ class PaymentController extends Controller
             } else {
                 // default to Cash
                 $txRef = 'Cash';
+            }
+            
+            // Append discount info to transaction reference if discount was applied
+            if ($isPWD || $isSenior) {
+                $txRef .= $discountPercent;
             }
 
             // Create payment record (column names match migration)

@@ -46,6 +46,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }));
   }
 
+  // Calculate discount based on PWD/Senior Citizen checkboxes
+  function getDiscount() {
+    const isPWD = document.getElementById('pwdCheckbox')?.checked || false;
+    const isSenior = document.getElementById('seniorCheckbox')?.checked || false;
+    return (isPWD || isSenior) ? 0.12 : 0; // 12% discount
+  }
+
   // Build receipt HTML
   function buildReceiptHtml() {
     const customerName = (document.getElementById('customerName')?.value.trim()) || 'Guest';
@@ -57,10 +64,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let subtotal = 0;
     items.forEach(it => subtotal += it.price * it.qty);
     const vat = subtotal * 0.12;
-    const total = subtotal + vat;
+    let total = subtotal + vat;
+
+    // Apply discount if PWD or Senior Citizen
+    const discountRate = getDiscount();
+    const discountAmount = total * discountRate;
+    const finalTotal = total - discountAmount;
 
     const amountPaid = parseFloat(document.getElementById('amountPaid')?.value || 0);
-    const change = Math.max(0, amountPaid - total);
+    const change = Math.max(0, amountPaid - finalTotal);
 
     const now = new Date();
     const dateStr = now.toLocaleDateString();
@@ -105,6 +117,16 @@ document.addEventListener('DOMContentLoaded', () => {
           <span>TOTAL:</span>
           <span>${fmt(total)}</span>
         </div>
+        ${discountAmount > 0 ? `
+        <div style="display:flex; justify-content:space-between; color:#d9534f; margin:3px 0;">
+          <span>Discount (12%):</span>
+          <span>-${fmt(discountAmount)}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:15px; margin:5px 0; color:#28a745;">
+          <span>FINAL TOTAL:</span>
+          <span>${fmt(finalTotal)}</span>
+        </div>
+        ` : ''}
         <hr style="border:1px dashed #333; margin:10px 0;">
         <div style="display:flex; justify-content:space-between; margin:3px 0;">
           <span>Cash:</span>
@@ -139,7 +161,16 @@ document.addEventListener('DOMContentLoaded', () => {
     let subtotal = 0;
     items.forEach(it => subtotal += it.price * it.qty);
     const vat = subtotal * 0.12;
-    const total = subtotal + vat;
+    let total = subtotal + vat;
+
+    // Apply discount if PWD or Senior Citizen
+    const isPWD = document.getElementById('pwdCheckbox')?.checked || false;
+    const isSenior = document.getElementById('seniorCheckbox')?.checked || false;
+    if (isPWD || isSenior) {
+      const discountAmount = total * 0.12;
+      total = total - discountAmount;
+      console.log('✅ Discount applied:', isPWD ? 'PWD' : 'Senior Citizen');
+    }
 
     const orderData = {
       customer_name: customerName,
@@ -172,11 +203,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const payload = {
         customerName: customerName,
         orderType: orderType,
-        totalAmount: orderData.total,
+        totalAmount: total,
         orders: orderData.orders,
         paymentMethod: paymentMethodToSend,
         amountPaid: amountPaidInput,
-        transactionReference: transactionRefToSend
+        transactionReference: transactionRefToSend,
+        isPWD: isPWD,
+        isSenior: isSenior
       };
 
       const response = await fetch('/api/orders/payment', {
@@ -237,10 +270,20 @@ document.addEventListener('DOMContentLoaded', () => {
       let subtotal = 0;
       items.forEach(it => subtotal += it.price * it.qty);
       const total = subtotal + (subtotal * 0.12);
+      
+      // Apply discount if PWD or Senior Citizen
+      const isPWD = document.getElementById('pwdCheckbox')?.checked || false;
+      const isSenior = document.getElementById('seniorCheckbox')?.checked || false;
+      let finalTotal = total;
+      if (isPWD || isSenior) {
+        const discountAmount = total * 0.12;
+        finalTotal = total - discountAmount;
+      }
+      
       const amountPaid = parseFloat(document.getElementById('amountPaid')?.value || 0);
 
-      if (amountPaid < total) {
-        alert(`Insufficient payment!\nTotal: ${fmt(total)}\nPaid: ${fmt(amountPaid)}`);
+      if (amountPaid < finalTotal) {
+        alert(`Insufficient payment!\nTotal: ${fmt(finalTotal)}\nPaid: ${fmt(amountPaid)}`);
         document.getElementById('amountPaid')?.focus();
         return;
       }
@@ -305,6 +348,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const customerName = document.getElementById('customerName');
       if (amountPaid) amountPaid.value = '';
       if (customerName) customerName.value = '';
+      
+      // Clear discount checkboxes
+      const pwdCheckbox = document.getElementById('pwdCheckbox');
+      const seniorCheckbox = document.getElementById('seniorCheckbox');
+      if (pwdCheckbox) pwdCheckbox.checked = false;
+      if (seniorCheckbox) seniorCheckbox.checked = false;
       
       // ✅ IMPORTANT: Clear localStorage
       localStorage.removeItem("orders");
