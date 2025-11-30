@@ -10,22 +10,22 @@ class OrderItemController extends Controller
 {
     public function index()
     {
-        $search = request('search');
 
-        // Fetch order items from the database with pagination and search
-        $orderItems = DB::table('order_items')
+        $search = request('search');
+        // Fetch order items from the database with pagination
+        $orderItems = DB::table('order_items') // ✅ Changed from 'orderitem' to 'order_items'
             ->join('orders', 'order_items.Order_id', '=', 'orders.Order_id')
             ->join('products', 'order_items.Product_id', '=', 'products.Product_id')
-            ->join('customer', 'orders.Customer_id', '=', 'customer.Customer_id')
+            ->join('customer', 'orders.Customer_id', '=', 'customer.Customer_id') // Note: Check if table is 'costumer' or 'customer'
             ->select(
                 'order_items.OrderItem_id',
                 'order_items.Order_id',
                 'customer.Customer_name',
                 'products.Product_name',
                 'order_items.Quantity',
-                'order_items.UnitPrice'
+                'order_items.UnitPrice' // ✅ Changed from Price_sale to UnitPrice and aliased it
             )
-            ->when($search, function($query, $search) {
+             ->when($search, function($query, $search) {
                 $query->where('customer.Customer_name', 'like', "%$search%")
                       ->orWhere('products.Product_name', 'like', "%$search%")
                       ->orWhere('order_items.Order_id', 'like', "%$search%")

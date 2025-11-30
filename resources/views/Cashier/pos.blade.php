@@ -149,8 +149,8 @@
                                 <span>Senior Citizen</span>
                             </label>
                         </div>
-                        <!-- <p style="margin-top: 8px; font-size: 12px; color: #666;">Discount: <span id="discountAmount">₱0.00</span></p>
-                        <p style="margin: 5px 0 0 0; font-weight: bold; font-size: 14px;">After Discount: <span id="finalTotalPrice">₱0.00</span></p> -->
+                        <p style="margin-top: 8px; font-size: 12px; color: #666;">Discount: <span id="discountAmount">₱0.00</span></p>
+                        <p style="margin: 5px 0 0 0; font-weight: bold; font-size: 14px;">After Discount: <span id="finalTotalPrice">₱0.00</span></p>
                     </div>
                 </div>
 
@@ -192,6 +192,7 @@
     <script src="{{ asset('Javascripts/QRlogic.js') }}"></script>
     <script src="{{ asset('Javascripts/OrderTypeButton.js') }}"></script>
     <script src="{{ asset('Javascripts/Inputs.js') }}"></script>
+    <script src="{{ asset('Javascripts/paymentMethod.js') }}"></script>
     <script src="{{ asset('Javascripts/placeordermodal.js') }}"></script>
     <script src="{{ asset('Javascripts/orderingcoffee.js') }}"></script>
     <!-- <script src="{{ asset('Javascripts/PaymentSummary.js') }}"></script> -->

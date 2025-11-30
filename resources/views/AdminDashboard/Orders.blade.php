@@ -62,6 +62,7 @@
             border-radius: 4px;
         }
     </style>
+
 </head>
 <body>
     <div id="app">
@@ -89,19 +90,19 @@
             <aside class="sidebar">
                 <nav class="sidebar-nav">
                     <a href="{{ route('admin.dashboard') }}" class="nav-item"><i class="bi bi-list"></i> Dashboard</a>
-                    <a href="{{ route('products.index') }}" class="nav-item"><i class="bi bi-bag"></i> Products</a>
-                    <a href="{{ route('admin.orders') }}" class="nav-item active"><i class="bi bi-bag-check-fill"></i> Orders</a>
-                    <a href="{{ route('admin.orderitem') }}" class="nav-item"><i class="bi bi-basket"></i> OrderItem</a>
-                    <a href="{{ route('admin.employee') }}" class="nav-item"><i class="bi bi-person-circle"></i> Employee</a>
-                    <a href="{{ route('admin.archived') }}" class="nav-item"><i class="bi bi-person-x"></i> Employee Archived</a>
-                    <a href="{{ route('admin.inventory') }}" class="nav-item"><i class="bi bi-cart-check"></i> Inventory</a>
-                    <a href="{{ route('admin.ingredients') }}" class="nav-item"><i class="bi bi-check2-square"></i> Ingredients</a>
-                    <a href="{{ route('suppliers.index') }}" class="nav-item"><i class="bi bi-box-fill"></i> Supplier</a>
-                    <a href="{{ route('admin.payment') }}" class="nav-item"><i class="bi bi-cash-coin"></i> Payment</a>
-                    <a href="{{ route('admin.category') }}" class="nav-item"><i class="bi bi-tags"></i> Category</a>
-                    <a href="{{ route('admin.logout') }}" class="nav-item logout">
-                        <i class="bi bi-box-arrow-left"></i> Logout
-                    </a>
+                <a href="{{ route('products.index') }}" class="nav-item"><i class="bi bi-bag"></i> Products</a>
+                <a href="{{ route('admin.orders') }}" class="nav-item active"><i class="bi bi-bag-check-fill"></i> Orders</a>
+                <a href="{{ route('admin.orderitem') }}" class="nav-item"><i class="bi bi-basket"></i> OrderItem</a>
+                <a href="{{ route('admin.employee') }}" class="nav-item"><i class="bi bi-person-circle"></i> Employee</a>
+                <a href="{{ route('admin.archived') }}" class="nav-item"><i class="bi bi-person-x"></i> Employee Archived</a>
+                <a href="{{ route('admin.inventory') }}" class="nav-item"><i class="bi bi-cart-check"></i> Inventory</a>
+                <a href="{{ route('admin.ingredients') }}" class="nav-item"><i class="bi bi-check2-square"></i> Ingredients</a>
+                <a href="{{ route('suppliers.index') }}" class="nav-item"><i class="bi bi-box-fill"></i> Supplier</a>
+                <a href="{{ route('admin.payment') }}" class="nav-item"><i class="bi bi-cash-coin"></i> Payment</a>
+                <a href="{{ route('admin.category') }}" class="nav-item"><i class="bi bi-tags"></i> Category</a>
+                <a href="{{ route('admin.logout') }}" class="nav-item logout">
+                    <i class="bi bi-box-arrow-left"></i> Logout
+                </a>
                 </nav>
             </aside>
 
@@ -221,5 +222,7 @@
             }
         });
     </script>
+
+    <script src="{{ asset('Javascripts/RealTime.js') }}"></script>
 </body>
 </html>

@@ -186,11 +186,12 @@ class CashierController extends Controller
         return redirect()->route('cashier.pos', ['category' => 'pastries']);
     }
 
-    public function storeOrder(Request $request)
+  public function storeOrder(Request $request)
 {
     try {
         DB::beginTransaction();
         
+        // ✅ UPDATED: Added payment fields to validation
         $orderData = $request->validate([
             'customer_name' => 'required|string',
             'order_type' => 'required|string|in:Dine In,Take Out',
@@ -199,7 +200,16 @@ class CashierController extends Controller
             'orders.*.name' => 'required|string',
             'orders.*.quantity' => 'required|integer|min:1',
             'orders.*.price' => 'required|numeric|min:0',
+            // ✅ NEW: Payment validation (made optional with defaults)
+            'amount_paid' => 'required|numeric|min:0',
+            'payment_date' => 'required|string',
+            'payment_method' => 'nullable|string',
+            'transaction_reference' => 'nullable|string',
         ]);
+
+        // ✅ Set defaults if not provided
+        $paymentMethod = $orderData['payment_method'] ?? 'Cash';
+        $transactionReference = $orderData['transaction_reference'] ?? 'CASH-' . time();
 
         $employeeId = Session::get('cashier_id');
         
@@ -225,7 +235,7 @@ class CashierController extends Controller
         $orderType  = $orderData['order_type'];
 
         if (strtolower($orderType) === 'take out') {
-        $orderType = 'Takeout';
+            $orderType = 'Takeout';
         }
         
         // 1. Create the order
@@ -242,7 +252,23 @@ class CashierController extends Controller
 
         Log::info("Order created: ID={$orderId}, Customer={$orderData['customer_name']}, Total={$orderData['total']}");
 
-        // 2. Process each order item
+        // ✅ NEW: 2. Create payment record
+        // Convert ISO 8601 date to MySQL datetime format
+        $paymentDate = date('Y-m-d H:i:s', strtotime($orderData['payment_date']));
+        
+        $paymentId = DB::table('payment')->insertGetId([
+            'Order_id' => $orderId,
+            'PaymentMethod' => $paymentMethod,
+            'AmountPaid' => $orderData['amount_paid'],
+            'PaymentDate' => $paymentDate,
+            'TransactionReference' => $transactionReference,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        Log::info("Payment created: ID={$paymentId}, Method={$paymentMethod}, Paid={$orderData['amount_paid']}, Ref={$transactionReference}");
+
+        // 3. Process each order item
         foreach ($orderData['orders'] as $item) {
             // Find the product
             $product = DB::table('products')
@@ -265,7 +291,7 @@ class CashierController extends Controller
 
             Log::info("Order item: {$product->Product_name} x{$item['quantity']} @ ₱{$item['price']}");
 
-            // 3. Get all ingredients needed for this product
+            // 4. Get all ingredients needed for this product
             $ingredients = DB::table('product_ingredients')
                 ->where('Product_id', $product->Product_id)
                 ->get();
@@ -275,7 +301,7 @@ class CashierController extends Controller
                 continue;
             }
 
-            // 4. Deduct each ingredient from inventory
+            // 5. Deduct each ingredient from inventory
             foreach ($ingredients as $ingredient) {
                 $totalQuantityUsed = $ingredient->Quantity_used * $item['quantity'];
                 
@@ -298,8 +324,7 @@ class CashierController extends Controller
                     throw new \Exception("Insufficient stock! {$product->Product_name} needs {$totalQuantityUsed} {$ingredientInfo->Unit} of {$ingredientInfo->Ingredient_name}, but only {$inventory->RemainingStock} {$ingredientInfo->Unit} available.");
                 }
                 
-                // 5. Update inventory record (deduct stock and track usage)
-                // Update inventory record
+                // 6. Update inventory record (deduct stock and track usage)
                 DB::table('inventories')
                     ->where('Product_id', $product->Product_id)
                     ->where('Ingredient_id', $ingredient->Ingredient_id)
@@ -320,17 +345,18 @@ class CashierController extends Controller
                     ->decrement('StockQuantity', $totalQuantityUsed, ['updated_at' => now()]);
 
                 Log::info("Stock deducted: Ingredient={$ingredient->Ingredient_id}, Used={$totalQuantityUsed}, Remaining={$newRemainingStock}");
-              }
             }
+        }
 
         DB::commit();
         
-        Log::info("Order {$orderId} completed successfully!");
+        Log::info("Order {$orderId} with Payment {$paymentId} completed successfully!");
         
         return response()->json([
             'success' => true, 
             'message' => 'Order placed successfully!',
-            'order_id' => $orderId
+            'order_id' => $orderId,
+            'payment_id' => $paymentId
         ]);
         
     } catch (\Illuminate\Validation\ValidationException $e) {

@@ -6,7 +6,7 @@
     <title>Admin - Order Items</title>
     <link rel="stylesheet" href="{{ asset('Dashboard CSS/Orders.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <style>
+     <style>
         .search-container {
             margin-bottom: 20px;
             display: flex;
@@ -53,6 +53,7 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
     </style>
+
 </head>
 <body>
     <div id="app">
@@ -101,12 +102,12 @@
                 <h1 class="page-title">Order Items</h1>
 
                 @if(session('success'))
-                    <div class="alert alert-success" style="background: #d4edda; color: #155724; padding: 12px; margin-bottom: 20px; border-radius: 4px;">
+                    <div class="alert alert-success">
                         {{ session('success') }}
                     </div>
                 @endif
 
-                <!-- Search Bar -->
+                 <!-- Search Bar -->
                 <div class="search-container">
                     <input 
                         type="text" 
@@ -148,10 +149,11 @@
                                 </tr>
                             @endforelse
                         </tbody>
+
                     </table>
                 </div>
 
-                <!-- Pagination Container -->
+                 <!-- Pagination Container -->
                 <div class="pagination-container">
                     {{-- Previous Button --}}
                     @if ($orderItems->currentPage() > 1)
@@ -179,30 +181,34 @@
             </main>
         </div>
     </div>
+    
+                <script>
+                    // Search functionality
+                    function performSearch() {
+                        const searchValue = document.getElementById('searchInput').value;
+                        const currentUrl = new URL(window.location.href);
+                        
+                        if (searchValue.trim()) {
+                            currentUrl.searchParams.set('search', searchValue);
+                            currentUrl.searchParams.set('page', '1');
+                        } else {
+                            currentUrl.searchParams.delete('search');
+                        }
+                        
+                        window.location.href = currentUrl.toString();
+                    }
+
+                    // Allow search on Enter key
+                    document.getElementById('searchInput').addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter') {
+                            performSearch();
+                        }
+                    });
+                </script>
+            </main>
+        </div>
+    </div>
 
 <script src="{{ asset('Javascripts/RealTime.js') }}"></script>
-<script>
-    // Search functionality
-    function performSearch() {
-        const searchValue = document.getElementById('searchInput').value;
-        const currentUrl = new URL(window.location.href);
-        
-        if (searchValue.trim()) {
-            currentUrl.searchParams.set('search', searchValue);
-            currentUrl.searchParams.set('page', '1');
-        } else {
-            currentUrl.searchParams.delete('search');
-        }
-        
-        window.location.href = currentUrl.toString();
-    }
-
-    // Allow search on Enter key
-    document.getElementById('searchInput').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            performSearch();
-        }
-    });
-</script>
 </body>
 </html>
