@@ -8,38 +8,51 @@ document.addEventListener('DOMContentLoaded', () => {
     if (cardInput) cardInput.style.display = 'none';
     if (referenceInput) referenceInput.style.display = 'none';
 
-    // 🔹 Load saved payment type if exists
+    // 🔹 Load saved payment type
     const savedPaymentType = localStorage.getItem('paymentType');
-    if (savedPaymentType === 'Card' && cardBtn) {
+    if (savedPaymentType === 'Card') {
         cardInput.style.display = 'block';
-    } else if (savedPaymentType === 'GCash' && gcashBtn) {
+    } else if (savedPaymentType === 'GCash') {
         referenceInput.style.display = 'block';
     }
 
     // 🔹 Helper to save payment type
     function setPaymentType(type) {
         localStorage.setItem('paymentType', type);
-        // 🔸 Notify other scripts (like orderingcoffee.js)
         document.dispatchEvent(new CustomEvent('paymentTypeChanged', {
             detail: { type }
         }));
     }
 
-    // 🔹 Click Card button
+    // 🔹 Toggle function
+    function toggleInput(inputToShow, inputToHide, type) {
+        const isVisible = inputToShow.style.display === 'block';
+
+        // Hide both
+        inputToShow.style.display = 'none';
+        inputToHide.style.display = 'none';
+
+        if (!isVisible) {
+            // Show selected input if previously hidden
+            inputToShow.style.display = 'block';
+            setPaymentType(type);
+        } else {
+            // If toggled off, clear stored payment
+            localStorage.removeItem('paymentType');
+        }
+    }
+
+    // 🔹 Click Card button (toggle)
     if (cardBtn) {
         cardBtn.addEventListener('click', () => {
-            if (cardInput) cardInput.style.display = 'block';
-            if (referenceInput) referenceInput.style.display = 'none';
-            setPaymentType('Card');
+            toggleInput(cardInput, referenceInput, 'Card');
         });
     }
 
-    // 🔹 Click GCash button
+    // 🔹 Click GCash button (toggle)
     if (gcashBtn) {
         gcashBtn.addEventListener('click', () => {
-            if (cardInput) cardInput.style.display = 'none';
-            if (referenceInput) referenceInput.style.display = 'block';
-            setPaymentType('GCash');
+            toggleInput(referenceInput, cardInput, 'GCash');
         });
     }
 });
