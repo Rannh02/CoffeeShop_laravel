@@ -15,16 +15,28 @@ use Illuminate\Support\Facades\Validator;
 class PaymentController extends Controller
 {
     /**
-     * Display payment listing
+     * Display payment listing with search and pagination
      */
-    public function index()
+    public function index(Request $request)
     {
         $fullname = Session::get('fullname', 'Admin');
-        
-        // Get all payments ordered by date descending
+        $search = $request->input('search');
+        $perPage = 8;
+
         // Try-catch to handle table issues gracefully
         try {
-            $payments = Payment::orderBy('PaymentDate', 'desc')->get();
+            // Fetch payments with search and pagination
+            $payments = Payment::when($search, function($query, $search) {
+                           $query->where('Payment_id', 'like', "%$search%")
+                                 ->orWhere('Order_id', 'like', "%$search%")
+                                 ->orWhere('PaymentMethod', 'like', "%$search%")
+                                 ->orWhere('AmountPaid', 'like', "%$search%")
+                                 ->orWhere('TransactionReference', 'like', "%$search%");
+                       })
+                       ->orderBy('PaymentDate', 'desc')
+                       ->paginate($perPage)
+                       ->withQueryString(); // ✅ Preserves search query in pagination links
+
         } catch (\Exception $e) {
             // If table doesn't exist or query fails, return empty collection
             $payments = collect([]);

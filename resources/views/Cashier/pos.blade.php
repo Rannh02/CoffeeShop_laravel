@@ -149,8 +149,8 @@
                                 <span>Senior Citizen</span>
                             </label>
                         </div>
-                        <p style="margin-top: 8px; font-size: 12px; color: #666;">Discount: <span id="discountAmount">₱0.00</span></p>
-                        <p style="margin: 5px 0 0 0; font-weight: bold; font-size: 14px;">After Discount: <span id="finalTotalPrice">₱0.00</span></p>
+                        <p style="margin-top: 8px; font-size: 20px; color: #666;">Discount: <span id="discountAmount">₱0.00</span></p>
+                        <!-- <p style="margin: 5px 0 0 0; font-weight: bold; font-size: 14px;">After Discount: <span id="finalTotalPrice">₱0.00</span></p> -->
                     </div>
                 </div>
 

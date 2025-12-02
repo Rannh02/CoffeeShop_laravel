@@ -122,7 +122,7 @@ body {
 }
 
 .stat-card {
-  background-color: #f8fafc;
+  background-color: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   padding: 24px;
@@ -130,6 +130,19 @@ body {
   align-items: center;
   gap: 16px;
   transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background-color: #10b981; /* Default green color */
+  border-radius: 12px 12px 0 0;
 }
 
 .stat-card:hover {
@@ -138,32 +151,75 @@ body {
 }
 
 .stat-icon {
-  width: 45px;
-  height: 45px;
-  background-color: #f8fafc;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #000000;
-  flex-shrink: 0;
+  font-size: 24px;
 }
 
+.stat-card-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
 .stat-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   flex: 1;
 }
-
 .stat-number {
   font-size: 32px;
   font-weight: 700;
-  color: #1f2937;
-  line-height: 1;
+  color: #1e293b;
+  line-height: 1.2;
 }
 
 .stat-label {
   font-size: 14px;
-  color: #6b7280;
+  color: #64748b;
   font-weight: 500;
+}
+.stat-sublabel {
+  font-size: 12px;
+  color: #94a3b8;
   margin-top: 2px;
+}
+.stat-card:nth-child(1)::before {
+  background-color: #3b82f6; /* Blue for Customers */
+}
+.stat-card:nth-child(1) .stat-icon {
+  background-color: #eff6ff;
+  color: #3b82f6;
+}
+
+.stat-card:nth-child(2)::before {
+  background-color: #8b5cf6; /* Purple for Orders */
+}
+.stat-card:nth-child(2) .stat-icon {
+  background-color: #f5f3ff;
+  color: #8b5cf6;
+}
+
+.stat-card:nth-child(3)::before {
+  background-color: #10b981; /* Green for Total Sales */
+}
+.stat-card:nth-child(3) .stat-icon {
+  background-color: #f0fdf4;
+  color: #10b981;
+}
+
+.stat-card:nth-child(4)::before {
+  background-color: #f59e0b; /* Orange for Weekly Sales */
+}
+.stat-card:nth-child(4) .stat-icon {
+  background-color: #fffbeb;
+  color: #f59e0b;
 }
 
 /* Charts Grid */
