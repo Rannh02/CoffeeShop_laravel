@@ -1,0 +1,59 @@
+databases:
+  - name: coffee-pos-db
+    plan: free
+    databaseName: Coffee_POS
+    user: coffee_pos_user
+
+services:
+  - type: web
+    name: coffee-pos-app
+    env: php
+    plan: free
+    buildCommand: |
+      composer install --optimize-autoloader --no-dev
+      npm ci
+      npm run build
+      php artisan config:cache
+      php artisan route:cache
+      php artisan view:cache
+    startCommand: |
+      php artisan migrate --force
+      php artisan serve --host=0.0.0.0 --port=$PORT
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_KEY
+        generateValue: true
+      - key: APP_URL
+        fromService:
+          type: web
+          name: coffee-pos-app
+          property: host
+      - key: DB_CONNECTION
+        value: mysql
+      - key: DB_HOST
+        fromDatabase:
+          name: coffee-pos-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: coffee-pos-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: coffee-pos-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: coffee-pos-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: coffee-pos-db
+          property: password
+      - key: SESSION_DRIVER
+        value: database
+      - key: CACHE_STORE
+        value: database
