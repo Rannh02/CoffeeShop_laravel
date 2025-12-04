@@ -28,9 +28,6 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # Install Laravel dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Cache config for production
-RUN php artisan config:cache
-
 # Create storage symlink
 RUN php artisan storage:link || true
 
