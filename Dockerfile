@@ -28,15 +28,17 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # Install Laravel dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Create storage symlink (important for images)
+# Cache config for production
+RUN php artisan config:cache
+
+# Create storage symlink
 RUN php artisan storage:link || true
 
-# Permissions fix - THIS IS CRITICAL!
+# Permissions fix
 RUN chown -R www-data:www-data /var/www/html/storage \
     /var/www/html/bootstrap/cache \
     /var/www/html/public
 
-# Set proper permissions for public assets
 RUN chmod -R 755 /var/www/html/public
 
 EXPOSE 10000
