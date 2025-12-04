@@ -328,7 +328,7 @@
                     const name = this.getAttribute('data-category-name');
                     updateNameInput.value = name;
                     updateForm.action = '/admin/category/' + id + '/update';
-                    updateModal.style.display = 'block';
+                    updateModal.style.display = 'flex';
                 });
             });
 
@@ -348,7 +348,7 @@
                     const name = this.getAttribute('data-category-name');
                     deleteNameSpan.textContent = name;
                     deleteForm.action = '/admin/category/' + id;
-                    deleteModal.style.display = 'block';
+                    deleteModal.style.display = 'flex';
                 });
             });
 
