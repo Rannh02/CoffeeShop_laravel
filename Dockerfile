@@ -1,5 +1,7 @@
 FROM php:8.2-apache
-RUN apt-get update && apt-get install -y \ git unzip libpq-dev zip\ && docker-php-ext-install pdo pdo_pgsql zip
+RUN apt-get update && apt-get install -y \ 
+    git unzip libpq-dev libzip-dev zip \
+    && docker-php-ext-install pdo pdo_mysql pdo_pgsql zip
 RUN a2enmod rewrite
 RUN sed -i 's|/var/www/html|/var/www/public|g' /etc/apache2/sites-available/000-default.conf\ && sed -i 's|/var/www/html|/var/www/public|g' /etc/apache2.conf
 
