@@ -5,17 +5,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Welcome</title>
   <link rel="stylesheet" href="{{ asset('LoginSystemcss/Admin.css') }}">
+  <style>
+    /* Ensure images are visible */
+    .background-image {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1;
+      filter: blur(3px);
+    }
+    
+    .image-section img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+  </style>
 </head>
 <body>
 
-
-  <!-- PAKI TRANSPARENT GD ANG CONTAINER ANI PAREHAS SA REGISTER CASHIER UG ADMIN THANKS -->
-  <img src="../Images/CoffeeShop.png" alt="Coffee Shop" 
-       style="position: fixed; width: 100%; height: 100%; z-index: -1; filter: blur(3px); box-shadow: none;">
+  <!-- Background Image -->
+  <img src="{{ asset('images/CoffeeShop.png') }}" alt="Coffee Shop" class="background-image">
+  
   <div class="container">
     <div class="image-section">
-      <img src="../Images/CoffeeCup.jpg" alt="Coffee Cup" 
-           style="width: 100%; height: 100%; object-fit: cover;">
+      <img src="{{ asset('images/CoffeeCup.jpg') }}" alt="Coffee Cup">
     </div>
     <div class="login-section">
       <h1>Welcome to Berde Kopi</h1>
@@ -24,16 +42,13 @@
         <a href="{{ route('cashier.login') }}">
             <button type="button">Cashier</button>
         </a>
-            <span>or</span>
+        <span>or</span>
         <a href="{{ route('login.admin') }}">
             <button type="button">Admin</button>
         </a>
-
-    
-        
       </div>
       <div class="watermark">
-          <a>©CoffeePOS 2025<a>
+          <span>©CoffeePOS 2025</span>
       </div>
     </div>
   </div>
