@@ -7,31 +7,32 @@ RUN apt-get update && apt-get install -y \
 
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
+
+# Point DocumentRoot to Laravel public folder
 RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|g' \
     /etc/apache2/sites-available/000-default.conf
 
-# Update DocumentRoot to Laravel's public folder
-RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
+# Allow .htaccess inside public/ to work
+RUN echo "<Directory /var/www/html/public>" >> /etc/apache2/apache2.conf \
+    && echo "    AllowOverride All" >> /etc/apache2/apache2.conf \
+    && echo "</Directory>" >> /etc/apache2/apache2.conf
 
 # Copy project files
 COPY . /var/www/html/
 
-# Create uploads folder and permissions
-RUN mkdir -p /var/www/html/public/uploads \
-    && chown -R www-data:www-data /var/www/html/public/uploads \
-    && chmod -R 775 /var/www/html/public/uploads
-
-# Copy composer from official image
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-
 WORKDIR /var/www/html
+
+# Install Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Install Laravel dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Fix permissions for Laravel
+# Create storage symlink
+RUN php artisan storage:link || true
+
+# Fix permissions
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 EXPOSE 10000
-
 CMD ["apache2-foreground"]
