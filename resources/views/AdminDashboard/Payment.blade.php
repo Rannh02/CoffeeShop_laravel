@@ -92,7 +92,6 @@
                 <a href="{{ route('admin.archived') }}" class="nav-item"><i class="bi bi-person-x"></i> Employee Archived</a>
                 <a href="{{ route('admin.inventory') }}" class="nav-item"><i class="bi bi-cart-check"></i> Inventory</a>
                 <a href="{{ route('admin.ingredients') }}" class="nav-item"><i class="bi bi-check2-square"></i> Ingredients</a>
-                <a href="{{ route('suppliers.index') }}" class="nav-item"><i class="bi bi-box-fill"></i> Supplier</a>
                 <a href="{{ route('admin.payment') }}" class="nav-item active"><i class="bi bi-cash-coin"></i> Payment</a>
                 <a href="{{ route('admin.category') }}" class="nav-item"><i class="bi bi-tags"></i> Category</a>
                 <a href="{{ route('admin.logout') }}" class="nav-item logout">
@@ -137,25 +136,35 @@
                 <table class="products-table">
                     <thead>
                         <tr>
-                            <th>Payment_id</th>
-                            <th>Order_id</th>
+                            <th>Order ID</th>
+                            <th>Customer ID</th>
+                            <th>Employee ID</th>
+                            <th>Customer Name</th>
+                            <th>Order Date</th>
+                            <th>Total Amount</th>
+                            <th>Order Type</th>
                             <th>Payment Method</th>
-                            <th>Amount</th>
+                            <th>Amount Paid</th>
                             <th>Transaction Reference</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($payments as $payment)
                             <tr>
-                                <td>{{ $payment->Payment_id }}</td>
                                 <td>{{ $payment->Order_id }}</td>
+                                <td>{{ $payment->order->Customer_id ?? '-' }}</td>
+                                <td>{{ $payment->order->Employee_id ?? '-' }}</td>
+                                <td>{{ $payment->order->Customer_name ?? '-' }}</td>
+                                <td>{{ $payment->order->Order_date ? \Carbon\Carbon::parse($payment->order->Order_date)->format('Y-m-d H:i:s') : '-' }}</td>
+                                <td>₱{{ number_format($payment->order->TotalAmount ?? 0, 2) }}</td>
+                                <td>{{ $payment->order->Order_Type ?? '-' }}</td>
                                 <td>{{ $payment->PaymentMethod ?? '-' }}</td>
-                                <td>{{ number_format($payment->AmountPaid ?? 0, 2) }}</td>
+                                <td>₱{{ number_format($payment->AmountPaid ?? 0, 2) }}</td>
                                 <td>{{ $payment->TransactionReference ?? '-' }}</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" style="text-align: center;">No payment records found</td>
+                                <td colspan="10" style="text-align: center;">No payment records found</td>
                             </tr>
                         @endforelse
                     </tbody>

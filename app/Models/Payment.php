@@ -19,4 +19,10 @@ class Payment extends Model
         'PaymentDate',
         'TransactionReference'
     ];
+
+    // Relationship with Order
+    public function order()
+    {
+        return $this->belongsTo(Order::class, 'Order_id', 'Order_id');
+    }
 }
