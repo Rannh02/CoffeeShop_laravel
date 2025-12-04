@@ -143,6 +143,8 @@
                             <tr>
                                 <th>Category ID</th>
                                 <th>Category Name</th>
+                                <th>Update</th>
+                                <th>Delete</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -150,10 +152,16 @@
                                 <tr>
                                     <td>{{ $category->Category_id }}</td>
                                     <td>{{ $category->Category_name }}</td>
+                                    <td>
+                                        <button class="update-btn" data-category-id="{{ $category->Category_id }}" data-category-name="{{ $category->Category_name }}">Update</button>
+                                    </td>
+                                    <td>
+                                        <button class="delete-btn" data-category-id="{{ $category->Category_id }}" data-category-name="{{ $category->Category_name }}">Delete</button>
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="2" style="text-align: center;">No categories found.</td>
+                                    <td colspan="4" style="text-align: center;">No categories found.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -204,6 +212,38 @@
                 </div>
             </form>
         </div>
+
+        <!-- Update Category Modal -->
+        <div id="UpdateCategoryModal" class="modal-overlay" style="display:none;">
+            <form id="updateCategoryForm" method="POST" class="modal-content">
+                @csrf
+                <span class="close-button" id="closeUpdateCategoryModal">&times;</span>
+                <h2>Update Category</h2>
+                @method('POST')
+                <label for="update_Category_name">Category Name:</label>
+                <input type="text" id="update_Category_name" name="Category_name" required>
+                <div class="btn-group">
+                    <button type="submit" class="submit-btn">Update Category</button>
+                    <button type="button" class="cancel-btn" id="cancelUpdateCategoryBtn">Cancel</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div id="DeleteCategoryModal" class="modal-overlay" style="display:none;">
+            <div class="modal-content">
+                <h2>Confirm Deletion</h2>
+                <p>Are you sure you want to delete <strong id="deleteCategoryName"></strong>?</p>
+                <form id="deleteCategoryForm" method="POST" action="">
+                    @csrf
+                    @method('DELETE')
+                    <div class="btn-group">
+                        <button type="submit" class="submit-btn">Yes, Delete</button>
+                        <button type="button" class="cancel-btn" id="cancelDeleteCategoryBtn">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
     <!-- JavaScript files -->
@@ -230,6 +270,49 @@
             if (e.key === 'Enter') {
                 performSearch();
             }
+        });
+        
+        // Update & Delete handlers for categories
+        document.addEventListener('DOMContentLoaded', function () {
+            // Update
+            const updateButtons = document.querySelectorAll('.update-btn');
+            const updateModal = document.getElementById('UpdateCategoryModal');
+            const updateForm = document.getElementById('updateCategoryForm');
+            const updateNameInput = document.getElementById('update_Category_name');
+            const closeUpdate = document.getElementById('closeUpdateCategoryModal');
+            const cancelUpdate = document.getElementById('cancelUpdateCategoryBtn');
+
+            updateButtons.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const id = this.getAttribute('data-category-id');
+                    const name = this.getAttribute('data-category-name');
+                    updateNameInput.value = name;
+                    updateForm.action = '/admin/category/' + id + '/update';
+                    updateModal.style.display = 'block';
+                });
+            });
+
+            if (closeUpdate) closeUpdate.addEventListener('click', () => updateModal.style.display = 'none');
+            if (cancelUpdate) cancelUpdate.addEventListener('click', () => updateModal.style.display = 'none');
+
+            // Delete
+            const deleteButtons = document.querySelectorAll('.delete-btn');
+            const deleteModal = document.getElementById('DeleteCategoryModal');
+            const deleteForm = document.getElementById('deleteCategoryForm');
+            const deleteNameSpan = document.getElementById('deleteCategoryName');
+            const cancelDelete = document.getElementById('cancelDeleteCategoryBtn');
+
+            deleteButtons.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const id = this.getAttribute('data-category-id');
+                    const name = this.getAttribute('data-category-name');
+                    deleteNameSpan.textContent = name;
+                    deleteForm.action = '/admin/category/' + id;
+                    deleteModal.style.display = 'block';
+                });
+            });
+
+            if (cancelDelete) cancelDelete.addEventListener('click', () => deleteModal.style.display = 'none');
         });
     </script>
 </body>
