@@ -59,6 +59,46 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
     </style>
+    <style>
+        /* Modal centering and styling */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 20px;
+            max-width: 720px;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        /* Close button position inside modal-content */
+        .modal-content .close-button {
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            font-size: 22px;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+        }
+
+        /* Small screens: make modal full height scrollable */
+        @media (max-width: 480px) {
+            .modal-content { max-width: 100%; height: auto; margin: 0 8px; }
+        }
+    </style>
 </head>
 <body>
     <div id="app">
