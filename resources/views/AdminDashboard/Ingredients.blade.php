@@ -211,15 +211,14 @@
             <label>Unit</label>
             <select name="Unit" required>
                 <option value="" disabled selected>Select Unit</option>
-                <option value="Kilo">Kilo</option>
+                <option value="Box"></option>
                 <option value="Gram">Gram</option>
-                <option value="Liter">Liter</option>
+
                 <option value="Milliliter">Milliliter</option>
                 <option value="Piece">Piece</option>
                 <option value="Pack">Pack</option>
                 <option value="Teaspoon">Teaspoon</option>
                 <option value="Tablespoon">Tablespoon</option>
-                <option value="Box">Box</option>
             </select>
 
             <label>Reorder Level</label>
