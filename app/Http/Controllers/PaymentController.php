@@ -116,23 +116,8 @@ class PaymentController extends Controller
             $amountPaid = $request->input('amountPaid', $discountedAmount);
             $transactionReference = $request->input('transactionReference');
 
-            // Get the current employee (cashier) ID from session
-            $employeeId = Session::get('cashier_id');
-            
-            // Get or create customer record if customer name is not "Guest"
-            $customerId = null;
-            if ($customerName !== 'Guest') {
-                $customer = \App\Models\Customer::firstOrCreate(
-                    ['Customer_name' => $customerName],
-                    ['Customer_name' => $customerName, 'Phone_number' => null]
-                );
-                $customerId = $customer->Customer_id;
-            }
-
-            // Create the order with employee_id and customer_id
+            // Create the order with the discounted amount
             $order = Order::create([
-                'Customer_id' => $customerId,
-                'Employee_id' => $employeeId,
                 'Customer_name' => $customerName,
                 'Order_Type' => $orderType,
                 'TotalAmount' => $discountedAmount,

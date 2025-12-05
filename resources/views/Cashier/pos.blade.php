@@ -176,13 +176,13 @@
 
     <!-- Place Order Confirmation Modal -->
     <div id="placeOrderModal" class="modal-overlay" style="display:none;">
-        <div class="modal-content" style="width: 300px; padding: 30px 20px; max-height: 200px;">
-            <h2 style="display:none;">Order Placed!</h2>
-            <p style="display:none;">Your order has been successfully placed.</p>
+        <div class="modal-content">
+            <h2>Order Placed!</h2>
+            <p>Your order has been successfully placed.</p>
             <div id="receipt" style="display:none; margin-top: 20px; font-family: monospace; white-space: pre-wrap;"></div>
-            <div class="modal-buttons" style="display: flex; gap: 10px; justify-content: center;">
-                <button id="printReceipt" class="btn btn-primary" style="flex: 1;">Print Receipt</button>
-                <button id="continueOrder" class="btn btn-secondary" style="flex: 1;">Continue</button>
+            <div class="modal-buttons">
+                <button id="printReceipt" class="btn btn-primary">Print Receipt</button>
+                <button id="continueOrder" class="btn btn-secondary">Continue</button>
             </div>
         </div>
     </div>

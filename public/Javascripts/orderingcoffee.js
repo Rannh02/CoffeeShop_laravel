@@ -33,11 +33,26 @@ document.addEventListener('DOMContentLoaded', () => {
     return 'Dine In'; // Default
   }
 
-  // Calculate discount based on PWD/Senior Citizen checkboxes
-  function getDiscount() {
-    const isPWD = document.getElementById('pwdCheckbox')?.checked || false;
-    const isSenior = document.getElementById('seniorCheckbox')?.checked || false;
-    return (isPWD || isSenior) ? 0.12 : 0; // 12% discount
+  // ✅ NEW: Get active discounts
+  function getActiveDiscounts() {
+    const pwdCheckbox = document.getElementById('pwdCheckbox');
+    const seniorCheckbox = document.getElementById('seniorCheckbox');
+    
+    const discounts = [];
+    if (pwdCheckbox && pwdCheckbox.checked) discounts.push('PWD');
+    if (seniorCheckbox && seniorCheckbox.checked) discounts.push('Senior Citizen');
+    
+    return discounts;
+  }
+
+  // ✅ NEW: Calculate discount amount (20% for PWD or Senior)
+  function calculateDiscount(subtotal) {
+    const discounts = getActiveDiscounts();
+    
+    if (discounts.length > 0) {
+      return subtotal * 0.20; // 20% discount
+    }
+    return 0;
   }
 
   // ✅ FIXED: Get order items from localStorage (where orderSystem.js stores them)
@@ -53,40 +68,73 @@ document.addEventListener('DOMContentLoaded', () => {
     }));
   }
 
-  // ✅ FIXED: Get order items from localStorage (where orderSystem.js stores them)
-  function getOrderItems() {
-    const savedOrders = JSON.parse(localStorage.getItem("orders")) || [];
+  // ✅ NEW: Update totals with discount calculation
+  function updateTotals() {
+    const items = getOrderItems();
+    let subtotal = 0;
+    items.forEach(it => subtotal += it.price * it.qty);
     
-    console.log('📦 Retrieved orders from localStorage:', savedOrders);
+    const discount = calculateDiscount(subtotal);
+    const subtotalAfterDiscount = subtotal - discount;
+    const vat = subtotalAfterDiscount * 0.12;
+    const total = subtotalAfterDiscount + vat;
     
-    return savedOrders.map(item => ({
-      name: item.name,
-      qty: item.quantity,
-      price: item.price
-    }));
+    const totalPriceElement = document.getElementById('totalPrice');
+    if (totalPriceElement) {
+      totalPriceElement.textContent = fmt(total);
+    }
+    
+    // Update change
+    const amountPaid = parseFloat(document.getElementById('amountPaid')?.value || 0);
+    const change = Math.max(0, amountPaid - total);
+    const changePriceElement = document.getElementById('changePrice');
+    if (changePriceElement) {
+      changePriceElement.textContent = fmt(change);
+    }
+    
+    // Update discount display if element exists
+    const discountElement = document.getElementById('discountAmount');
+    if (discountElement) {
+      discountElement.textContent = fmt(discount);
+    }
+  }
+
+  // ✅ NEW: Add event listeners for discount checkboxes
+  const pwdCheckbox = document.getElementById('pwdCheckbox');
+  const seniorCheckbox = document.getElementById('seniorCheckbox');
+  
+  if (pwdCheckbox) {
+    pwdCheckbox.addEventListener('change', updateTotals);
+  }
+  
+  if (seniorCheckbox) {
+    seniorCheckbox.addEventListener('change', updateTotals);
+  }
+
+  // ✅ NEW: Add event listener for amount paid to recalculate change
+  const amountPaidInput = document.getElementById('amountPaid');
+  if (amountPaidInput) {
+    amountPaidInput.addEventListener('input', updateTotals);
   }
 
   // Build receipt HTML
   function buildReceiptHtml() {
     const customerName = (document.getElementById('customerName')?.value.trim()) || 'Guest';
-    // Extract only the first span text (the actual staff name) from .staff-name
-    const cashierNameSpan = document.querySelector('.staff-name > span');
-    const cashierName = (cashierNameSpan?.textContent.trim()) || 'Cashier';
+    const cashierName = (document.querySelector('.staff-name')?.textContent.trim()) || 'Cashier';
     const orderType = getOrderType();
     const items = getOrderItems();
+    const discounts = getActiveDiscounts();
 
     let subtotal = 0;
     items.forEach(it => subtotal += it.price * it.qty);
-    const vat = subtotal * 0.12;
-    let total = subtotal + vat;
-
-    // Apply discount if PWD or Senior Citizen
-    const discountRate = getDiscount();
-    const discountAmount = total * discountRate;
-    const finalTotal = total - discountAmount;
+    
+    const discountAmount = calculateDiscount(subtotal);
+    const subtotalAfterDiscount = subtotal - discountAmount;
+    const vat = subtotalAfterDiscount * 0.12;
+    const total = subtotalAfterDiscount + vat;
 
     const amountPaid = parseFloat(document.getElementById('amountPaid')?.value || 0);
-    const change = Math.max(0, amountPaid - finalTotal);
+    const change = Math.max(0, amountPaid - total);
 
     const now = new Date();
     const dateStr = now.toLocaleDateString();
@@ -105,6 +153,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!items.length) itemRowsHtml = `<div style="text-align:center; color:#999;">(No items)</div>`;
 
+    // ✅ NEW: Add discount section to receipt
+    let discountSection = '';
+    if (discountAmount > 0) {
+      const discountLabel = discounts.join(' + ') + ' Discount (20%)';
+      discountSection = `
+        <div style="display:flex; justify-content:space-between; margin:3px 0; color:#d32f2f;">
+          <span>${discountLabel}:</span>
+          <span>-${fmt(discountAmount)}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin:3px 0;">
+          <span>Subtotal After Discount:</span>
+          <span>${fmt(subtotalAfterDiscount)}</span>
+        </div>`;
+    }
+
     return `
       <div style="width:320px; margin:auto; font-family:monospace; font-size:13px; padding:20px;">
         <div style="text-align:center; font-weight:bold; font-size:18px; margin-bottom:5px;">BERDE KOPI</div>
@@ -112,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <hr style="border:1px dashed #333; margin:10px 0;">
         <div style="font-size:11px; line-height:1.6;">
           Date: ${dateStr} ${timeStr}<br>
-          Cashier: ${escapeHtml(cashierName)}<br>
+          Cashier: ${cashierName}<br>
           Customer: ${customerName}<br>
           Type: ${orderType}
         </div>
@@ -123,6 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <span>Subtotal:</span>
           <span>${fmt(subtotal)}</span>
         </div>
+        ${discountSection}
         <div style="display:flex; justify-content:space-between; margin:3px 0;">
           <span>VAT (12%):</span>
           <span>${fmt(vat)}</span>
@@ -131,16 +195,6 @@ document.addEventListener('DOMContentLoaded', () => {
           <span>TOTAL:</span>
           <span>${fmt(total)}</span>
         </div>
-        ${discountAmount > 0 ? `
-        <div style="display:flex; justify-content:space-between; color:#d9534f; margin:3px 0;">
-          <span>Discount (12%):</span>
-          <span>-${fmt(discountAmount)}</span>
-        </div>
-        <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:15px; margin:5px 0; color:#28a745;">
-          <span>FINAL TOTAL:</span>
-          <span>${fmt(finalTotal)}</span>
-        </div>
-        ` : ''}
         <hr style="border:1px dashed #333; margin:10px 0;">
         <div style="display:flex; justify-content:space-between; margin:3px 0;">
           <span>Cash:</span>
@@ -160,11 +214,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const customerName = document.getElementById('customerName')?.value.trim() || 'Guest';
     const orderType = getOrderType();
     const items = getOrderItems();
+    const discounts = getActiveDiscounts();
 
     console.log('📤 Preparing to save order...');
     console.log('Customer:', customerName);
     console.log('Order Type:', orderType);
     console.log('Items:', items);
+    console.log('Discounts:', discounts);
 
     if (items.length === 0) {
       console.error('❌ No items in order!');
@@ -174,22 +230,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let subtotal = 0;
     items.forEach(it => subtotal += it.price * it.qty);
-    const vat = subtotal * 0.12;
-    let total = subtotal + vat;
+    
+    const discountAmount = calculateDiscount(subtotal);
+    const subtotalAfterDiscount = subtotal - discountAmount;
+    const vat = subtotalAfterDiscount * 0.12;
+    const total = subtotalAfterDiscount + vat;
 
-    // Apply discount if PWD or Senior Citizen
-    const isPWD = document.getElementById('pwdCheckbox')?.checked || false;
-    const isSenior = document.getElementById('seniorCheckbox')?.checked || false;
-    if (isPWD || isSenior) {
-      const discountAmount = total * 0.12;
-      total = total - discountAmount;
-      console.log('✅ Discount applied:', isPWD ? 'PWD' : 'Senior Citizen');
+    const amountPaid = parseFloat(document.getElementById('amountPaid')?.value || 0);
+
+    // ✅ NEW: Get payment method and transaction reference
+    let paymentMethod = 'Cash'; // Default
+    let transactionReference = `CASH-${Date.now()}`; // Default
+    
+    // Check if payment method functions exist
+    if (typeof window.getPaymentMethod === 'function') {
+      paymentMethod = window.getPaymentMethod();
     }
+    
+    if (typeof window.getTransactionReference === 'function') {
+      try {
+        transactionReference = window.getTransactionReference();
+      } catch (error) {
+        alert(error.message);
+        return false;
+      }
+    }
+
+    console.log('💳 Payment Method:', paymentMethod);
+    console.log('📝 Transaction Reference:', transactionReference);
 
     const orderData = {
       customer_name: customerName,
       order_type: orderType,
       total: total,
+      amount_paid: amountPaid,
+      payment_date: new Date().toISOString(),
+      payment_method: paymentMethod,
+      transaction_reference: transactionReference,
       orders: items.map(it => ({
         name: it.name,
         quantity: it.qty,
@@ -200,52 +277,26 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('📦 Order data to send:', orderData);
 
     try {
-      // Determine payment method and transaction reference
-      const storedPaymentType = localStorage.getItem('paymentType');
-      let paymentMethodToSend = 'Cash';
-      let transactionRefToSend = null;
-      if (storedPaymentType === 'Card') {
-        paymentMethodToSend = 'Card';
-        transactionRefToSend = document.getElementById('cardNumber')?.value || null;
-      } else if (storedPaymentType === 'GCash') {
-        paymentMethodToSend = 'GCash';
-        transactionRefToSend = document.getElementById('referenceNumber')?.value || null;
-      }
-
-      const amountPaidInput = parseFloat(document.getElementById('amountPaid')?.value || orderData.total);
-
-      const payload = {
-        customerName: customerName,
-        orderType: orderType,
-        totalAmount: total,
-        orders: orderData.orders,
-        paymentMethod: paymentMethodToSend,
-        amountPaid: amountPaidInput,
-        transactionReference: transactionRefToSend,
-        isPWD: isPWD,
-        isSenior: isSenior
-      };
-
-      const response = await fetch('/api/orders/payment', {
+      const response = await fetch('/cashier/place-order', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(orderData)
       });
 
       console.log('📡 Response status:', response.status);
 
-      const data = await response.json().catch(() => ({}));
+      const data = await response.json();
       console.log('📥 Response data:', data);
 
-      if (response.ok && data.status === 'success') {
+      if (data.success) {
         console.log('✅ Order saved successfully! Order ID:', data.order_id);
         return true;
       } else {
-        console.error('❌ Failed to save order:', data.message || data);
-        alert('Failed to save order: ' + (data.message || 'Server error'));
+        console.error('❌ Failed to save order:', data.message);
+        alert('Failed to save order: ' + data.message);
         return false;
       }
     } catch (err) {
@@ -281,23 +332,23 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
+      // ✅ NEW: Validate payment method (Card/QR inputs)
+      if (typeof window.validatePaymentMethod === 'function') {
+        if (!window.validatePaymentMethod()) {
+          return; // Stop if payment method validation fails
+        }
+      }
+
       let subtotal = 0;
       items.forEach(it => subtotal += it.price * it.qty);
-      const total = subtotal + (subtotal * 0.12);
       
-      // Apply discount if PWD or Senior Citizen
-      const isPWD = document.getElementById('pwdCheckbox')?.checked || false;
-      const isSenior = document.getElementById('seniorCheckbox')?.checked || false;
-      let finalTotal = total;
-      if (isPWD || isSenior) {
-        const discountAmount = total * 0.12;
-        finalTotal = total - discountAmount;
-      }
-      
+      const discountAmount = calculateDiscount(subtotal);
+      const subtotalAfterDiscount = subtotal - discountAmount;
+      const total = subtotalAfterDiscount + (subtotalAfterDiscount * 0.12);
       const amountPaid = parseFloat(document.getElementById('amountPaid')?.value || 0);
 
-      if (amountPaid < finalTotal) {
-        alert(`Insufficient payment!\nTotal: ${fmt(finalTotal)}\nPaid: ${fmt(amountPaid)}`);
+      if (amountPaid < total) {
+        alert(`Insufficient payment!\nTotal: ${fmt(total)}\nPaid: ${fmt(amountPaid)}`);
         document.getElementById('amountPaid')?.focus();
         return;
       }
@@ -310,9 +361,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const success = await saveOrderToDatabase();
 
       if (success) {
-        // Build receipt but keep it hidden (only for printing)
+        // Show receipt
         receiptDiv.innerHTML = buildReceiptHtml();
-        receiptDiv.style.display = 'none';
+        receiptDiv.style.display = 'block';
         modal.style.display = 'flex';
       }
 
@@ -335,6 +386,7 @@ document.addEventListener('DOMContentLoaded', () => {
       printWindow.focus();
       setTimeout(() => {
         printWindow.print();
+        printWindow.close();
       }, 300);
     });
   }
@@ -362,11 +414,16 @@ document.addEventListener('DOMContentLoaded', () => {
       if (amountPaid) amountPaid.value = '';
       if (customerName) customerName.value = '';
       
-      // Clear discount checkboxes
+      // ✅ NEW: Clear discount checkboxes
       const pwdCheckbox = document.getElementById('pwdCheckbox');
       const seniorCheckbox = document.getElementById('seniorCheckbox');
       if (pwdCheckbox) pwdCheckbox.checked = false;
       if (seniorCheckbox) seniorCheckbox.checked = false;
+      
+      // ✅ NEW: Reset payment method
+      if (typeof window.resetPaymentMethod === 'function') {
+        window.resetPaymentMethod();
+      }
       
       // ✅ IMPORTANT: Clear localStorage
       localStorage.removeItem("orders");
