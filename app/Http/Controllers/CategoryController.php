@@ -51,38 +51,4 @@ class CategoryController extends Controller
             return back()->with('error', 'Error adding category: ' . $e->getMessage());
         }
     }
-
-      // Update category
-    public function update(Request $request, $id)
-    {
-        $request->validate([
-            'Category_name' => 'required|string|max:255',
-        ]);
-
-        try {
-            $category = Category::findOrFail($id);
-            $category->Category_name = $request->input('Category_name');
-            $category->save();
-
-            return redirect()->route('admin.category')->with('success', 'Category updated successfully.');
-        } catch (\Exception $e) {
-            Log::error('Category Update Error: ' . $e->getMessage());
-            return back()->with('error', 'Error updating category: ' . $e->getMessage());
-        }
-    }
-
-    // Delete category
-    public function destroy($id)
-    {
-        try {
-            $category = Category::findOrFail($id);
-            $category->delete();
-
-            return redirect()->route('admin.category')->with('success', 'Category deleted successfully.');
-        } catch (\Exception $e) {
-            Log::error('Category Destroy Error: ' . $e->getMessage());
-            return back()->with('error', 'Error deleting category: ' . $e->getMessage());
-        }
-    }
-
 }

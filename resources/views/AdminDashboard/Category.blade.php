@@ -59,6 +59,46 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
     </style>
+    <style>
+        /* Modal centering and styling */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 20px;
+            max-width: 720px;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        /* Close button position inside modal-content */
+        .modal-content .close-button {
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            font-size: 22px;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+        }
+
+        /* Small screens: make modal full height scrollable */
+        @media (max-width: 480px) {
+            .modal-content { max-width: 100%; height: auto; margin: 0 8px; }
+        }
+    </style>
 </head>
 <body>
     <div id="app">
@@ -270,49 +310,6 @@
             if (e.key === 'Enter') {
                 performSearch();
             }
-        });
-        
-        // Update & Delete handlers for categories
-        document.addEventListener('DOMContentLoaded', function () {
-            // Update
-            const updateButtons = document.querySelectorAll('.update-btn');
-            const updateModal = document.getElementById('UpdateCategoryModal');
-            const updateForm = document.getElementById('updateCategoryForm');
-            const updateNameInput = document.getElementById('update_Category_name');
-            const closeUpdate = document.getElementById('closeUpdateCategoryModal');
-            const cancelUpdate = document.getElementById('cancelUpdateCategoryBtn');
-
-            updateButtons.forEach(btn => {
-                btn.addEventListener('click', function () {
-                    const id = this.getAttribute('data-category-id');
-                    const name = this.getAttribute('data-category-name');
-                    updateNameInput.value = name;
-                    updateForm.action = '/admin/category/' + id + '/update';
-                    updateModal.style.display = 'block';
-                });
-            });
-
-            if (closeUpdate) closeUpdate.addEventListener('click', () => updateModal.style.display = 'none');
-            if (cancelUpdate) cancelUpdate.addEventListener('click', () => updateModal.style.display = 'none');
-
-            // Delete
-            const deleteButtons = document.querySelectorAll('.delete-btn');
-            const deleteModal = document.getElementById('DeleteCategoryModal');
-            const deleteForm = document.getElementById('deleteCategoryForm');
-            const deleteNameSpan = document.getElementById('deleteCategoryName');
-            const cancelDelete = document.getElementById('cancelDeleteCategoryBtn');
-
-            deleteButtons.forEach(btn => {
-                btn.addEventListener('click', function () {
-                    const id = this.getAttribute('data-category-id');
-                    const name = this.getAttribute('data-category-name');
-                    deleteNameSpan.textContent = name;
-                    deleteForm.action = '/admin/category/' + id;
-                    deleteModal.style.display = 'block';
-                });
-            });
-
-            if (cancelDelete) cancelDelete.addEventListener('click', () => deleteModal.style.display = 'none');
         });
     </script>
 </body>

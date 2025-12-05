@@ -103,9 +103,6 @@ Route::prefix('admin')->group(function () {
     // ✅ Category
     Route::get('/category', [CategoryController::class, 'index'])->name('admin.category');
     Route::post('/category', [CategoryController::class, 'store'])->name('category.store');
-     // Update & Delete for Category
-    Route::post('/category/{Category_id}/update', [CategoryController::class, 'update'])->name('category.update');
-    Route::delete('/category/{Category_id}', [CategoryController::class, 'destroy'])->name('category.destroy');
 
     // ✅ Inventory
     Route::get('/inventory', [InventoryController::class, 'index'])->name('admin.inventory');

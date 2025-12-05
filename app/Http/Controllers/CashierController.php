@@ -159,8 +159,8 @@ class CashierController extends Controller
         'categorySlug' => $categorySlug
     ]);
 
-    // ✅ FIXED: Changed from 'cashier.pos' to 'cashier'
-    return view('cashier.pos', compact('staffName', 'categories', 'products', 'selectedCategory', 'categorySlug'));
+    // FIXED: Use correct view folder case to match resources/views/Cashier/pos.blade.php
+    return view('Cashier.pos', compact('staffName', 'categories', 'products', 'selectedCategory', 'categorySlug'));
 }
 
     /**
