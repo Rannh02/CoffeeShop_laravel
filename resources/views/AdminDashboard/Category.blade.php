@@ -64,7 +64,7 @@
            This is robust even when ancestors create stacking contexts or transform contexts. */
         #UpdateCategoryModal,
         #DeleteCategoryModal {
-            display: none !important;
+            display: none;
             position: fixed !important;
             top: 0 !important;
             left: 0 !important;
