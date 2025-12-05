@@ -60,29 +60,33 @@
         }
     </style>
     <style>
-        /* Ensure Update/Delete modals are centered and on top */
+        /* Ensure Update/Delete modals are centered and on top (use viewport units and transform centering)
+           This is robust even when ancestors create stacking contexts or transform contexts. */
         #UpdateCategoryModal,
         #DeleteCategoryModal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.45);
-            z-index: 10000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+            display: none !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            background: rgba(0, 0, 0, 0.45) !important;
+            z-index: 10000 !important;
+            padding: 0 !important;
+            overflow: visible !important;
         }
 
+        /* Center the modal-content using transform (independent of flex or ancestor layouts) */
         #UpdateCategoryModal .modal-content,
         #DeleteCategoryModal .modal-content {
-            max-width: 600px;
-            width: 100%;
-            margin: 0;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            position: absolute !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            max-width: 600px !important;
+            width: calc(100% - 40px) !important; /* small side padding */
+            margin: 0 !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25) !important;
         }
     </style>
 </head>
