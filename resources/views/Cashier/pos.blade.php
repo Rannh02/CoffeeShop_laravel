@@ -190,8 +190,8 @@
     <script src="{{ asset('Javascripts/RealTime.js') }}"></script>
     <script src="{{ asset('Javascripts/orderSystem.js') }}"></script>
     <script src="{{ asset('Javascripts/QRlogic.js') }}"></script>
-    <script src="{{ asset('Javascripts/OrderTypeButton.js') }}"></script>
-    <script src="{{ asset('Javascripts/Inputs.js') }}"></script>
+    <script src="{{ asset('Javascripts/orderTypeButton.js') }}"></script>
+    <script src="{{ asset('Javascripts/inputs.js') }}"></script>
     <script src="{{ asset('Javascripts/paymentMethod.js') }}"></script>
     <script src="{{ asset('Javascripts/placeordermodal.js') }}"></script>
     <script src="{{ asset('Javascripts/orderingcoffee.js') }}"></script>
