@@ -194,7 +194,7 @@ class CashierController extends Controller
         // ✅ UPDATED: Added payment fields to validation
         $orderData = $request->validate([
             'customer_name' => 'required|string',
-            'order_type' => 'required|string|in:Dine In,Take Out',
+            'order_type' => 'required|string|in:Dine In,Take Out,Takeout',
             'total' => 'required|numeric|min:0',
             'orders' => 'required|array|min:1',
             'orders.*.name' => 'required|string',
@@ -202,7 +202,7 @@ class CashierController extends Controller
             'orders.*.price' => 'required|numeric|min:0',
             // ✅ NEW: Payment validation (made optional with defaults)
             'amount_paid' => 'required|numeric|min:0',
-            'payment_date' => 'required|string',
+            'payment_date' => 'nullable|string',
             'payment_method' => 'nullable|string',
             'transaction_reference' => 'nullable|string',
         ]);
@@ -210,6 +210,9 @@ class CashierController extends Controller
         // ✅ Set defaults if not provided
         $paymentMethod = $orderData['payment_method'] ?? 'Cash';
         $transactionReference = $orderData['transaction_reference'] ?? 'CASH-' . time();
+        $paymentDate = isset($orderData['payment_date']) 
+            ? date('Y-m-d H:i:s', strtotime($orderData['payment_date'])) 
+            : now();
 
         $employeeId = Session::get('cashier_id');
         
