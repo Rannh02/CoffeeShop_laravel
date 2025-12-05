@@ -169,8 +169,8 @@
             <button id="closeEwalletModal" class="close-btn">&times;</button>
             <h2>E-Wallet Payment</h2>
             <p>Please scan the QR code with your preferred wallet app.</p>
-            <img src="{{ asset('Images/QRcode.png') }}" alt="E-Wallet QR Code" 
-                 style="width: 1000px; height: 500px; object-fit:cover;">
+              <img src="{{ asset('images/QRcode.png') }}" alt="E-Wallet QR Code" 
+                  style="max-width:100%; height:auto; object-fit:cover;">
         </div>
     </div>
 
