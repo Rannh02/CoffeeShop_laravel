@@ -59,6 +59,32 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
     </style>
+    <style>
+        /* Ensure Update/Delete modals are centered and on top */
+        #UpdateCategoryModal,
+        #DeleteCategoryModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        #UpdateCategoryModal .modal-content,
+        #DeleteCategoryModal .modal-content {
+            max-width: 600px;
+            width: 100%;
+            margin: 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+        }
+    </style>
 </head>
 <body>
     <div id="app">
