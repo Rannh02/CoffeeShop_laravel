@@ -7,7 +7,7 @@
  * It reads the $PORT environment variable (Render provides it) and forwards
  * stdout/stderr so logs appear in Render.
  */
-const { spawn } = require('child_process');
+import { spawn } from 'child_process';
 
 const port = process.env.PORT || '10000';
 const phpArgs = ['-S', `0.0.0.0:${port}`, '-t', 'public'];
@@ -22,7 +22,7 @@ php.on('exit', (code, signal) => {
     process.exit(0);
   }
   console.log(`PHP server exited with code ${code}`);
-  process.exit(code);
+  process.exit(code || 0);
 });
 
 function shutdown() {
