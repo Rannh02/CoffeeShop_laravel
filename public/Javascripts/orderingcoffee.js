@@ -260,13 +260,14 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('📝 Transaction Reference:', transactionReference);
 
     const orderData = {
-      customer_name: customerName,
-      order_type: orderType,
-      total: total,
-      amount_paid: amountPaid,
-      payment_date: new Date().toISOString(),
-      payment_method: paymentMethod,
-      transaction_reference: transactionReference,
+      customerName: customerName,
+      orderType: orderType,
+      totalAmount: total,
+      amountPaid: amountPaid,
+      paymentMethod: paymentMethod,
+      transactionReference: transactionReference,
+      isPWD: discounts.includes('PWD'),
+      isSenior: discounts.includes('Senior Citizen'),
       orders: items.map(it => ({
         name: it.name,
         quantity: it.qty,
@@ -277,7 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('📦 Order data to send:', orderData);
 
     try {
-      const response = await fetch('/cashier/place-order', {
+      const response = await fetch('/api/orders/payment', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

@@ -627,6 +627,13 @@ h2,
     box-shadow: 0 4px 12px rgba(212, 165, 116, 0.3);
 }
 
+.order-type-btn.active {
+    background: linear-gradient(135deg, #d4a574 0%, #c9912d 100%);
+    color: white;
+    border-color: #b8860b;
+    box-shadow: 0 4px 12px rgba(212, 165, 116, 0.3);
+}
+
 .clear-btn {
     width: 100%;
     padding: 12px;
