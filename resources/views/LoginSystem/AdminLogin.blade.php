@@ -8,12 +8,12 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 </head>
 <body>
-  <img src="../Images/CoffeeShop.png" alt="Coffee Shop" 
-       style="position: fixed; width: 100%; height: 100%; z-index: -1; filter: blur(3px); box-shadow: none;">
+    <img src="{{ asset('images/CoffeeShop.png') }}" alt="Coffee Shop" 
+      style="position: fixed; width: 100%; height: 100%; z-index: -1; filter: blur(3px); box-shadow: none;">
   
   <div class="container">
     <div class="image-section">
-      <img src="../Images/CoffeeCup.jpg" alt="Coffee Cup" 
+      <img src="{{ asset('images/CoffeeCup.jpg') }}" alt="Coffee Cup" 
            style="width: 100%; height: 100%; object-fit: cover;">
     </div>
 

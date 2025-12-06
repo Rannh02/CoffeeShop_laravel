@@ -292,12 +292,15 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await response.json();
       console.log('📥 Response data:', data);
 
-      if (data.success) {
-        console.log('✅ Order saved successfully! Order ID:', data.order_id);
+      // Support both boolean `success` and string `status` responses from backend
+      const ok = (data && (data.success === true || data.status === 'success' || data.status === 'ok'));
+      if (ok) {
+        console.log('✅ Order saved successfully! Order ID:', data.order_id || data.order_id);
         return true;
       } else {
-        console.error('❌ Failed to save order:', data.message);
-        alert('Failed to save order: ' + data.message);
+        const msg = data && (data.message || data.error || JSON.stringify(data)) || 'Unknown error';
+        console.error('❌ Failed to save order:', msg);
+        alert('Failed to save order: ' + msg);
         return false;
       }
     } catch (err) {
