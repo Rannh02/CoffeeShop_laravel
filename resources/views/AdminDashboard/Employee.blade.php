@@ -252,7 +252,6 @@
                         <option value="Staff" {{ old('position') == 'Staff' ? 'selected' : '' }}>Staff</option>
                     </select>
                     <br><br>
-
                     <div class="button-group">
                         <button type="submit" class="AddBtn">Add Employee</button>
                         <button type="button" id="closeEmployeeModal" class="CancelBtn">Cancel</button>

@@ -116,8 +116,26 @@ class PaymentController extends Controller
             $amountPaid = $request->input('amountPaid', $discountedAmount);
             $transactionReference = $request->input('transactionReference');
 
-            // Create the order with the discounted amount
+            // Determine Customer_id: try to find existing customer by name or create new
+            $customerRecord = DB::table('customer')->where('Customer_name', $customerName)->first();
+            if ($customerRecord) {
+                $customerId = $customerRecord->Customer_id;
+            } else {
+                // Insert minimal customer record
+                $customerId = DB::table('customer')->insertGetId([
+                    'Customer_name' => $customerName,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+
+            // Get logged-in cashier/employee id from session if available
+            $employeeId = Session::get('cashier_id');
+
+            // Create the order with the discounted amount and link customer/employee when available
             $order = Order::create([
+                'Customer_id' => $customerId,
+                'Employee_id' => $employeeId,
                 'Customer_name' => $customerName,
                 'Order_Type' => $orderType,
                 'TotalAmount' => $discountedAmount,

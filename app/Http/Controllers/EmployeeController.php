@@ -74,11 +74,16 @@ class EmployeeController extends Controller
         
         return view('AdminDashboard.Archived', compact('employees', 'fullname'));
     }
-    public function restore($id)
+    public function restore(Request $request, $id)
     {
         $employee = Employee::findOrFail($id);
         $employee->update(['Status' => 'Active']);
 
-        return response()->json(['success' => true, 'message' => 'Employee restored successfully']);
+        // If the request expects JSON (AJAX), return JSON. Otherwise redirect back to archived list.
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Employee restored successfully']);
+        }
+
+        return redirect()->route('admin.archived')->with('success', 'Employee restored successfully');
     }
 }   
