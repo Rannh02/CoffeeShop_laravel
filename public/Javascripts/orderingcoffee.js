@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const receiptDiv = document.getElementById('receipt');
 
   // Format currency
-  const fmt = (n) => '₱' + Number(n).toFixed(2);
+  const fmt = 👎 => '₱' + Number(n).toFixed(2);
 
   // Escape HTML helper
   function escapeHtml(s) {
@@ -151,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>`;
     });
 
-    if (!items.length) itemRowsHtml = `<div style="text-align:center; color:#999;">(No items)</div>`;
+    if (!items.length) itemRowsHtml = <div style="text-align:center; color:#999;">(No items)</div>;
 
     // ✅ NEW: Add discount section to receipt
     let discountSection = '';
@@ -240,7 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ✅ NEW: Get payment method and transaction reference
     let paymentMethod = 'Cash'; // Default
-    let transactionReference = `CASH-${Date.now()}`; // Default
+    let transactionReference = CASH-${Date.now()}; // Default
     
     // Check if payment method functions exist
     if (typeof window.getPaymentMethod === 'function') {
@@ -260,14 +260,13 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('📝 Transaction Reference:', transactionReference);
 
     const orderData = {
-      customerName: customerName,
-      orderType: orderType,
-      totalAmount: total,
-      amountPaid: amountPaid,
-      paymentMethod: paymentMethod,
-      transactionReference: transactionReference,
-      isPWD: discounts.includes('PWD'),
-      isSenior: discounts.includes('Senior Citizen'),
+      customer_name: customerName,
+      order_type: orderType,
+      total: total,
+      amount_paid: amountPaid,
+      payment_date: new Date().toISOString(),
+      payment_method: paymentMethod,
+      transaction_reference: transactionReference,
       orders: items.map(it => ({
         name: it.name,
         quantity: it.qty,
@@ -278,7 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('📦 Order data to send:', orderData);
 
     try {
-      const response = await fetch('/api/orders/payment', {
+      const response = await fetch('/cashier/place-order', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -292,15 +291,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await response.json();
       console.log('📥 Response data:', data);
 
-      // Support both boolean `success` and string `status` responses from backend
-      const ok = (data && (data.success === true || data.status === 'success' || data.status === 'ok'));
-      if (ok) {
-        console.log('✅ Order saved successfully! Order ID:', data.order_id || data.order_id);
+      if (data.success) {
+        console.log('✅ Order saved successfully! Order ID:', data.order_id);
         return true;
       } else {
-        const msg = data && (data.message || data.error || JSON.stringify(data)) || 'Unknown error';
-        console.error('❌ Failed to save order:', msg);
-        alert('Failed to save order: ' + msg);
+        console.error('❌ Failed to save order:', data.message);
+        alert('Failed to save order: ' + data.message);
         return false;
       }
     } catch (err) {
@@ -352,7 +348,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const amountPaid = parseFloat(document.getElementById('amountPaid')?.value || 0);
 
       if (amountPaid < total) {
-        alert(`Insufficient payment!\nTotal: ${fmt(total)}\nPaid: ${fmt(amountPaid)}`);
+        alert(Insufficient payment!\nTotal: ${fmt(total)}\nPaid: ${fmt(amountPaid)});
         document.getElementById('amountPaid')?.focus();
         return;
       }
