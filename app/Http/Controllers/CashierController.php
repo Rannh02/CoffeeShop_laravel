@@ -396,12 +396,21 @@ class CashierController extends Controller
                             'updated_at' => now(),
                         ]);
 
-                    // Update ingredients table
+                    // ✅ Update ingredients table - prevent negative stock
+                    $currentIngredientStock = DB::table('ingredients')
+                        ->where('Ingredient_id', $ingredient->Ingredient_id)
+                        ->value('StockQuantity');
+                    
+                    $newStock = max(0, $currentIngredientStock - $totalQuantityUsed);
+                    
                     DB::table('ingredients')
                         ->where('Ingredient_id', $ingredient->Ingredient_id)
-                        ->decrement('StockQuantity', $totalQuantityUsed, ['updated_at' => now()]);
+                        ->update([
+                            'StockQuantity' => $newStock,
+                            'updated_at' => now()
+                        ]);
 
-                    Log::info("Deducted {$totalQuantityUsed} of ingredient {$ingredient->Ingredient_id}");
+                    Log::info("Deducted {$totalQuantityUsed} of ingredient {$ingredient->Ingredient_id}. New stock: {$newStock}");
                 }
             }
 
