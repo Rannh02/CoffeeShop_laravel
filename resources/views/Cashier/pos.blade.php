@@ -10,6 +10,55 @@
     <link rel="stylesheet" href="{{ asset('Dashboard CSS/confirmationOrder.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    
+    <style>
+        /* ✅ NEW: Out of Stock Styling */
+        .product-card.out-of-stock {
+            opacity: 0.5;
+            position: relative;
+            pointer-events: none;
+            cursor: not-allowed;
+        }
+
+        .product-card.out-of-stock::before {
+            content: 'OUT OF STOCK';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(239, 68, 68, 0.95);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 14px;
+            z-index: 10;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .stock-warning {
+            background: #FEE2E2;
+            color: #DC2626;
+            padding: 6px 10px;
+            border-radius: 5px;
+            margin: 8px 0 0 0;
+            font-size: 11px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .stock-warning i {
+            font-size: 14px;
+        }
+
+        .product-card:not(.out-of-stock):hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
     <div class="pos-container">
@@ -30,7 +79,6 @@
                     
                     <!-- Dropdown Menu -->
                     <div class="user-dropdown" id="userDropdown">
-                        <!-- User Info Section -->
                         <div class="dropdown-user-info">
                             <div class="user-avatar">
                                 <i class="bi bi-person-fill"></i>
@@ -39,7 +87,6 @@
                             <div class="user-role">Cashier</div>
                         </div>
                         
-                        <!-- Menu Items -->
                         <div class="dropdown-menu-items">
                             <a href="#" class="dropdown-item">
                                 <i class="bi bi-person"></i>
@@ -78,41 +125,47 @@
                     @endforeach
                 </nav>
 
-                <!-- Product Grid Fetched from DB -->
-                    <div class="product-grid">
-                        @if(count($products) > 0)
-                            @foreach($products as $prod)
-                                @php
-                                    $isOutOfStock = $prod->StockQuantity <= 0;
-                                @endphp
+                <!-- ✅ UPDATED: Product Grid with Stock Checking -->
+                <div class="product-grid">
+                    @if(count($products) > 0)
+                        @foreach($products as $prod)
+                            @php
+                                // ✅ Check if product is available (has all ingredients in stock)
+                                $isAvailable = $prod->is_available ?? true;
+                                $availabilityMessage = $prod->availability_message ?? '';
+                            @endphp
 
-                                <div class="product-card {{ $isOutOfStock ? 'out-of-stock' : '' }}"
-                                    data-name="{{ $prod->Product_name }}"
-                                    data-price="{{ $prod->Price }}"
-                                    data-stock="{{ $prod->StockQuantity }}"
-                                    @if($isOutOfStock) style="pointer-events:none; opacity:0.5;" @endif>
+                            <div class="product-card {{ !$isAvailable ? 'out-of-stock' : '' }}"
+                                data-id="{{ $prod->Product_id }}"
+                                data-name="{{ $prod->Product_name }}"
+                                data-price="{{ $prod->Price }}"
+                                data-available="{{ $isAvailable ? 'true' : 'false' }}">
 
-                                    <div class="product-image">
-                                        @if(!empty($prod->Image_url))
-                                            <img src="{{ asset($prod->Image_url) }}" alt="{{ $prod->Product_name }}">
-                                        @else
-                                            <img src="{{ asset('ProductImages/default.jpg') }}" alt="No Image">
-                                        @endif
-                                    </div>
-
-                                    <div class="product-info">
-                                        <h3 class="product-name">{{ $prod->Product_name }}</h3>
-                                        <span class="product-price">₱{{ number_format($prod->Price, 2) }}</span>
-                                    </div>
-
+                                <div class="product-image">
+                                    @if(!empty($prod->Image_url))
+                                        <img src="{{ asset($prod->Image_url) }}" alt="{{ $prod->Product_name }}">
+                                    @else
+                                        <img src="{{ asset('ProductImages/default.jpg') }}" alt="No Image">
+                                    @endif
                                 </div>
 
-                            @endforeach
-                        @else
-                            <p>No products available in this category.</p>
-                        @endif
-                    </div>
-
+                                <div class="product-info">
+                                    <h3 class="product-name">{{ $prod->Product_name }}</h3>
+                                    <span class="product-price">₱{{ number_format($prod->Price, 2) }}</span>
+                                    
+                                    @if(!$isAvailable)
+                                        <div class="stock-warning">
+                                            <i class="bi bi-exclamation-triangle-fill"></i>
+                                            <span>Ingredients unavailable</span>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
+                    @else
+                        <p style="text-align: center; padding: 20px; color: #666;">No products available in this category.</p>
+                    @endif
+                </div>
             </div>
 
             <div class="order-panel">
@@ -150,13 +203,12 @@
                             </label>
                         </div>
                         <p style="margin-top: 8px; font-size: 20px; color: #666;">Discount: <span id="discountAmount">₱0.00</span></p>
-                        <!-- <p style="margin: 5px 0 0 0; font-weight: bold; font-size: 14px;">After Discount: <span id="finalTotalPrice">₱0.00</span></p> -->
                     </div>
                 </div>
 
                 <div class="payment-buttons">
-                    <button id = "card" class="payment-btn card"><i class="bi bi-credit-card-2-back"></i> Card</button>
-                    <button id = "gcash" class="payment-btn gcash"><i class="bi bi-qr-code"></i> E-Wallet</button>
+                    <button id="card" class="payment-btn card"><i class="bi bi-credit-card-2-back"></i> Card</button>
+                    <button id="gcash" class="payment-btn gcash"><i class="bi bi-qr-code"></i> E-Wallet</button>
                 </div>
                 <button id="placeOrderBtn" class="btn btn-primary">Place Order</button>
             </div>
@@ -169,8 +221,8 @@
             <button id="closeEwalletModal" class="close-btn">&times;</button>
             <h2>E-Wallet Payment</h2>
             <p>Please scan the QR code with your preferred wallet app.</p>
-              <img src="{{ asset('images/QRcode.png') }}" alt="E-Wallet QR Code" 
-                  style="max-width:100%; height:auto; object-fit:cover;">
+            <img src="{{ asset('Images/QRcode.png') }}" alt="E-Wallet QR Code" 
+                 style="width: 1000px; height: 500px; object-fit:cover;">
         </div>
     </div>
 
@@ -190,13 +242,37 @@
     <script src="{{ asset('Javascripts/RealTime.js') }}"></script>
     <script src="{{ asset('Javascripts/orderSystem.js') }}"></script>
     <script src="{{ asset('Javascripts/QRlogic.js') }}"></script>
-    <script src="{{ asset('Javascripts/ordertypebutton.js') }}"></script>
-    <script src="{{ asset('Javascripts/inputs.js') }}"></script>
+    <script src="{{ asset('Javascripts/OrderTypeButton.js') }}"></script>
+    <script src="{{ asset('Javascripts/Inputs.js') }}"></script>
     <script src="{{ asset('Javascripts/paymentMethod.js') }}"></script>
     <script src="{{ asset('Javascripts/placeordermodal.js') }}"></script>
     <script src="{{ asset('Javascripts/orderingcoffee.js') }}"></script>
-    <!-- <script src="{{ asset('Javascripts/PaymentSummary.js') }}"></script> -->
     
+    <!-- ✅ NEW: Stock Validation Script -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Prevent clicking on out-of-stock products
+        const productCards = document.querySelectorAll('.product-card');
+        
+        productCards.forEach(card => {
+            card.addEventListener('click', function(e) {
+                const isAvailable = this.getAttribute('data-available') === 'true';
+                
+                if (!isAvailable) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const productName = this.getAttribute('data-name');
+                    alert(`Sorry, ${productName} is currently out of stock due to insufficient ingredients.`);
+                    
+                    return false;
+                }
+            });
+        });
+
+        console.log('Stock validation loaded. Out of stock products are disabled.');
+    });
+    </script>
     
     <!-- User Dropdown Script -->
     <script>
@@ -204,20 +280,17 @@
         const dropdownToggle = document.getElementById('userDropdownToggle');
         const dropdown = document.getElementById('userDropdown');
         
-        // Toggle dropdown on click
         dropdownToggle.addEventListener('click', function(e) {
             e.stopPropagation();
             dropdown.classList.toggle('show');
         });
         
-        // Close dropdown when clicking outside
         document.addEventListener('click', function(e) {
             if (!dropdownToggle.contains(e.target)) {
                 dropdown.classList.remove('show');
             }
         });
         
-        // Prevent dropdown from closing when clicking inside it
         dropdown.addEventListener('click', function(e) {
             e.stopPropagation();
         });

@@ -23,23 +23,18 @@ class CashierController extends Controller
      */
     public function login(Request $request)
     {
-        // validate username (cashier account) and password
         $request->validate([
             'username' => 'required|string',
             'password' => 'required'
         ]);
 
-        // Attempt to find the employee by Cashier_Account
         $employee = DB::table('employee')
             ->where('Cashier_Account', $request->username)
             ->first();
 
-        // Log for debugging (do NOT log sensitive data like passwords)
         Log::info('Cashier login attempt', ['username' => $request->username, 'found' => $employee ? true : false]);
 
-        // Verify credentials
         if ($employee && isset($employee->Password) && Hash::check($request->password, $employee->Password)) {
-            // store Employee primary id (Employee_id)
             $employeeId = $employee->Employee_id ?? ($employee->employee_id ?? null);
             Session::put('cashier_id', $employeeId);
             Session::put('cashier_name', trim(($employee->First_name ?? '') . ' ' . ($employee->Last_name ?? '')));
@@ -51,120 +46,177 @@ class CashierController extends Controller
     }
 
     /**
-     * 🆕 MAIN DYNAMIC POS PAGE - Shows all categories
+     * ✅ NEW: Check if a product has sufficient ingredient stock
      */
-    public function index(Request $request)
-{
-    // Default staff name
-    $staffName = "Cashier";
+    public function checkProductAvailability($productId, $requestedQuantity)
+    {
+        $product = DB::table('products')->where('Product_id', $productId)->first();
+        
+        if (!$product) {
+            return [
+                'available' => false,
+                'message' => 'Product not found.',
+                'stock_info' => []
+            ];
+        }
 
-    // If logged in, fetch cashier info
-    if (Session::has('cashier_id')) {
-        try {
-            $employee = DB::table('employee')
-                ->select('First_name', 'Last_name')
-                ->where('Employee_id', Session::get('cashier_id'))
+        // Get all ingredients needed for this product
+        $productIngredients = DB::table('product_ingredients')
+            ->where('Product_id', $productId)
+            ->get();
+
+        if ($productIngredients->isEmpty()) {
+            return [
+                'available' => false,
+                'message' => "{$product->Product_name} has no ingredients configured.",
+                'stock_info' => []
+            ];
+        }
+
+        $stockInfo = [];
+        $insufficientIngredients = [];
+
+        // Check each ingredient's stock
+        foreach ($productIngredients as $productIngredient) {
+            $ingredient = DB::table('ingredients')
+                ->where('Ingredient_id', $productIngredient->Ingredient_id)
                 ->first();
 
-            if ($employee) {
-                $staffName = $employee->First_name . " " . $employee->Last_name;
+            if (!$ingredient) {
+                return [
+                    'available' => false,
+                    'message' => "Ingredient ID {$productIngredient->Ingredient_id} not found.",
+                    'stock_info' => []
+                ];
             }
-        } catch (\Exception $e) {
-            Log::error('Error fetching employee: ' . $e->getMessage());
-            $staffName = "Error";
-        }
-    }
 
-    // Get the category from URL parameter
-    $categorySlug = $request->get('category', null);
-    
-    // Initialize with empty collections
-    $categories = collect([]);
-    $products = collect([]);
-    $selectedCategory = null;
-    
-    // Fetch all categories for navigation
-    try {
-        $categories = DB::table('categories')
-            ->select('Category_id', 'Category_name')
-            ->orderBy('Category_id')
-            ->get();
-        
-        Log::info('Categories fetched: ' . $categories->count());
-    } catch (\Exception $e) {
-        Log::error('Error fetching categories: ' . $e->getMessage());
-    }
+            $quantityNeeded = $productIngredient->Quantity_used * $requestedQuantity;
+            $available = $ingredient->StockQuantity >= $quantityNeeded;
+            
+            $stockInfo[] = [
+                'ingredient_name' => $ingredient->Ingredient_name,
+                'needed' => $quantityNeeded,
+                'available' => $ingredient->StockQuantity,
+                'unit' => $ingredient->Unit,
+                'sufficient' => $available
+            ];
 
-    // Only proceed if we have categories
-    if ($categories->isNotEmpty()) {
-        // Find the selected category
-        if ($categorySlug) {
-            $selectedCategory = $categories->firstWhere(function($cat) use ($categorySlug) {
-                return strtolower(str_replace(' ', '-', $cat->Category_name)) === strtolower($categorySlug);
-            });
-        }
-        
-        // If no category selected or not found, default to first category
-        if (!$selectedCategory) {
-            $selectedCategory = $categories->first();
-            $categorySlug = strtolower(str_replace(' ', '-', $selectedCategory->Category_name));
-        }
-
-// Fetch products for the selected category WITH proper stock checking
-        if ($selectedCategory) {
-            try {
-                $products = DB::table('products as p')
-                    ->leftJoin('product_ingredients as pi', 'p.Product_id', '=', 'pi.Product_id')
-                    ->leftJoin('inventories as inv', function($join) {
-                        $join->on('pi.Ingredient_id', '=', 'inv.Ingredient_id')
-                            ->on('p.Product_id', '=', 'inv.Product_id');
-                    })
-                    ->select(
-                        'p.Product_id',
-                        'p.Product_name',
-                        'p.Price',
-                        'p.Image_url',
-                        // Calculate how many products can be made based on ingredient stock
-                        DB::raw('COALESCE(MIN(FLOOR(inv.RemainingStock / NULLIF(pi.Quantity_used, 0))), 0) as StockQuantity')
-                    )
-                    ->where('p.Category_id', $selectedCategory->Category_id)
-                    ->groupBy('p.Product_id', 'p.Product_name', 'p.Price', 'p.Image_url')
-                    ->orderBy('p.Product_id', 'desc')
-                    ->get();
-                    
-                Log::info('Products fetched for category ' . $selectedCategory->Category_name . ': ' . $products->count());
-                
-                // Log stock info for debugging
-                foreach($products as $product) {
-                    Log::info('Product: ' . $product->Product_name . ' | Stock: ' . $product->StockQuantity);
-                }
-                
-            } catch (\Exception $e) {
-                Log::error('Error fetching products: ' . $e->getMessage());
-                // Return empty products on error to prevent page crash
-                $products = collect([]);
+            // If insufficient, add to list
+            if (!$available) {
+                $insufficientIngredients[] = "{$ingredient->Ingredient_name} (Need: {$quantityNeeded} {$ingredient->Unit}, Available: {$ingredient->StockQuantity} {$ingredient->Unit})";
             }
         }
-    } else {
-        Log::warning('No categories found in database');
-        $categorySlug = '';
+
+        if (!empty($insufficientIngredients)) {
+            return [
+                'available' => false,
+                'message' => "Insufficient stock for: " . implode(', ', $insufficientIngredients),
+                'stock_info' => $stockInfo
+            ];
+        }
+
+        return [
+            'available' => true,
+            'message' => 'Product available',
+            'stock_info' => $stockInfo
+        ];
     }
-
-    // Debug: Log what we're passing to the view
-    Log::info('Passing to view:', [
-        'staffName' => $staffName,
-        'categories_count' => $categories->count(),
-        'products_count' => $products->count(),
-        'selectedCategory' => $selectedCategory ? $selectedCategory->Category_name : 'none',
-        'categorySlug' => $categorySlug
-    ]);
-
-    // FIXED: Use correct view folder case to match resources/views/Cashier/pos.blade.php
-    return view('Cashier.pos', compact('staffName', 'categories', 'products', 'selectedCategory', 'categorySlug'));
-}
 
     /**
-     * ⚠️ LEGACY METHODS - Keep for backward compatibility
+     * ✅ NEW: API endpoint to check stock (for real-time checking)
+     */
+    public function checkStock($productId, $quantity)
+    {
+        $availability = $this->checkProductAvailability($productId, $quantity);
+        return response()->json($availability);
+    }
+
+    /**
+     * 🆕 MAIN DYNAMIC POS PAGE - Shows all categories with real stock checking
+     */
+    public function index(Request $request)
+    {
+        $staffName = "Cashier";
+
+        if (Session::has('cashier_id')) {
+            try {
+                $employee = DB::table('employee')
+                    ->select('First_name', 'Last_name')
+                    ->where('Employee_id', Session::get('cashier_id'))
+                    ->first();
+
+                if ($employee) {
+                    $staffName = $employee->First_name . " " . $employee->Last_name;
+                }
+            } catch (\Exception $e) {
+                Log::error('Error fetching employee: ' . $e->getMessage());
+                $staffName = "Error";
+            }
+        }
+
+        $categorySlug = $request->get('category', null);
+        $categories = collect([]);
+        $products = collect([]);
+        $selectedCategory = null;
+        
+        try {
+            $categories = DB::table('categories')
+                ->select('Category_id', 'Category_name')
+                ->orderBy('Category_id')
+                ->get();
+            
+            Log::info('Categories fetched: ' . $categories->count());
+        } catch (\Exception $e) {
+            Log::error('Error fetching categories: ' . $e->getMessage());
+        }
+
+        if ($categories->isNotEmpty()) {
+            if ($categorySlug) {
+                $selectedCategory = $categories->firstWhere(function($cat) use ($categorySlug) {
+                    return strtolower(str_replace(' ', '-', $cat->Category_name)) === strtolower($categorySlug);
+                });
+            }
+            
+            if (!$selectedCategory) {
+                $selectedCategory = $categories->first();
+                $categorySlug = strtolower(str_replace(' ', '-', $selectedCategory->Category_name));
+            }
+
+            if ($selectedCategory) {
+                try {
+                    // Fetch products
+                    $rawProducts = DB::table('products')
+                        ->where('Category_id', $selectedCategory->Category_id)
+                        ->get();
+
+                    // ✅ ENHANCED: Check actual availability for each product
+                    $products = $rawProducts->map(function($product) {
+                        $availability = $this->checkProductAvailability($product->Product_id, 1);
+                        
+                        $product->is_available = $availability['available'];
+                        $product->availability_message = $availability['message'];
+                        $product->stock_info = $availability['stock_info'];
+                        
+                        return $product;
+                    });
+                    
+                    Log::info('Products fetched for category ' . $selectedCategory->Category_name . ': ' . $products->count());
+                    
+                } catch (\Exception $e) {
+                    Log::error('Error fetching products: ' . $e->getMessage());
+                    $products = collect([]);
+                }
+            }
+        } else {
+            Log::warning('No categories found in database');
+            $categorySlug = '';
+        }
+
+        return view('Cashier.pos', compact('staffName', 'categories', 'products', 'selectedCategory', 'categorySlug'));
+    }
+
+    /**
+     * ⚠️ LEGACY METHODS
      */
     public function showCoffee()
     {
@@ -186,212 +238,213 @@ class CashierController extends Controller
         return redirect()->route('cashier.pos', ['category' => 'pastries']);
     }
 
-  public function storeOrder(Request $request)
-{
-    try {
-        DB::beginTransaction();
-        
-        // ✅ UPDATED: Added payment fields to validation
-        $orderData = $request->validate([
-            'customer_name' => 'required|string',
-            'order_type' => 'required|string|in:Dine In,Take Out,Takeout',
-            'total' => 'required|numeric|min:0',
-            'orders' => 'required|array|min:1',
-            'orders.*.name' => 'required|string',
-            'orders.*.quantity' => 'required|integer|min:1',
-            'orders.*.price' => 'required|numeric|min:0',
-            // ✅ NEW: Payment validation (made optional with defaults)
-            'amount_paid' => 'required|numeric|min:0',
-            'payment_date' => 'nullable|string',
-            'payment_method' => 'nullable|string',
-            'transaction_reference' => 'nullable|string',
-        ]);
-
-        // ✅ Set defaults if not provided
-        $paymentMethod = $orderData['payment_method'] ?? 'Cash';
-        $transactionReference = $orderData['transaction_reference'] ?? 'CASH-' . time();
-        $paymentDate = isset($orderData['payment_date']) 
-            ? date('Y-m-d H:i:s', strtotime($orderData['payment_date'])) 
-            : now();
-
-        $employeeId = Session::get('cashier_id');
-        
-        if (!$employeeId) {
-            return response()->json(['success' => false, 'message' => 'Not logged in'], 401);
-        }
-
-        $customer = DB::table('customer')
-            ->where('Customer_name', $orderData['customer_name'])
-            ->first();
-
-        if (!$customer) {
-            $customerId = DB::table('customer')->insertGetId([
-                'Customer_name' => $orderData['customer_name'],
-                'Date/Time' => now(),
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
-        } else {
-            $customerId = $customer->Customer_id;
-        }
-
-        $orderType  = $orderData['order_type'];
-
-        if (strtolower($orderType) === 'take out') {
-            $orderType = 'Takeout';
-        }
-        
-        // 1. Create the order
-        $orderId = DB::table('orders')->insertGetId([   
-            'Customer_id' => $customerId,
-            'Employee_id' => $employeeId,
-            'Customer_name' => $orderData['customer_name'],
-            'Order_date' => now(),   
-            'TotalAmount' => $orderData['total'],
-            'Order_Type' => $orderType,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        Log::info("Order created: ID={$orderId}, Customer={$orderData['customer_name']}, Total={$orderData['total']}");
-
-        // ✅ NEW: 2. Create payment record
-        // Convert ISO 8601 date to MySQL datetime format
-        $paymentDate = date('Y-m-d H:i:s', strtotime($orderData['payment_date']));
-        
-        $paymentId = DB::table('payment')->insertGetId([
-            'Order_id' => $orderId,
-            'PaymentMethod' => $paymentMethod,
-            'AmountPaid' => $orderData['amount_paid'],
-            'PaymentDate' => $paymentDate,
-            'TransactionReference' => $transactionReference,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        Log::info("Payment created: ID={$paymentId}, Method={$paymentMethod}, Paid={$orderData['amount_paid']}, Ref={$transactionReference}");
-
-        // 3. Process each order item
-        foreach ($orderData['orders'] as $item) {
-            // Find the product
-            $product = DB::table('products')
-                ->where('Product_name', $item['name'])
-                ->first();
+    /**
+     * ✅ UPDATED: Store order with UPFRONT stock validation
+     */
+    public function storeOrder(Request $request)
+    {
+        try {
+            DB::beginTransaction();
             
-            if (!$product) {
-                throw new \Exception('Product not found: ' . $item['name']);
+            $orderData = $request->validate([
+                'customer_name' => 'required|string',
+                'order_type' => 'required|string|in:Dine In,Take Out,Takeout',
+                'total' => 'required|numeric|min:0',
+                'orders' => 'required|array|min:1',
+                'orders.*.name' => 'required|string',
+                'orders.*.quantity' => 'required|integer|min:1',
+                'orders.*.price' => 'required|numeric|min:0',
+                'amount_paid' => 'required|numeric|min:0',
+                'payment_date' => 'nullable|string',
+                'payment_method' => 'nullable|string',
+                'transaction_reference' => 'nullable|string',
+            ]);
+
+            $paymentMethod = $orderData['payment_method'] ?? 'Cash';
+            $transactionReference = $orderData['transaction_reference'] ?? 'CASH-' . time();
+            $paymentDate = isset($orderData['payment_date']) 
+                ? date('Y-m-d H:i:s', strtotime($orderData['payment_date'])) 
+                : now();
+
+            $employeeId = Session::get('cashier_id');
+            
+            if (!$employeeId) {
+                return response()->json(['success' => false, 'message' => 'Not logged in'], 401);
             }
 
-            // Insert order item
-            DB::table('order_items')->insert([
-                'Order_id' => $orderId,
-                'Product_id' => $product->Product_id,
-                'Quantity' => $item['quantity'],
-                'UnitPrice' => $item['price'],
+            // ✅ CRITICAL: CHECK ALL PRODUCTS AVAILABILITY BEFORE CREATING ORDER
+            Log::info("=== VALIDATING STOCK FOR ALL PRODUCTS ===");
+            
+            foreach ($orderData['orders'] as $item) {
+                $product = DB::table('products')
+                    ->where('Product_name', $item['name'])
+                    ->first();
+                
+                if (!$product) {
+                    throw new \Exception("Product not found: {$item['name']}");
+                }
+
+                // ✅ CHECK STOCK AVAILABILITY
+                $availability = $this->checkProductAvailability($product->Product_id, $item['quantity']);
+                
+                if (!$availability['available']) {
+                    Log::warning("Stock check failed for {$product->Product_name}: {$availability['message']}");
+                    throw new \Exception("Cannot process order: {$availability['message']}");
+                }
+                
+                Log::info("✓ Stock validated for {$product->Product_name} x{$item['quantity']}");
+            }
+
+            Log::info("=== ALL PRODUCTS VALIDATED - PROCEEDING WITH ORDER ===");
+
+            // Create or find customer
+            $customer = DB::table('customer')
+                ->where('Customer_name', $orderData['customer_name'])
+                ->first();
+
+            if (!$customer) {
+                $customerId = DB::table('customer')->insertGetId([
+                    'Customer_name' => $orderData['customer_name'],
+                    'Date/Time' => now(),
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+            } else {
+                $customerId = $customer->Customer_id;
+            }
+
+            $orderType = $orderData['order_type'];
+            if (strtolower($orderType) === 'take out') {
+                $orderType = 'Takeout';
+            }
+            
+            // Create the order
+            $orderId = DB::table('orders')->insertGetId([   
+                'Customer_id' => $customerId,
+                'Employee_id' => $employeeId,
+                'Customer_name' => $orderData['customer_name'],
+                'Order_date' => now(),   
+                'TotalAmount' => $orderData['total'],
+                'Order_Type' => $orderType,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
 
-            Log::info("Order item: {$product->Product_name} x{$item['quantity']} @ ₱{$item['price']}");
+            Log::info("Order created: ID={$orderId}");
 
-            // 4. Get all ingredients needed for this product
-            $ingredients = DB::table('product_ingredients')
-                ->where('Product_id', $product->Product_id)
-                ->get();
+            // Create payment record
+            $paymentId = DB::table('payment')->insertGetId([
+                'Order_id' => $orderId,
+                'PaymentMethod' => $paymentMethod,
+                'AmountPaid' => $orderData['amount_paid'],
+                'PaymentDate' => $paymentDate,
+                'TransactionReference' => $transactionReference,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
 
-            if ($ingredients->isEmpty()) {
-                Log::warning("No ingredients configured for product: {$product->Product_name}");
-                continue;
-            }
+            Log::info("Payment created: ID={$paymentId}");
 
-            // 5. Deduct each ingredient from inventory
-            foreach ($ingredients as $ingredient) {
-                $totalQuantityUsed = $ingredient->Quantity_used * $item['quantity'];
-                
-                // Get current inventory record
-                $inventory = DB::table('inventories')
-                    ->where('Product_id', $product->Product_id)
-                    ->where('Ingredient_id', $ingredient->Ingredient_id)
+            // Process each order item and deduct stock
+            foreach ($orderData['orders'] as $item) {
+                $product = DB::table('products')
+                    ->where('Product_name', $item['name'])
                     ->first();
-                
-                if (!$inventory) {
-                    throw new \Exception("No inventory record for {$product->Product_name} - Ingredient ID {$ingredient->Ingredient_id}. Please add the product again.");
+
+                // Insert order item
+                DB::table('order_items')->insert([
+                    'Order_id' => $orderId,
+                    'Product_id' => $product->Product_id,
+                    'Quantity' => $item['quantity'],
+                    'UnitPrice' => $item['price'],
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                // Get ingredients
+                $ingredients = DB::table('product_ingredients')
+                    ->where('Product_id', $product->Product_id)
+                    ->get();
+
+                if ($ingredients->isEmpty()) {
+                    Log::warning("No ingredients for {$product->Product_name}");
+                    continue;
                 }
-                
-                // Check if we have enough stock
-                if ($inventory->RemainingStock < $totalQuantityUsed) {
-                    $ingredientInfo = DB::table('ingredients')
+
+                // Deduct each ingredient
+                foreach ($ingredients as $ingredient) {
+                    $totalQuantityUsed = $ingredient->Quantity_used * $item['quantity'];
+                    
+                    $inventory = DB::table('inventories')
+                        ->where('Product_id', $product->Product_id)
                         ->where('Ingredient_id', $ingredient->Ingredient_id)
                         ->first();
                     
-                    throw new \Exception("Insufficient stock! {$product->Product_name} needs {$totalQuantityUsed} {$ingredientInfo->Unit} of {$ingredientInfo->Ingredient_name}, but only {$inventory->RemainingStock} {$ingredientInfo->Unit} available.");
+                    if (!$inventory) {
+                        throw new \Exception("No inventory record for {$product->Product_name}");
+                    }
+                    
+                    // Update inventory
+                    DB::table('inventories')
+                        ->where('Product_id', $product->Product_id)
+                        ->where('Ingredient_id', $ingredient->Ingredient_id)
+                        ->update([
+                            'QuantityUsed' => DB::raw("QuantityUsed + {$totalQuantityUsed}"),
+                            'RemainingStock' => DB::raw("RemainingStock - {$totalQuantityUsed}"),
+                            'Action' => 'deduct',
+                            'DateUsed' => now(),
+                            'updated_at' => now(),
+                        ]);
+
+                    // Update ingredients table
+                    DB::table('ingredients')
+                        ->where('Ingredient_id', $ingredient->Ingredient_id)
+                        ->decrement('StockQuantity', $totalQuantityUsed, ['updated_at' => now()]);
+
+                    Log::info("Deducted {$totalQuantityUsed} of ingredient {$ingredient->Ingredient_id}");
                 }
-                
-                // 6. Update inventory record (deduct stock and track usage)
-                DB::table('inventories')
-                    ->where('Product_id', $product->Product_id)
-                    ->where('Ingredient_id', $ingredient->Ingredient_id)
-                    ->update([
-                        'QuantityUsed' => DB::raw("QuantityUsed + {$totalQuantityUsed}"),
-                        'RemainingStock' => DB::raw("RemainingStock - {$totalQuantityUsed}"),
-                        'Action' => 'deduct',
-                        'DateUsed' => now(),
-                        'updated_at' => now(),
-                    ]);
-
-                // Calculate new remaining stock for logging
-                $newRemainingStock = $inventory->RemainingStock - $totalQuantityUsed;
-
-                // Also update the main ingredients table stock
-                DB::table('ingredients')
-                    ->where('Ingredient_id', $ingredient->Ingredient_id)
-                    ->decrement('StockQuantity', $totalQuantityUsed, ['updated_at' => now()]);
-
-                Log::info("Stock deducted: Ingredient={$ingredient->Ingredient_id}, Used={$totalQuantityUsed}, Remaining={$newRemainingStock}");
             }
-        }
 
-        DB::commit();
-        
-        Log::info("Order {$orderId} with Payment {$paymentId} completed successfully!");
-        
-        return response()->json([
-            'success' => true, 
-            'message' => 'Order placed successfully!',
-            'order_id' => $orderId,
-            'payment_id' => $paymentId
-        ]);
-        
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        DB::rollBack();
-        Log::error('Validation error: ' . json_encode($e->errors()));
-        return response()->json([
-            'success' => false, 
-            'message' => 'Invalid order data',
-            'errors' => $e->errors()
-        ], 422);
-        
-    } catch (\Exception $e) {
-        DB::rollBack();
-        Log::error('Order error: ' . $e->getMessage());
-        Log::error('Stack trace: ' . $e->getTraceAsString());
-        return response()->json([
-            'success' => false, 
-            'message' => $e->getMessage()
-        ], 500);
+            DB::commit();
+            
+            Log::info("Order {$orderId} completed successfully!");
+            
+            return response()->json([
+                'success' => true, 
+                'message' => 'Order placed successfully!',
+                'order_id' => $orderId,
+                'payment_id' => $paymentId
+            ]);
+            
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            Log::error('Validation error: ' . json_encode($e->errors()));
+            return response()->json([
+                'success' => false, 
+                'message' => 'Invalid order data',
+                'errors' => $e->errors()
+            ], 422);
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Order error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false, 
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
-}
 
     /**
      * Handle logout
      */
     public function logout(Request $request)
-{
-    Session::forget('cashier_id');
-    Session::forget('cashier_name');
-    $request->session()->invalidate();
-    $request->session()->regenerateToken();
-    
-    return redirect()->route('welcome')->with('success', 'Logged out successfully');
-}
+    {
+        Session::forget('cashier_id');
+        Session::forget('cashier_name');
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        
+        return redirect()->route('welcome')->with('success', 'Logged out successfully');
+    }
 }

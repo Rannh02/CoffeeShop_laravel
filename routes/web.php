@@ -38,6 +38,9 @@ Route::prefix('cashier')->name('cashier.')->group(function () {
     Route::get('/login', [CashierController::class, 'showLoginForm'])->name('login.form');
     Route::post('/login', [CashierController::class, 'login'])->name('login');
 
+    Route::get('/cashier/check-stock/{productId}/{quantity}', [CashierController::class, 'checkStock'])
+    ->name('cashier.check.stock');
+    
     // Protected routes (require cashier authentication)
     Route::middleware('cashier.auth')->group(function () {
         Route::get('/pos', [CashierController::class, 'index'])->name('pos');
