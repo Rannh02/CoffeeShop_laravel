@@ -5,111 +5,187 @@ namespace App\Http\Controllers;
 use App\Models\Payment;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class PaymentController extends Controller
 {
+    /**
+     * Display payment listing with search and pagination
+     */
     public function index(Request $request)
     {
-        $query = Payment::query();
+        $fullname = Session::get('fullname', 'Admin');
+        $search = $request->input('search');
+        $perPage = 8;
 
-        if ($request->has('search') && $request->search != '') {
-            $search = $request->search;
-            
-            $query->where(function($q) use ($search) {
-                $q->where('Payment_id', 'LIKE', "%{$search}%")
-                  ->orWhere('Order_id', 'LIKE', "%{$search}%")
-                  ->orWhere('PaymentMethod', 'LIKE', "%{$search}%")
-                  ->orWhere('TransactionReference', 'LIKE', "%{$search}%")
-                  ->orWhere('AmountPaid', 'LIKE', "%{$search}%");
-            });
+        // Try-catch to handle table issues gracefully
+        try {
+            // Fetch payments with search and pagination
+            $payments = Payment::when($search, function($query, $search) {
+                           $query->where('Payment_id', 'like', "%$search%")
+                                 ->orWhere('Order_id', 'like', "%$search%")
+                                 ->orWhere('PaymentMethod', 'like', "%$search%")
+                                 ->orWhere('AmountPaid', 'like', "%$search%")
+                                 ->orWhere('TransactionReference', 'like', "%$search%");
+                       })
+                       ->orderBy('PaymentDate', 'desc')
+                       ->paginate($perPage)
+                       ->withQueryString(); // ✅ Preserves search query in pagination links
+
+        } catch (\Exception $e) {
+            // If table doesn't exist or query fails, return empty collection
+            $payments = collect([]);
+            Log::error('Payment query error: ' . $e->getMessage());
         }
 
-        $payments = $query->orderBy('Payment_id', 'desc')->paginate(10);
-        $fullname = session('fullname', 'Admin');
-
-        return view('admin.payment', compact('payments', 'fullname'));
+        return view('AdminDashboard.Payment', compact('payments', 'fullname'));
     }
 
-    public function create()
+    /**
+     * Store a new order with payment (JSON API endpoint)
+     * This handles the POS/Cashier system submitting orders
+     */
+    public function storeOrderWithPayment(Request $request)
     {
-        $orders = Order::all();
-        $fullname = session('fullname', 'Admin');
-        
-        return view('admin.payment-create', compact('orders', 'fullname'));
-    }
+        // Validate if this is a JSON request
+        if (!$request->isJson()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Invalid request format. JSON expected.'
+            ], 400);
+        }
 
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'Order_id' => 'required|exists:orders,Order_id',
-            'PaymentMethod' => 'required|string|max:50',
-            'AmountPaid' => 'required|numeric|min:0',
-            'TransactionReference' => 'nullable|string|max:255'
+        // Validate incoming data
+        $validator = Validator::make($request->all(), [
+            'customerName' => 'nullable|string|max:255',
+            'orderType' => 'nullable|string|max:50',
+            'totalAmount' => 'required|numeric|min:0',
+            'orders' => 'required|array|min:1',
+            'orders.*.name' => 'required|string',
+            'orders.*.quantity' => 'required|integer|min:1',
+            'orders.*.price' => 'required|numeric|min:0',
+            'paymentMethod' => 'nullable|string|max:50',
+            'amountPaid' => 'nullable|numeric|min:0',
+            'transactionReference' => 'nullable|string|max:100',
+            'isPWD' => 'nullable|boolean',
+            'isSenior' => 'nullable|boolean'
         ]);
 
-        try {
-            Payment::create($validated);
-            
-            return redirect()->route('admin.payment')
-                ->with('success', 'Payment created successfully!');
-        } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', 'Error creating payment: ' . $e->getMessage())
-                ->withInput();
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
         }
-    }
 
-    public function show($id)
-    {
-        $payment = Payment::with('order')->findOrFail($id);
-        $fullname = session('fullname', 'Admin');
-        
-        return view('admin.payment-show', compact('payment', 'fullname'));
-    }
-
-    public function edit($id)
-    {
-        $payment = Payment::findOrFail($id);
-        $orders = Order::all();
-        $fullname = session('fullname', 'Admin');
-        
-        return view('admin.payment-edit', compact('payment', 'orders', 'fullname'));
-    }
-
-    public function update(Request $request, $id)
-    {
-        $validated = $request->validate([
-            'Order_id' => 'required|exists:orders,Order_id',
-            'PaymentMethod' => 'required|string|max:50',
-            'AmountPaid' => 'required|numeric|min:0',
-            'TransactionReference' => 'nullable|string|max:255'
-        ]);
-
+        DB::beginTransaction();
         try {
-            $payment = Payment::findOrFail($id);
-            $payment->update($validated);
+            // Get validated data with defaults
+            $customerName = $request->input('customerName', 'Guest');
+            $orderType = $request->input('orderType', 'Dine In');
+            // Normalize order type to match DB enum values ('Dine In' or 'Takeout')
+            $otype = trim(strtolower($orderType));
+            if (in_array($otype, ['take out', 'take-out', 'takeout'])) {
+                $orderType = 'Takeout';
+            } elseif (in_array($otype, ['dine in', 'dine-in', 'dinein'])) {
+                $orderType = 'Dine In';
+            }
             
-            return redirect()->route('admin.payment')
-                ->with('success', 'Payment updated successfully!');
-        } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', 'Error updating payment: ' . $e->getMessage())
-                ->withInput();
-        }
-    }
+            $totalAmount = $request->input('totalAmount');
+            
+            // Apply discount if PWD or Senior Citizen
+            $isPWD = $request->input('isPWD', false);
+            $isSenior = $request->input('isSenior', false);
+            $discountedAmount = $totalAmount;
+            $discountPercent = '';
+            
+            if ($isPWD || $isSenior) {
+                $discountedAmount = $totalAmount * 0.88; // 12% discount
+                $discountPercent = $isPWD ? ' (PWD)' : ' (Senior Citizen)';
+                Log::info('Discount applied: ' . $discountPercent . ' - Original: ' . $totalAmount . ', Discounted: ' . $discountedAmount);
+            }
+            
+            $orders = $request->input('orders');
+            $paymentMethod = $request->input('paymentMethod', 'Cash');
+            $amountPaid = $request->input('amountPaid', $discountedAmount);
+            $transactionReference = $request->input('transactionReference');
 
-    public function destroy($id)
-    {
-        try {
-            $payment = Payment::findOrFail($id);
-            $payment->delete();
+            // Create the order with the discounted amount
+            $order = Order::create([
+                'Customer_name' => $customerName,
+                'Order_Type' => $orderType,
+                'TotalAmount' => $discountedAmount,
+                'Order_date' => now()
+            ]);
+
+            // Create order items: try to resolve Product_id by name when possible
+            foreach ($orders as $item) {
+                $product = Product::where('Product_name', $item['name'])->first();
+                $productId = $product ? $product->Product_id : null;
+
+                OrderItem::create([
+                    'Order_id' => $order->Order_id,
+                    'Product_id' => $productId,
+                    'Quantity' => $item['quantity'],
+                    'UnitPrice' => $item['price']
+                ]);
+            }
+
+            // Format transaction reference for display/storage
+            $txRef = null;
+            $pm = strtolower(trim($paymentMethod));
+            if ($pm === 'card') {
+                if (!empty($transactionReference)) {
+                    $txRef = 'Card Number: ' . $transactionReference;
+                } else {
+                    $txRef = 'Card';
+                }
+            } elseif ($pm === 'gcash' || $pm === 'e-wallet' || $pm === 'ewallet') {
+                if (!empty($transactionReference)) {
+                    $txRef = 'Reference Number: ' . $transactionReference;
+                } else {
+                    $txRef = 'GCash';
+                }
+            } else {
+                // default to Cash
+                $txRef = 'Cash';
+            }
             
-            return redirect()->route('admin.payment')
-                ->with('success', 'Payment deleted successfully!');
+            // Append discount info to transaction reference if discount was applied
+            if ($isPWD || $isSenior) {
+                $txRef .= $discountPercent;
+            }
+
+            // Create payment record (column names match migration)
+            Payment::create([
+                'Order_id' => $order->Order_id,
+                'PaymentMethod' => $paymentMethod,
+                'AmountPaid' => $amountPaid,
+                'PaymentDate' => now(),
+                'TransactionReference' => $txRef
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Order and payment recorded successfully.',
+                'order_id' => $order->Order_id
+            ], 201);
+
         } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', 'Error deleting payment: ' . $e->getMessage());
+            DB::rollBack();
+            
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Database error: ' . $e->getMessage()
+            ], 500);
         }
     }
 }
