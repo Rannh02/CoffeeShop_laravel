@@ -45,18 +45,55 @@
             font-weight: 600;
             transition: all 0.2s ease;
         }
+        
         .search-btn i {
             font-size: 15px; 
             -webkit-text-stroke: 1px;
         }
-
-        
         
         .search-btn:hover {
             background-color: #747474ff;
             transform: translateY(-1px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        
+        }
+
+        /* ✅ NEW: Stock status badges */
+        .stock-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .stock-badge.critical {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .stock-badge.low {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .stock-badge.good {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        .stock-badge i {
+            font-size: 14px;
+        }
+
+        /* ✅ NEW: Highlight out of stock rows */
+        tr.out-of-stock {
+            background: #fef2f2;
+        }
+
+        tr.low-stock {
+            background: #fffbeb;
         }
     </style>
 </head>
@@ -141,14 +178,35 @@
                             <th>Product</th>
                             <th>Ingredient</th>
                             <th>Quantity Used</th>
-                            <th>Remaining Stock</th>
+                            <th>Record Stock</th>
+                            <th>Current Ingredient Stock</th>
                             <th>Action</th>
                             <th>Date Used</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($inventories as $inventory)
-                            <tr>
+                            @php
+                                // ✅ Get CURRENT ingredient stock (not the old RemainingStock)
+                                $currentStock = $inventory->ingredient ? $inventory->ingredient->StockQuantity : 0;
+                                
+                                // Determine stock status
+                                $stockClass = '';
+                                $stockBadgeClass = 'good';
+                                $stockIcon = 'check-circle-fill';
+                                
+                                if ($currentStock <= 0) {
+                                    $stockClass = 'out-of-stock';
+                                    $stockBadgeClass = 'critical';
+                                    $stockIcon = 'exclamation-triangle-fill';
+                                } elseif ($currentStock <= 10) {
+                                    $stockClass = 'low-stock';
+                                    $stockBadgeClass = 'low';
+                                    $stockIcon = 'exclamation-circle-fill';
+                                }
+                            @endphp
+                            
+                            <tr class="{{ $stockClass }}">
                                 <td>{{ $inventory->Inventory_id }}</td>
                                 <td>{{ $inventory->product->Product_name ?? 'N/A' }}</td>
                                 <td>
@@ -164,12 +222,32 @@
                                     <span style="font-weight:600; color:{{ $inventory->RemainingStock > 10 ? '#28a745' : ($inventory->RemainingStock > 5 ? '#ffc107' : '#dc3545') }};">
                                         {{ number_format($inventory->RemainingStock, 2) }}
                                     </span>
+                                    <small style="color:#999; display:block; font-size:11px;">At time of record</small>
+                                </td>
+                                <td>
+                                    <span class="stock-badge {{ $stockBadgeClass }}">
+                                        <i class="bi bi-{{ $stockIcon }}"></i>
+                                        {{ number_format($currentStock, 2) }}
+                                        {{ $inventory->ingredient ? $inventory->ingredient->Unit : '' }}
+                                    </span>
+                                    
+                                    @if($currentStock <= 0)
+                                        <small style="color:#dc2626; display:block; font-size:11px; margin-top:4px;">
+                                            ⚠️ Out of Stock
+                                        </small>
+                                    @elseif($currentStock <= 10)
+                                        <small style="color:#d97706; display:block; font-size:11px; margin-top:4px;">
+                                            ⚠️ Low Stock
+                                        </small>
+                                    @endif
                                 </td>
                                 <td>
                                     @if($inventory->Action === 'add')
                                         <span style="background:#28a745;color:white;padding:4px 12px;border-radius:12px;font-size:12px;font-weight:600;">Added</span>
                                     @elseif($inventory->Action === 'deduct')
                                         <span style="background:#dc3545;color:white;padding:4px 12px;border-radius:12px;font-size:12px;font-weight:600;">Deducted</span>
+                                    @elseif($inventory->Action === 'restore')
+                                        <span style="background:#3b82f6;color:white;padding:4px 12px;border-radius:12px;font-size:12px;font-weight:600;">Restored</span>
                                     @else
                                         <span style="background:#6c757d;color:white;padding:4px 12px;border-radius:12px;font-size:12px;">{{ strtoupper($inventory->Action ?? 'N/A') }}</span>
                                     @endif
@@ -178,7 +256,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" style="text-align:center;padding:40px;color:#999;">
+                                <td colspan="8" style="text-align:center;padding:40px;color:#999;">
                                     <i class="bi bi-inbox" style="font-size:48px;display:block;margin-bottom:10px;"></i>
                                     No inventory records found
                                 </td>
@@ -241,4 +319,4 @@ document.getElementById('searchInput').addEventListener('keypress', function(e) 
 });
 </script>
 </body>
-</html> 
+</html>
