@@ -9,14 +9,10 @@ use Illuminate\Http\Request;
 
 class PaymentController extends Controller
 {
-    /**
-     * Display a listing of payments with search functionality
-     */
     public function index(Request $request)
     {
         $query = Payment::query();
 
-        // Search functionality
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
             
@@ -29,18 +25,12 @@ class PaymentController extends Controller
             });
         }
 
-        // Paginate results (10 per page)
         $payments = $query->orderBy('Payment_id', 'desc')->paginate(10);
-
-        // Get admin info
         $fullname = session('fullname', 'Admin');
 
         return view('admin.payment', compact('payments', 'fullname'));
     }
 
-    /**
-     * Show the form for creating a new payment
-     */
     public function create()
     {
         $orders = Order::all();
@@ -49,9 +39,6 @@ class PaymentController extends Controller
         return view('admin.payment-create', compact('orders', 'fullname'));
     }
 
-    /**
-     * Store a newly created payment in storage
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -73,9 +60,6 @@ class PaymentController extends Controller
         }
     }
 
-    /**
-     * Display the specified payment
-     */
     public function show($id)
     {
         $payment = Payment::with('order')->findOrFail($id);
@@ -84,9 +68,6 @@ class PaymentController extends Controller
         return view('admin.payment-show', compact('payment', 'fullname'));
     }
 
-    /**
-     * Show the form for editing the specified payment
-     */
     public function edit($id)
     {
         $payment = Payment::findOrFail($id);
@@ -96,9 +77,6 @@ class PaymentController extends Controller
         return view('admin.payment-edit', compact('payment', 'orders', 'fullname'));
     }
 
-    /**
-     * Update the specified payment in storage
-     */
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
@@ -121,9 +99,6 @@ class PaymentController extends Controller
         }
     }
 
-    /**
-     * Remove the specified payment from storage
-     */
     public function destroy($id)
     {
         try {
