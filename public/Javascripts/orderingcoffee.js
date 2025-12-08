@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const receiptDiv = document.getElementById('receipt');
 
   // Format currency
-  const fmt = 👎 => '₱' + Number(n).toFixed(2);
+  const fmt = n => '\u20B1' + Number(n || 0).toFixed(2);
 
   // Escape HTML helper
   function escapeHtml(s) {
@@ -58,13 +58,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // ✅ FIXED: Get order items from localStorage (where orderSystem.js stores them)
   function getOrderItems() {
     const savedOrders = JSON.parse(localStorage.getItem("orders")) || [];
-    
+
     console.log('📦 Retrieved orders from localStorage:', savedOrders);
-    
+
+    // Normalize to { name, quantity, price }
     return savedOrders.map(item => ({
-      name: item.name,
-      qty: item.quantity,
-      price: item.price
+      name: item.name || item.Product_name || '',
+      quantity: item.quantity ?? item.qty ?? 1,
+      price: parseFloat(item.price ?? item.unit_price ?? 0)
     }));
   }
 
@@ -72,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function updateTotals() {
     const items = getOrderItems();
     let subtotal = 0;
-    items.forEach(it => subtotal += it.price * it.qty);
+    items.forEach(it => subtotal += (it.price || 0) * (it.quantity || 0));
     
     const discount = calculateDiscount(subtotal);
     const subtotalAfterDiscount = subtotal - discount;
@@ -126,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const discounts = getActiveDiscounts();
 
     let subtotal = 0;
-    items.forEach(it => subtotal += it.price * it.qty);
+    items.forEach(it => subtotal += (it.price || 0) * (it.quantity || 0));
     
     const discountAmount = calculateDiscount(subtotal);
     const subtotalAfterDiscount = subtotal - discountAmount;
@@ -142,16 +143,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let itemRowsHtml = '';
     items.forEach(it => {
-      const lineTotal = it.price * it.qty;
+      const lineTotal = (it.price || 0) * (it.quantity || 0);
       itemRowsHtml += `
         <div class="item-row" style="display:flex; justify-content:space-between; margin:5px 0;">
           <div style="width:50%;">${escapeHtml(it.name)}</div>
-          <div style="width:25%; text-align:right;">${it.qty} x ${fmt(it.price)}</div>
+          <div style="width:25%; text-align:right;">${it.quantity} x ${fmt(it.price)}</div>
           <div style="width:25%; text-align:right;">${fmt(lineTotal)}</div>
         </div>`;
     });
 
-    if (!items.length) itemRowsHtml = <div style="text-align:center; color:#999;">(No items)</div>;
+    if (!items.length) itemRowsHtml = '<div style="text-align:center; color:#999;">(No items)</div>';
 
     // ✅ NEW: Add discount section to receipt
     let discountSection = '';
@@ -229,7 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     let subtotal = 0;
-    items.forEach(it => subtotal += it.price * it.qty);
+    items.forEach(it => subtotal += (it.price || 0) * (it.quantity || 0));
     
     const discountAmount = calculateDiscount(subtotal);
     const subtotalAfterDiscount = subtotal - discountAmount;
@@ -240,7 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ✅ NEW: Get payment method and transaction reference
     let paymentMethod = 'Cash'; // Default
-    let transactionReference = CASH-${Date.now()}; // Default
+    let transactionReference = `CASH-${Date.now()}`; // Default
     
     // Check if payment method functions exist
     if (typeof window.getPaymentMethod === 'function') {
@@ -269,7 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
       transaction_reference: transactionReference,
       orders: items.map(it => ({
         name: it.name,
-        quantity: it.qty,
+        quantity: it.quantity,
         price: it.price
       }))
     };
@@ -277,11 +278,14 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('📦 Order data to send:', orderData);
 
     try {
+      const tokenElem = document.querySelector('meta[name="csrf-token"]');
+      const csrfToken = tokenElem ? tokenElem.content : '';
+
       const response = await fetch('/cashier/place-order', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        'X-CSRF-TOKEN': csrfToken
         },
         body: JSON.stringify(orderData)
       });
@@ -291,12 +295,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await response.json();
       console.log('📥 Response data:', data);
 
-      if (data.success) {
+      if (data.success === true || data.status === 'success') {
         console.log('✅ Order saved successfully! Order ID:', data.order_id);
         return true;
       } else {
-        console.error('❌ Failed to save order:', data.message);
-        alert('Failed to save order: ' + data.message);
+        console.error('❌ Failed to save order:', data.message || data);
+        alert('Failed to save order: ' + (data.message || JSON.stringify(data)));
         return false;
       }
     } catch (err) {
@@ -340,7 +344,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       let subtotal = 0;
-      items.forEach(it => subtotal += it.price * it.qty);
+      items.forEach(it => subtotal += (it.price || 0) * (it.quantity || 0));
       
       const discountAmount = calculateDiscount(subtotal);
       const subtotalAfterDiscount = subtotal - discountAmount;
@@ -348,7 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const amountPaid = parseFloat(document.getElementById('amountPaid')?.value || 0);
 
       if (amountPaid < total) {
-        alert(Insufficient payment!\nTotal: ${fmt(total)}\nPaid: ${fmt(amountPaid)});
+        alert(`Insufficient payment!\nTotal: ${fmt(total)}\nPaid: ${fmt(amountPaid)}`);
         document.getElementById('amountPaid')?.focus();
         return;
       }
@@ -405,8 +409,8 @@ document.addEventListener('DOMContentLoaded', () => {
       // Reset totals
       const totalPrice = document.getElementById('totalPrice');
       const changePrice = document.getElementById('changePrice');
-      if (totalPrice) totalPrice.textContent = '₱0.00';
-      if (changePrice) changePrice.textContent = '₱0.00';
+      if (totalPrice) totalPrice.textContent = fmt(0);
+      if (changePrice) changePrice.textContent = fmt(0);
       
       // Clear inputs
       const amountPaid = document.getElementById('amountPaid');
