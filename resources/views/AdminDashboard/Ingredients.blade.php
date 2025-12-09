@@ -337,7 +337,7 @@ function openUpdateModal(id, name, stock, reorder) {
     document.getElementById('updateReorderLevel').value = reorder;
     
     // Set form action
-    document.getElementById('updateForm').action = `/admin/ingredients/${id}`;
+    document.getElementById('updateForm').action = `/ingredients/${id}`;
     
     document.getElementById('UpdateModal').style.display = 'flex';
 }
