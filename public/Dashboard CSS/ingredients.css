@@ -414,10 +414,6 @@ body {
             cursor: not-allowed;
         }
 
-
-
-
-
         .page-btn {
             display: inline-block;
             margin: 0 5px;
@@ -440,4 +436,151 @@ body {
         }
         .view-items-btn{
           text-decoration: none;
+        }
+          .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            backdrop-filter: blur(3px);
+        }
+
+        /* Modal Form */
+        .modal-form {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Modal Title */
+        .modal-form h1 {
+            margin: 0 0 25px 0;
+            color: #1f2937;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        /* Form Labels */
+        .modal-form label {
+            display: block;
+            margin-bottom: 8px;
+            color: #374151;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        /* Form Inputs */
+        .modal-form input,
+        .modal-form select {
+            width: 100%;
+            padding: 10px 12px;
+            margin-bottom: 20px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.2s;
+            box-sizing: border-box;
+        }
+
+        .modal-form input:focus,
+        .modal-form select:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        .modal-form input[readonly] {
+            background: #f3f4f6;
+            cursor: not-allowed;
+            color: #6b7280;
+        }
+
+        /* Button Group */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 25px;
+        }
+
+        /* Add/Update Button */
+        .AddBtn {
+            background-color: #10b981;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .AddBtn:hover {
+            background-color: #059669;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+        }
+
+        .AddBtn:active {
+            transform: scale(0.98);
+        }
+
+        /* Cancel Button */
+        .CancelBtn {
+            background-color: #6b7280;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .CancelBtn:hover {
+            background-color: #4b5563;
+            transform: translateY(-1px);
+        }
+
+        .CancelBtn:active {
+            transform: scale(0.98);
+        }
+
+        /* Responsive */
+        @media (max-width: 576px) {
+            .modal-form {
+                width: 95%;
+                padding: 20px;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .AddBtn, .CancelBtn {
+                width: 100%;
+            }
         }
