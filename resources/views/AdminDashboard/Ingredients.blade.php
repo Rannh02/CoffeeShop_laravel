@@ -172,7 +172,7 @@
                         <th>Stock Quantity</th>
                         <th>Reorder Level</th>
                         <th>Status</th>
-                        <th>Action</th>
+                        <th>Actions</th>
                     </tr>
                     </thead>
                     <tbody>
