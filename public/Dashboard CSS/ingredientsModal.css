@@ -90,12 +90,12 @@
 
 /* Add Button */
 #ProductModal form .AddBtn {
-  background: #8b5e34;
+  background: #10b981;
   color: #fff;
 }
 
 #ProductModal form .AddBtn:hover {
-  background: #6d4626;
+  background: #059669;
   transform: translateY(-2px);
 }
 

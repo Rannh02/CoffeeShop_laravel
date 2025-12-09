@@ -70,7 +70,7 @@
         }
 
         .update-btn {
-            background-color: #3B82F6;
+            background-color: #f59e0b;
             color: white;
             border: none;
             padding: 8px 16px;
@@ -82,7 +82,7 @@
         }
 
         .update-btn:hover {
-            background-color: #2563EB;
+            background-color: #d97706;
             transform: translateY(-1px);
         }
 
