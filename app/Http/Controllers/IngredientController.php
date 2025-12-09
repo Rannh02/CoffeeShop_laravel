@@ -59,26 +59,46 @@ class IngredientController extends Controller
 }
 
     // Update an existing ingredient
-    public function update(Request $request, $id)
+   public function update(Request $request, $id)
     {
-        $ingredient = Ingredient::findOrFail($id);
+        try {
+            // Validate input
+            $validated = $request->validate([
+                'StockQuantity' => 'required|numeric|min:0',
+                'ReorderLevel' => 'required|numeric|min:0',
+            ]);
 
-        $request->validate([
-            'Ingredient_name' => 'required|string|max:255',
-            'Unit' => 'nullable|string|max:50',
-            'StockQuantity' => 'required|numeric|min:0',
-            'ReorderLevel' => 'required|integer|min:0',
-        ]);
+            // Find ingredient
+            $ingredient = DB::table('ingredients')
+                ->where('Ingredient_id', $id)
+                ->first();
 
-        $ingredient->update([
-            'Ingredient_name' => $request->Ingredient_name,
-            'Unit' => $request->Unit,
-            'StockQuantity' => $request->StockQuantity,
-            'ReorderLevel' => $request->ReorderLevel,
-        ]);
+            if (!$ingredient) {
+                return redirect()->back()->with('error', 'Ingredient not found.');
+            }
 
-        return redirect()->back()->with('success', 'Ingredient updated successfully.');
+            // Update ingredient
+            DB::table('ingredients')
+                ->where('Ingredient_id', $id)
+                ->update([
+                    'StockQuantity' => $validated['StockQuantity'],
+                    'ReorderLevel' => $validated['ReorderLevel'],
+                    'updated_at' => now()
+                ]);
+
+            return redirect()->route('admin.ingredients')
+                ->with('success', 'Ingredient updated successfully!');
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect()->back()
+                ->withErrors($e->errors())
+                ->withInput();
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Failed to update ingredient: ' . $e->getMessage());
+        }
     }
+
 
     public function products()
 {

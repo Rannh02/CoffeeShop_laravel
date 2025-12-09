@@ -50,18 +50,57 @@
             font-weight: 600;
             transition: all 0.2s ease;
         }
+        
         .search-btn i {
             font-size: 15px; 
             -webkit-text-stroke: 1px;
         }
-
-        
         
         .search-btn:hover {
             background-color: #747474ff;
             transform: translateY(-1px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        
+        }
+
+        /* Action buttons styling */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .update-btn {
+            background-color: #3B82F6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .update-btn:hover {
+            background-color: #2563EB;
+            transform: translateY(-1px);
+        }
+
+        .delete-btn {
+            background-color: #EF4444;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .delete-btn:hover {
+            background-color: #DC2626;
+            transform: translateY(-1px);
         }
     </style>
 </head>
@@ -153,11 +192,18 @@
                             @endif
 
                             <td>
-                                <form action="{{ route('ingredients.destroy', $ingredient->Ingredient_id) }}" method="POST">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="delete-btn">Delete</button>
-                                </form>
+                                <div class="action-buttons">
+                                    <button 
+                                        class="update-btn" 
+                                        onclick="openUpdateModal({{ $ingredient->Ingredient_id }}, '{{ $ingredient->Ingredient_name }}', {{ $ingredient->StockQuantity }}, {{ $ingredient->ReorderLevel }})">
+                                        Update
+                                    </button>
+                                    <form action="{{ route('ingredients.destroy', $ingredient->Ingredient_id) }}" method="POST" style="margin: 0;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="delete-btn">Delete</button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @empty
@@ -211,9 +257,8 @@
             <label>Unit</label>
             <select name="Unit" required>
                 <option value="" disabled selected>Select Unit</option>
-                <option value="Box"></option>
+                <option value="Box">Box</option>
                 <option value="Gram">Gram</option>
-
                 <option value="Milliliter">Milliliter</option>
                 <option value="Piece">Piece</option>
                 <option value="Pack">Pack</option>
@@ -230,10 +275,37 @@
             </div>
         </form>
     </div>
+
+    <!-- Modal for Updating Ingredient -->
+    <div id="UpdateModal" class="modal-overlay" style="display:none;">
+        <form id="updateForm" method="POST" class="modal-form">
+            @csrf
+            @method('PUT')
+            <h1>Update Ingredient</h1>
+
+            <input type="hidden" id="updateIngredientId" name="Ingredient_id">
+
+            <label>Ingredient Name</label>
+            <input type="text" id="updateIngredientName" name="Ingredient_name" readonly style="background: #f3f4f6;">
+
+            <label>Stock Quantity</label>
+            <input type="number" step="0.01" min="0" id="updateStockQuantity" name="StockQuantity" required>
+
+            <label>Reorder Level</label>
+            <input type="number" step="0.1" min="0" id="updateReorderLevel" name="ReorderLevel" required>
+
+            <div class="btn-group">
+                <button type="submit" class="AddBtn">Update Ingredient</button>
+                <button type="button" id="closeUpdateModal" class="CancelBtn">Cancel</button>
+            </div>
+        </form>
+    </div>
 </div>
+
 <script src="{{ asset('Javascripts/RealTime.js') }}"></script>
 <script src="{{ asset('Javascripts/ingredientsDelete.js') }}"></script>
 <script src="{{ asset('Javascripts/ingredientsModal.js') }}"></script>
+
 <script>
 // Search functionality
 function performSearch() {
@@ -254,6 +326,31 @@ function performSearch() {
 document.getElementById('searchInput').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') {
         performSearch();
+    }
+});
+
+// Open Update Modal
+function openUpdateModal(id, name, stock, reorder) {
+    document.getElementById('updateIngredientId').value = id;
+    document.getElementById('updateIngredientName').value = name;
+    document.getElementById('updateStockQuantity').value = stock;
+    document.getElementById('updateReorderLevel').value = reorder;
+    
+    // Set form action
+    document.getElementById('updateForm').action = `/admin/ingredients/${id}`;
+    
+    document.getElementById('UpdateModal').style.display = 'flex';
+}
+
+// Close Update Modal
+document.getElementById('closeUpdateModal').addEventListener('click', function() {
+    document.getElementById('UpdateModal').style.display = 'none';
+});
+
+// Close modal when clicking outside
+document.getElementById('UpdateModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        this.style.display = 'none';
     }
 });
 </script>

@@ -77,6 +77,7 @@ Route::prefix('admin')->group(function () {
     Route::get('/ingredients', [IngredientController::class, 'index'])->name('admin.ingredients');
     Route::post('/ingredients', [IngredientController::class, 'store'])->name('admin.ingredients.store');
     Route::post('/ingredients/{id}/update', [IngredientController::class, 'update'])->name('admin.ingredients.update');
+    Route::put('/ingredients/{id}', [IngredientController::class, 'update'])->name('ingredients.update');
     Route::delete('/ingredients/{id}', [IngredientController::class, 'destroy'])->name('admin.ingredients.destroy');
 
     // ✅ Suppliers
